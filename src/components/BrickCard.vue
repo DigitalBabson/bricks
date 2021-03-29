@@ -4,7 +4,7 @@
   <ui-modal v-if="showImg" @close="closeImg">
     <img class="object-contain max-h-full" :src="brick.imgLink" />
 </ui-modal>
-  <button class="text-green-500 bg-gray-100 p-3 my-3" @click="openMap">View on map</button>
+  <button class="bg-gray-100 p-3 my-3" @click="openMap">View on map</button>
 </article>
 <!--brick-map v-if="showMap" :zone="brick.zone" @close="closeMap" />-->
 <ui-modal v-if="showMap" @close="closeMap">
@@ -45,5 +45,7 @@ export default {
 </script>
 
 <style scoped>
-
+button {
+  color:#064;
+}
 </style>

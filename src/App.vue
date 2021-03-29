@@ -1,16 +1,19 @@
 <template>
 <div class="w-full">
+  <babson-header/>
   <the-bricks/>
 </div>
 </template>
 
 <script>
 //import HelloWorld from './components/HelloWorld.vue';
+import BabsonHeader from './components/BabsonHeader.vue';
 import TheBricks from './components/TheBricks.vue';
 
 export default {
 	components: {
-		TheBricks
+		TheBricks,
+    BabsonHeader
 	}
 }
 // This starter template is using Vue 3 experimental <script setup> SFCs

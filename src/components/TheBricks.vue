@@ -5,10 +5,12 @@
     <input id="search-brick"  v-model="filter.inscription" type="text"/>
   </div>
 </form-->
-  <brick-filter v-model:inscription="filter.inscription" />
+  <brick-filter v-model:inscription="filter.inscription" v-model:reset="resetForm" />
 <div class="bricks container mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-4">
   <brick-card v-for="brick in filterBricksByName" :key="brick.id" :brick="brick" />
 </div>
+  <h3 class="container mx-auto max-w-6xl msg_no_results text-3xl" v-if="filterBricksByName.length === 0">No bricks match your criteria</h3>
+
 
 </template>
 
@@ -69,6 +71,11 @@ export default {
   computed: {
     filterBricksByName() {
       return this.bricks.filter(brick => brick.inscription.toString().match(new RegExp(this.filter.inscription.trim().toString(), 'i')))
+    }
+  },
+  methods: {
+    resetForm() {
+      this.filter.inscription = '';
     }
   }
 }

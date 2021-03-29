@@ -1,8 +1,9 @@
 <template>
   <form class="container mx-auto max-w-6xl bg-yellow-100 py-2 mb-5">
-  <div class="form-control">
-    <label for="search-brick" class="mr-2">Search bricks by name</label>
+  <div class="form-control py-1 px-3">
+    <label for="search-brick" class="mr-4">Search bricks by name</label>
     <input id="search-brick"  :value="inscription" @input="$emit('update:inscription', $event.target.value)" type="text"/>
+    <button @click="$emit('update:reset')">Clear</button>
   </div>
 </form>
 </template>
@@ -11,7 +12,7 @@ export default {
   props: {
     inscription: String // previously was `value: String`
   },
-  emits: ['update:inscription'],
+  emits: ['update:inscription', 'reset'],
   methods: {
    filterName(inscription) {
       this.$emit('update:inscription', inscription) // previously was `this.$emit('input', title)`
@@ -21,6 +22,8 @@ export default {
 </script>
 
 <style scoped>
-
+form {
+  background-color: #eeaf00;
+}
 </style>
 
