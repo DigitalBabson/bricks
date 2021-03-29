@@ -10,8 +10,8 @@
   <div class="space-y-4">
   <brick-card v-for="brick in filterBricksByName" :key="brick.id" :brick="brick" v-model:map="mapImgSrc"/>
   </div>
-  <div class="col-span-3">
-    <div id="bricks-map" class="relative">
+  <div class="md:col-span-3">
+    <div id="bricks-map" class="mb-5">
       <img :src="mapImgSrc" />
     </div>
   </div>

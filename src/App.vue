@@ -1,6 +1,7 @@
 <template>
-<div class="w-full">
+
   <babson-header/>
+  <div class="w-full px-5 md:px-0">
   <the-bricks/>
 </div>
 </template>
