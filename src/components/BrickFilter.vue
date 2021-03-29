@@ -2,7 +2,7 @@
   <form class="container mx-auto max-w-6xl bg-yellow-100 py-2 mb-5">
   <div class="form-control py-1 px-3 text-lg">
     <label for="search-brick" class="mr-4">Search bricks by name</label>
-    <input id="search-brick"  :value="inscription" @input="$emit('update:inscription', $event.target.value)" type="text"/>
+    <input id="search-brick" class="p-1" :value="inscription" @input="$emit('update:inscription', $event.target.value)" type="text"/>
     <button class="ml-5" @click="$emit('update:reset')">Clear</button>
   </div>
 </form>
@@ -14,9 +14,9 @@ export default {
   },
   emits: ['update:inscription', 'reset'],
   methods: {
-   filterName(inscription) {
-      this.$emit('update:inscription', inscription) // previously was `this.$emit('input', title)`
-    }
+  //  filterName(inscription) {
+  //     this.$emit('update:inscription', inscription) // previously was `this.$emit('input', title)`
+  //   }
   }
 }
 </script>

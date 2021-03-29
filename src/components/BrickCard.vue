@@ -1,6 +1,6 @@
 <template>
 <article class="brick-card border border-gray-100 shadow-sm text-center">
-  <img :src="brick.imgLink" @click="openImg"/>
+  <img :src="brick.imgLink" @click="openImg" class="cursor-pointer"/>
   <teleport to="body">
     <transition name="fade">
   <ui-modal v-if="showImg" @close="closeImg">
@@ -8,7 +8,7 @@
 </ui-modal>
     </transition>
   </teleport>
-  <button class="bg-gray-100 p-3 my-3" @click="openMap">View on map</button>
+  <button class="bg-gray-100 p-3 my-3" @click="$emit('update:map', 'src/assets/maps/'+brick.zone+'.jpg')">View on map</button>
 
 </article>
 <!--brick-map v-if="showMap" :zone="brick.zone" @close="closeMap" />-->
@@ -25,7 +25,8 @@
 //import BrickMap from './BrickMap.vue';
 import UiModal from './UiModal.vue';
 export default {
-  props: ['brick'],
+  props: ['brick', 'map'],
+  emits: ['update:map'],
   data() {
     return {
       showMap: false,
@@ -55,7 +56,14 @@ export default {
 
 <style scoped>
 button {
-  color:#064;
+  border: .2rem solid #ddd055;
+  background: #fff;
+  color: #005172;
+}
+button:hover {
+  color: #fff;
+  background: #005172;
+  border: .2rem solid #005172;
 }
 .fade-enter-active,
 .fade-leave-active {

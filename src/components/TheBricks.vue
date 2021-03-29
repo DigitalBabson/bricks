@@ -6,8 +6,15 @@
   </div>
 </form-->
   <brick-filter v-model:inscription="filter.inscription" v-model:reset="resetForm" />
-<div class="bricks container mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-4">
-  <brick-card v-for="brick in filterBricksByName" :key="brick.id" :brick="brick" />
+<div class="bricks container mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-4 gap-4">
+  <div class="space-y-4">
+  <brick-card v-for="brick in filterBricksByName" :key="brick.id" :brick="brick" v-model:map="mapImgSrc"/>
+  </div>
+  <div class="col-span-3">
+    <div id="bricks-map" class="relative">
+      <img :src="mapImgSrc" />
+    </div>
+  </div>
 </div>
   <h3 class="container mx-auto max-w-6xl msg_no_results text-3xl" v-if="filterBricksByName.length === 0">No bricks match your criteria</h3>
 
@@ -28,6 +35,7 @@ export default {
       filter: {
         inscription: '',
       },
+      mapImgSrc: 'src/assets/maps/bigmap.jpg',
       bricks: [
         {
           id: 'bjohnson2019',
