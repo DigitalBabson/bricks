@@ -8,7 +8,8 @@
 </ui-modal>
     </transition>
   </teleport>
-  <button v-scroll-to="{el:'#bricks-map', duration: 1000}" class="bg-gray-100 p-3 my-3" @click="$emit('update:map', 'src/assets/maps/'+brick.zone+'.jpg')">View on map</button>
+  <button v-scroll-to="{el:'#bricks-map', duration: 1000}" class="sm-screen bg-gray-100 p-3 my-3" @click="$emit('update:map', 'src/assets/maps/'+brick.zone+'.jpg')">View on map</button>
+  <button class="big-screen bg-gray-100 p-3 my-3" @click="$emit('update:map', 'src/assets/maps/'+brick.zone+'.jpg')">View on map</button>
 
 </article>
 <!--brick-map v-if="showMap" :zone="brick.zone" @close="closeMap" />-->
@@ -65,6 +66,18 @@ button:hover {
   background: #005172;
   border: .2rem solid #005172;
 }
+button.big-screen {
+  display: none;
+}
+@media (min-width: 768px) {
+  button.sm-screen {
+  display: none;
+  }
+  button.big-screen {
+    display: inline-block;
+  }
+
+ }
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.5s ease;
