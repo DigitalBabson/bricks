@@ -6,7 +6,7 @@
   <dialog class="absolute inset-0 md:h-5/6 p-0" open>
     <slot />
   </dialog>
-<button class="absolute top-5 right-5" @click="$emit('close')">X</button>
+<button class="absolute top-5 text-5 right-10 text-white" @click="$emit('close')">X</button>
 
 <!--/teleport-->
 </div>
