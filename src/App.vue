@@ -1,6 +1,5 @@
 <template>
 <div class="w-full">
-  <babson-header/>
   <the-bricks/>
 </div>
 </template>

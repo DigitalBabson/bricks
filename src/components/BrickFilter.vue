@@ -1,7 +1,7 @@
 <template>
-  <form class="container mx-auto max-w-6xl bg-yellow-100 py-2 mb-5">
-  <div class="form-control py-1 px-3 text-lg">
-    <label for="search-brick" class="mr-4">Search bricks by name</label>
+  <form class="w-full py-8 mb-5">
+  <div class="form-control py-1 text-center text-m">
+    <label for="search-brick" class="mr-4">Search for my brick inscription</label>
     <input id="search-brick"  :value="inscription" @input="$emit('update:inscription', $event.target.value)" type="text"/>
     <button class="ml-5" @click="$emit('update:reset')">Clear</button>
   </div>
@@ -23,7 +23,7 @@ export default {
 
 <style scoped>
 form {
-  background-color: #eeaf00;
+  background-color: #C7D28A;
 }
 </style>
 
