@@ -30,6 +30,7 @@ export default {
         inscription: '',
       },
       bricks: [
+
       ]
     }
   },
@@ -63,8 +64,6 @@ export default {
           inscription: bricks.attributes.brickInscription,
           brickImage: bricks.relationships.brickImage.data.id,
           brickParkLocation: bricks.relationships.brickParkLocation.data.id,
-          imgLink: 'src/assets/bricks/IMG_2008.jpg',
-          zone: 'zone1'
         }))
       } catch (err) {
         if (err.response) {

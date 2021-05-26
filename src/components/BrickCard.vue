@@ -15,7 +15,7 @@
 <teleport to="body">
   <transition name="fade">
 <ui-modal v-if="showMap" @close="closeMap">
-    <img class="object-contain max-h-full" :src="'src/assets/maps/'+brick.zone+'.jpg'" />
+    <img class="object-contain max-h-full" :src="parkLocationImgURL" />
 </ui-modal>
   </transition>
 </teleport>
@@ -31,7 +31,8 @@ export default {
     return {
       showMap: false,
       showImg: false,
-      brickImgUrl: ''
+      brickImgUrl: '',
+      parkLocationImgURL: ''
     }
   },
 	components: {
@@ -52,25 +53,40 @@ export default {
       this.showImg = false;
     },
     async getBrickImgURL() {
-
-        const url = `http://bell.babson.edu/jsonapi/media/image/`
-        axios.defaults.withCredentials = true;
-        const response = await axios.get(url + this.brick.brickImage, {}, {
-              headers: {
-      'crossDomain': true,
-      'Content-Type': 'application/json'
-    }
+      const url = `http://bell.babson.edu/jsonapi/media/image/`
+      axios.defaults.withCredentials = true;
+      const response = await axios.get(url + this.brick.brickImage, {}, {
+      headers: {
+        'crossDomain': true,
+        'Content-Type': 'application/json'
+      }
   // auth: {
   //   username: babson,
   //   password: drupal9
   // }
   })
-//console.log(response.data.included[0].attributes.uri.url);
-this.brickImgUrl = 'http://bell.babson.edu' + response.data.included[0].attributes.uri.url;
+    this.brickImgUrl = 'http://bell.babson.edu' + response.data.included[0].attributes.uri.url;
+    },
+    async getParkLocationImgURL() {
+      const url = `http://bell.babson.edu/jsonapi/parkLocations/` + this.brick.brickParkLocation + `?fields[file--file]=uri,url`
+      axios.defaults.withCredentials = true;
+      const response = await axios.get(url, {}, {
+      headers: {
+        'crossDomain': true,
+        'Content-Type': 'application/json'
+      }
+  // auth: {
+  //   username: babson,
+  //   password: drupal9
+  // }
+  })
+  console.log(response);
+    this.parkLocationImgURL = 'http://bell.babson.edu' + response.data.included[1].attributes.uri.url;
     }
   },
   mounted() {
     this.getBrickImgURL();
+    this.getParkLocationImgURL();
   }
 }
 </script>
