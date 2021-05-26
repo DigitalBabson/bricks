@@ -30,42 +30,6 @@ export default {
         inscription: '',
       },
       bricks: [
-        {
-          id: 'bjohnson2019',
-          firstName: 'Brandon',
-          lastName: 'Johnson',
-          year: '2019',
-          inscription: 'BRANDON PE JOHNSON BBALL CAPTAIN 2019',
-          imgLink: 'src/assets/bricks/IMG_2000.jpg',
-          zone: 'zone1'
-        },
-        {
-          id: 'croberston1983',
-          firstName: 'Craig',
-          lastName: 'Robertson',
-          year: '1983',
-          inscription: 'CRAIG ROBERTSON 1983',
-          imgLink: 'src/assets/bricks/IMG_2003.jpg',
-          zone: 'zone2'
-        },
-        {
-          id: 'mpattyson2021',
-          firstName: 'Matt',
-          lastName: 'Pattyson',
-          year: '2021',
-          inscription: 'MATT PATTYSON CLASS OF 2021',
-          imgLink: 'src/assets/bricks/IMG_2005.jpg',
-          zone: 'zone3'
-        },
-        {
-          id: 'jtgrove1977',
-          firstName: 'Joanne',
-          lastName: 'Grove',
-          year: '1977',
-          inscription: 'JOANNE THOMAS GROVE B\'1977',
-          imgLink: 'src/assets/bricks/IMG_2008.jpg',
-          zone: 'zone1'
-        }
       ]
     }
   },
@@ -80,7 +44,7 @@ export default {
     },
     async fetchBricks() {
       try {
-        const url = `http://bell.babson.edu/jsonapi/bricks?fields[file--file]=uri,url`
+        const url = `http://bell.babson.edu/jsonapi/bricks`
         axios.defaults.withCredentials = true;
         const response = await axios.get(url, {}, {
               headers: {
@@ -92,12 +56,13 @@ export default {
   //   password: drupal9
   // }
   })
-  console.log(response);
         const results = response.data.data
         this.bricks = results.map(bricks => ({
-          id: bricks.attributes.milleniumID,
+          id: bricks.id,
           number: bricks.attributes.brickNumber,
           inscription: bricks.attributes.brickInscription,
+          brickImage: bricks.relationships.brickImage.data.id,
+          brickParkLocation: bricks.relationships.brickParkLocation.data.id,
           imgLink: 'src/assets/bricks/IMG_2008.jpg',
           zone: 'zone1'
         }))

@@ -15,7 +15,7 @@ export default {
   emits: ['update:inscription', 'reset'],
   methods: {
    filterName(inscription) {
-      this.$emit('update:inscription', inscription) // previously was `this.$emit('input', title)`
+      this.$emit('update:inscription', inscription) 
     }
   }
 }

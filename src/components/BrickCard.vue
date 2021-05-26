@@ -1,10 +1,10 @@
 <template>
 <article class="brick-card border border-gray-100 shadow-sm text-center">
-  <img :src="brick.imgLink" @click="openImg"/>
+  <img :src="brickImgUrl" @click="openImg"/>
   <teleport to="body">
     <transition name="fade">
   <ui-modal v-if="showImg" @close="closeImg">
-    <img class="object-contain max-h-full" :src="brick.imgLink" />
+    <img class="object-contain max-h-full" :src="brickImgUrl" />
 </ui-modal>
     </transition>
   </teleport>
@@ -24,12 +24,14 @@
 <script>
 //import BrickMap from './BrickMap.vue';
 import UiModal from './UiModal.vue';
+import axios from "axios";
 export default {
   props: ['brick'],
   data() {
     return {
       showMap: false,
       showImg: false,
+      brickImgUrl: ''
     }
   },
 	components: {
@@ -48,7 +50,27 @@ export default {
     },
     closeImg() {
       this.showImg = false;
+    },
+    async getBrickImgURL() {
+
+        const url = `http://bell.babson.edu/jsonapi/media/image/`
+        axios.defaults.withCredentials = true;
+        const response = await axios.get(url + this.brick.brickImage, {}, {
+              headers: {
+      'crossDomain': true,
+      'Content-Type': 'application/json'
     }
+  // auth: {
+  //   username: babson,
+  //   password: drupal9
+  // }
+  })
+//console.log(response.data.included[0].attributes.uri.url);
+this.brickImgUrl = 'http://bell.babson.edu' + response.data.included[0].attributes.uri.url;
+    }
+  },
+  mounted() {
+    this.getBrickImgURL();
   }
 }
 </script>
