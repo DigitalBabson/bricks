@@ -1,15 +1,10 @@
 <template>
-  <!--form class="container mx-auto max-w-6xl bg-yellow-100 py-2 mb-5">
-  <div class="form-control">
-    <label for="search-brick" class="mr-2">Search bricks by name</label>
-    <input id="search-brick"  v-model="filter.inscription" type="text"/>
-  </div>
-</form-->
-  <brick-filter v-model:inscription="filter.inscription" v-model:reset="resetForm" />
+
+  <brick-filter v-model:inscription="inscription" v-model:reset="resetForm" />
 <div class="bricks container mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-4 gap-5">
-  <brick-card v-for="brick in filterBricksByName" :key="brick.id" :brick="brick" />
+  <brick-card v-for="brick in bricks" :key="brick.id" :brick="brick" />
 </div>
-  <h3 class="container mx-auto max-w-6xl msg_no_results text-3xl" v-if="filterBricksByName.length === 0">No bricks match your criteria</h3>
+  <h3 class="container mx-auto max-w-6xl msg_no_results text-3xl" v-if="bricks.length === 0">No bricks match your criteria</h3>
 
 
 </template>
@@ -26,9 +21,9 @@ export default {
 	},
   data() {
     return {
-      filter: {
+
         inscription: '',
-      },
+
       bricks: [
 
       ]
@@ -37,15 +32,22 @@ export default {
   computed: {
     filterBricksByName() {
       return this.bricks.filter(brick => brick.inscription.toString().match(new RegExp(this.filter.inscription.trim().toString(), 'i')))
+      //return this.fetchBricks(filter.inscription)
+    }
+  },
+  watch: {
+    inscription(value) {
+      console.log(value);
+      this.fetchBricks(value);
     }
   },
   methods: {
     resetForm() {
       this.filter.inscription = '';
     },
-    async fetchBricks() {
+    async fetchBricks(search = '') {
       try {
-        const url = `http://bell.babson.edu/jsonapi/bricks`
+        const url = `http://bell.babson.edu/jsonapi/bricks?filter[brickInscription][operator]=CONTAINS&filter[brickInscription][value]=` + search;
         axios.defaults.withCredentials = true;
         const response = await axios.get(url, {}, {
               headers: {
