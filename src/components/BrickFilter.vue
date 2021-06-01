@@ -1,9 +1,8 @@
 <template>
-  <form class="w-full py-8 mb-5">
+  <form class="w-full py-8 mb-5" @submit.prevent>
   <div class="form-control py-1 text-center text-m">
     <label for="search-brick" class="mr-4">Search for my brick inscription</label>
-    <input id="search-brick"  :value="inscription" @input="$emit('update:inscription', $event.target.value)" type="text"/>
-    <button class="ml-5" @click="$emit('update:reset')">Clear</button>
+    <input id="search-brick" :value="inscription" @input="$emit('update:inscription', $event.target.value)" type="text"/>
   </div>
 </form>
 </template>
