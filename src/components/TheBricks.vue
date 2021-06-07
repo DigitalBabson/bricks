@@ -66,10 +66,9 @@ export default {
     async fetchBricks(search = "", offset = "") {
       try {
         const url =
-          `http://stage2.bell.babson.edu/jsonapi/bricks?page[limit]=20&filter[brickInscription][operator]=CONTAINS&filter[brickInscription][value]=` +
+          `https://stage2.bell.babson.edu/jsonapi/bricks?page[limit]=20&filter[brickInscription][operator]=CONTAINS&filter[brickInscription][value]=` +
           search + '&page[offset]=' + offset;
         axios.defaults.withCredentials = true;
-        console.log(url)
         const response = await axios.get(
           url,
           {},
@@ -94,10 +93,10 @@ export default {
         }));
 
         // If searching, remove existing items
-        if (search !== 'undefined') { this.bricks = [] }
+        if (search.length !== 0) { this.bricks = [] }
         this.bricks.push(...data);
         //console.log(data);
-        if (response.data.links.next && search !== "undefined") {
+        if (response.data.links.next && search.length == 0) {
           this.nextPage = true
         } else this.nextPage = false
         if (offset) this.offset = offset;

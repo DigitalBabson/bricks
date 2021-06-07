@@ -53,7 +53,7 @@ export default {
       this.showImg = false;
     },
     async getBrickImgURL() {
-      const url = `http://stage2.bell.babson.edu/jsonapi/media/image/`
+      const url = `https://stage2.bell.babson.edu/jsonapi/media/image/`
       axios.defaults.withCredentials = true;
       const response = await axios.get(url + this.brick.brickImage, {}, {
       headers: {
@@ -65,10 +65,10 @@ export default {
   //   password: drupal9
   // }
   })
-    this.brickImgUrl = 'http://stage2.bell.babson.edu' + response.data.included[0].attributes.uri.url;
+    this.brickImgUrl = 'https://stage2.bell.babson.edu' + response.data.included[0].attributes.uri.url;
     },
     async getParkLocationImgURL() {
-      const url = `http://stage2.bell.babson.edu/jsonapi/parkLocations/` + this.brick.brickParkLocation + `?fields[file--file]=uri,url`
+      const url = `https://stage2.bell.babson.edu/jsonapi/parkLocations/` + this.brick.brickParkLocation + `?fields[file--file]=uri,url`
       axios.defaults.withCredentials = true;
       const response = await axios.get(url, {}, {
       headers: {
@@ -81,7 +81,7 @@ export default {
   // }
   })
   //console.log(response);
-    this.parkLocationImgURL = 'http://bell.babson.edu' + response.data.included[1].attributes.uri.url;
+    this.parkLocationImgURL = 'https://stage.bell.babson.edu' + response.data.included[1].attributes.uri.url;
     }
   },
   mounted() {
