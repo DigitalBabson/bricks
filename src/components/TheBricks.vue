@@ -5,7 +5,7 @@
       bricks
       tw-container
       tw-mx-auto
-      
+
       tw-grid tw-grid-cols-1
       md:tw-grid-cols-4
       tw-gap-5
@@ -42,6 +42,7 @@ export default {
       nextPage: false
     };
   },
+  inject: ["defaultEnv", "defaultUrl"],
   computed: {
     // filterBricksByName() {
     //   return this.bricks.filter((brick) =>
@@ -66,7 +67,7 @@ export default {
     async fetchBricks(search = "", offset = "") {
       try {
         const url =
-          `https://stage2.bell.babson.edu/jsonapi/bricks?page[limit]=20&filter[brickInscription][operator]=CONTAINS&filter[brickInscription][value]=` +
+          this.defaultUrl + `bricks?page[limit]=20&filter[brickInscription][operator]=CONTAINS&filter[brickInscription][value]=` +
           search + '&page[offset]=' + offset;
         axios.defaults.withCredentials = true;
         const response = await axios.get(

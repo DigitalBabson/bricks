@@ -13,7 +13,20 @@ export default {
 	components: {
 		TheBricks,
     BabsonHeader
-	}
+	},
+  provide() {
+    const drupalEnv = {
+      dev: "https://dev.bell.babson.edu",
+      stage: "https://stage.bell.babson.edu",
+      stage2: "https://stage2.bell.babson.edu/",
+      prod: "https://bell.babson.edu"
+    }
+    const feedUrl = "jsonapi/"
+    return  {
+      defaultEnv:  drupalEnv.stage2,
+      defaultUrl:  drupalEnv.stage2 + feedUrl
+    }
+  }
 }
 // This starter template is using Vue 3 experimental <script setup> SFCs
 // Check out https://github.com/vuejs/rfcs/blob/script-setup-2/active-rfcs/0000-script-setup.md
