@@ -1,5 +1,5 @@
 <template>
-<div class="w-full">
+<div class="tw-w-full">
   <the-bricks/>
 </div>
 </template>

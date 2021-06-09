@@ -1,8 +1,8 @@
 <template>
-<div class="container
-      mx-auto
-      max-w-6xl py-8 mb-5 text-center">
-  <button class="ml-5 py-2 px-5" @click="$emit('loadmore')">Load more</button>
+<div class="tw-container
+      tw-mx-auto
+      tw-max-w-6xl tw-py-8 tw-mb-5 tw-text-center">
+  <button class="tw-ml-5 tw-py-2 tw-px-5" @click="$emit('loadmore')">Load more</button>
   </div>
 </template>
 

@@ -3,18 +3,18 @@
   <div
     class="
       bricks
-      container
-      mx-auto
-      max-w-6xl
-      grid grid-cols-1
-      md:grid-cols-4
-      gap-5
+      tw-container
+      tw-mx-auto
+      
+      tw-grid tw-grid-cols-1
+      md:tw-grid-cols-4
+      tw-gap-5
     "
   >
     <brick-card v-for="brick in bricks" :key="brick.id" :brick="brick" />
   </div>
   <h3
-    class="container mx-auto max-w-6xl msg_no_results text-3xl"
+    class="tw-container tw-mx-auto tw-max-w-6xl msg_no_results tw-text-3xl"
     v-if="bricks.length === 0"
   >
     No bricks match your criteria

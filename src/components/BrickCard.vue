@@ -1,21 +1,21 @@
 <template>
-<article class="brick-card border border-gray-100 shadow-sm text-center">
+<article class="brick-card tw-border tw-border-gray-100 tw-shadow-sm tw-text-center">
   <img :src="brickImgUrl" @click="openImg"/>
   <teleport to="body">
     <transition name="fade">
   <ui-modal v-if="showImg" @close="closeImg">
-    <img class="object-contain max-h-full" :src="brickImgUrl" />
+    <img class="tw-object-contain tw-max-w-7xl" :src="brickImgUrl" />
 </ui-modal>
     </transition>
   </teleport>
-  <button class="bg-gray-100 p-3 my-3" @click="openMap">View on map</button>
+  <button class="tw-bg-gray-100 tw-p-3 tw-my-3" @click="openMap">View on map</button>
 
 </article>
 <!--brick-map v-if="showMap" :zone="brick.zone" @close="closeMap" />-->
 <teleport to="body">
   <transition name="fade">
 <ui-modal v-if="showMap" @close="closeMap">
-    <img class="object-contain max-h-full" :src="parkLocationImgURL" />
+    <img class="tw-object-contain tw-max-w-7xl" :src="parkLocationImgURL" />
 </ui-modal>
   </transition>
 </teleport>
@@ -80,8 +80,8 @@ export default {
   //   password: drupal9
   // }
   })
-  //console.log(response);
-    this.parkLocationImgURL = 'https://stage.bell.babson.edu' + response.data.included[1].attributes.uri.url;
+  console.log(response);
+    this.parkLocationImgURL = 'https://stage2.bell.babson.edu' + response.data.included[1].attributes.uri.url;
     }
   },
   mounted() {
