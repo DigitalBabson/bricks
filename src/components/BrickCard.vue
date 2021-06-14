@@ -1,6 +1,6 @@
 <template>
 <article class="brick-card tw-border tw-border-gray-100 tw-shadow-sm tw-text-center">
-  <img :src="brickImgUrl" @click="openImg"/>
+  <img :src="thumbnailUrl" @click="openImg"/>
   <teleport to="body">
     <transition name="fade">
   <ui-modal v-if="showImg" @close="closeImg">
@@ -32,6 +32,7 @@ export default {
       showMap: false,
       showImg: false,
       brickImgUrl: '',
+      thumbnailUrl: '',
       parkLocationImgURL: ''
     }
   },
@@ -66,6 +67,7 @@ export default {
   //   password: drupal9
   // }
   })
+    this.thumbnailUrl = response.data.included[0].attributes.image_style_uri.find(({brick}) => brick).brick
     this.brickImgUrl = this.defaultEnv + response.data.included[0].attributes.uri.url;
     },
     async getParkLocationImgURL() {
@@ -82,6 +84,7 @@ export default {
   // }
   })
   //console.log(response);
+
     this.parkLocationImgURL = this.defaultEnv + response.data.included[1].attributes.uri.url;
     }
   },

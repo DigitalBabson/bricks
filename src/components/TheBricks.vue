@@ -16,7 +16,7 @@
   </div>
   <h3
     class="tw-container tw-mx-auto tw-max-w-6xl msg_no_results tw-text-3xl"
-    v-if="bricks.length === 0"
+    v-if="showMessage == true"
   >
     No bricks match your criteria
   </h3>
@@ -40,7 +40,8 @@ export default {
       inscription: "",
       bricks: [],
       offset: 0,
-      nextPage: false
+      nextPage: false,
+      showMessage: false
     };
   },
   inject: ["defaultEnv", "defaultUrl"],
@@ -96,6 +97,9 @@ export default {
 
         // If searching, remove existing items
         if (search.length !== 0) { this.bricks = [] }
+        else {
+          this.showMessage = true
+          }
         this.bricks.push(...data);
         //console.log(data);
         if (response.data.links.next && search.length == 0) {
