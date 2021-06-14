@@ -4,7 +4,7 @@
   <teleport to="body">
     <transition name="fade">
   <ui-modal v-if="showImg" @close="closeImg">
-    <img class="tw-object-contain tw-max-w-7xl" :src="brickImgUrl" />
+    <img class="tw-object-contain" :src="brickImgUrl" />
 </ui-modal>
     </transition>
   </teleport>
@@ -55,7 +55,7 @@ export default {
     },
     async getBrickImgURL() {
       const url = this.defaultUrl + `media/image/`
-      axios.defaults.withCredentials = true;
+      //axios.defaults.withCredentials = true;
       const response = await axios.get(url + this.brick.brickImage, {}, {
       headers: {
         'crossDomain': true,
@@ -70,7 +70,7 @@ export default {
     },
     async getParkLocationImgURL() {
       const url = this.defaultUrl + `parkLocations/` + this.brick.brickParkLocation + `?fields[file--file]=uri,url`
-      axios.defaults.withCredentials = true;
+      //axios.defaults.withCredentials = true;
       const response = await axios.get(url, {}, {
       headers: {
         'crossDomain': true,

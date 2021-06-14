@@ -5,7 +5,8 @@
       bricks
       tw-container
       tw-mx-auto
-
+      tw-p-2
+      md:tw-p-0
       tw-grid tw-grid-cols-1
       md:tw-grid-cols-4
       tw-gap-5
@@ -69,7 +70,7 @@ export default {
         const url =
           this.defaultUrl + `bricks?page[limit]=20&filter[brickInscription][operator]=CONTAINS&filter[brickInscription][value]=` +
           search + '&page[offset]=' + offset;
-        axios.defaults.withCredentials = true;
+        //axios.defaults.withCredentials = true;
         const response = await axios.get(
           url,
           {},
