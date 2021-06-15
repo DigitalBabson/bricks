@@ -1,6 +1,6 @@
 <template>
 <article class="brick-card tw-border tw-border-gray-100 tw-shadow-sm tw-text-center">
-  <img :src="thumbnailUrl" @click="openImg"/>
+  <img class="tw-cursor-pointer" :src="thumbnailUrl" @click="openImg"/>
   <teleport to="body">
     <transition name="fade">
   <ui-modal v-if="showImg" @close="closeImg">
@@ -8,17 +8,21 @@
 </ui-modal>
     </transition>
   </teleport>
-  <button class="tw-bg-gray-100 tw-p-3 tw-my-3" @click="openMap">View on map</button>
+  <button class="tw-w-full tw-py-4 tw-text-brickSummerNight
+  tw-font-oswald tw-uppercase
+  hover:tw-bg-brickMediumGreen hover:tw-text-white
+  focus:tw-outline-none active:tw-outline-none
+  tw-transition-background tw-duration-200 tw-ease-in-out"
+  @click="openMap">See details</button>
 
 </article>
-<!--brick-map v-if="showMap" :zone="brick.zone" @close="closeMap" />-->
 <teleport to="body">
   <transition name="fade">
 <ui-modal v-if="showMap" @close="closeMap">
     <img class="tw-object-contain tw-max-w-7xl" :src="parkLocationImgURL" />
-    <div class="tw-text-center tw-bg-brickLightGreen">
-      <h3><span>Brick Location: {{ parkLocation }}</span></h3>
-      <h3><span>Brick Inscription: {{ brick.inscription }}</span></h3>
+    <div class="tw-text-center tw-bg-brickLightGreen tw-p-8 tw-text-4">
+      <h3><span class="tw-font-oswald tw-font-bold">Brick Location:</span> {{ parkLocation }}</h3>
+      <h3><span class="tw-font-oswald tw-font-bold">Brick Inscription:</span> {{ brick.inscription }}</h3>
     </div>
 </ui-modal>
   </transition>
@@ -26,7 +30,6 @@
 </template>
 
 <script>
-//import BrickMap from './BrickMap.vue';
 import UiModal from './UiModal.vue';
 import axios from "axios";
 export default {
@@ -43,7 +46,6 @@ export default {
   },
   inject: ["defaultEnv", "defaultUrl"],
 	components: {
-		//BrickMap,
     UiModal,
 	},
   methods: {
@@ -100,8 +102,8 @@ export default {
 </script>
 
 <style scoped>
-button {
-  color:#064;
+h3 {
+  font-size: 2rem;
 }
 .fade-enter-active,
 .fade-leave-active {

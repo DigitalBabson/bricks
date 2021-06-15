@@ -1,5 +1,5 @@
 <template>
-<div class="tw-w-full">
+<div class="tw-w-full tw-pb-brick80">
   <the-bricks/>
 </div>
 </template>

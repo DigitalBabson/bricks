@@ -1,8 +1,16 @@
 <template>
-<div class="tw-container
-      tw-mx-auto
-      tw-max-w-6xl tw-py-8 tw-mb-5 tw-text-center">
-  <button class="tw-ml-5 tw-py-2 tw-px-5" @click="$emit('loadmore')">Load more</button>
+<div class="bricks__pagination tw-container
+      tw-mx-auto tw-mt-brick50
+      tw-max-w-6xl tw-text-center">
+  <button
+  class="tw-bg-brickBabsonGreen tw-text-white
+  tw-font-oswald tw-px-9
+  tw-py-4 tw-uppercase
+  hover:tw-bg-brickLightGreen hover:tw-text-black
+  focus:tw-outline-none active:tw-outline-none
+  tw-transition-background tw-duration-200 tw-ease-in-out
+  "
+  @click="$emit('loadmore')">Load more</button>
   </div>
 </template>
 
@@ -15,9 +23,5 @@ export default {
 </script>
 
 <style scoped>
-button {
-  background-color:#064;
-  color: #fff;
-  text-transform: uppercase;
-}
+
 </style>

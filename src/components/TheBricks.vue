@@ -5,11 +5,13 @@
       bricks
       tw-container
       tw-mx-auto
-      tw-px-2
-      lg:tw-px-0
+      tw-px-4
+      lg:tw-px-brick20
+      2xl:tw-px-0
       tw-grid tw-grid-cols-1
       md:tw-grid-cols-4
-      tw-gap-5
+      tw-gap-4
+      lg:tw-gap-13
     "
   >
     <brick-card v-for="brick in bricks" :key="brick.id" :brick="brick" />
@@ -94,12 +96,13 @@ export default {
           brickImage: bricks.relationships.brickImage.data.id,
           brickParkLocation: bricks.relationships.brickParkLocation.data.id,
         }));
-
         // If searching, remove existing items
         if (search.length !== 0) {
           this.bricks = []
           if (data.length === 0) {
             this.showMessage = true
+          } else {
+            this.showMessage = false
           }
         }
         this.bricks.push(...data);
