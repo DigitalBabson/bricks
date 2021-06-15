@@ -5,8 +5,8 @@
       bricks
       tw-container
       tw-mx-auto
-      tw-p-2
-      md:tw-p-0
+      tw-px-2
+      lg:tw-px-0
       tw-grid tw-grid-cols-1
       md:tw-grid-cols-4
       tw-gap-5
@@ -96,12 +96,13 @@ export default {
         }));
 
         // If searching, remove existing items
-        if (search.length !== 0) { this.bricks = [] }
-        else {
-          this.showMessage = true
+        if (search.length !== 0) {
+          this.bricks = []
+          if (data.length === 0) {
+            this.showMessage = true
           }
+        }
         this.bricks.push(...data);
-        //console.log(data);
         if (response.data.links.next && search.length == 0) {
           this.nextPage = true
         } else this.nextPage = false

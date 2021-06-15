@@ -1,5 +1,5 @@
 <template>
-  <form class="tw-w-full tw-py-8 tw-mb-5" @submit.prevent>
+  <form class="tw-w-full tw-py-8 tw-mb-5 tw-bg-brickLightGreen" @submit.prevent>
   <div class="tw-container tw-mx-auto tw-form-control tw-py-1 tw-text-center tw-text-m">
     <label for="search-brick">Search for my brick inscription</label>
     <input id="search-brick" :value="inscription" @input="$emit('update:inscription', $event.target.value)" type="text"/>
@@ -21,9 +21,9 @@ export default {
 </script>
 
 <style scoped>
-form {
+/* form {
   background-color: #C7D28A;
-}
+} */
 form label {
   display: inline;
 }

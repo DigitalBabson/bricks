@@ -16,6 +16,10 @@
   <transition name="fade">
 <ui-modal v-if="showMap" @close="closeMap">
     <img class="tw-object-contain tw-max-w-7xl" :src="parkLocationImgURL" />
+    <div class="tw-text-center tw-bg-brickLightGreen">
+      <h3><span>Brick Location: {{ parkLocation }}</span></h3>
+      <h3><span>Brick Inscription: {{ brick.inscription }}</span></h3>
+    </div>
 </ui-modal>
   </transition>
 </teleport>
@@ -33,7 +37,8 @@ export default {
       showImg: false,
       brickImgUrl: '',
       thumbnailUrl: '',
-      parkLocationImgURL: ''
+      parkLocationImgURL: '',
+      parkLocation: ''
     }
   },
   inject: ["defaultEnv", "defaultUrl"],
@@ -83,8 +88,7 @@ export default {
   //   password: drupal9
   // }
   })
-  //console.log(response);
-
+    this.parkLocation = response.data.data.attributes.name
     this.parkLocationImgURL = this.defaultEnv + response.data.included[1].attributes.uri.url;
     }
   },
