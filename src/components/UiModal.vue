@@ -10,8 +10,8 @@
       open>
       <slot />
     </dialog>
-    <button class="tw-fixed tw-top-5 tw-right-5 tw-text-white tw-z-50" @click="$emit('close')">
-      X
+    <button class="tw-fixed tw-top-5 lg:tw-top-8 tw-right-5 lg:tw-right-8 tw-text-white tw-z-50 tw-text-5xl" @click="$emit('close')">
+      <i class="fas fa-times"></i>
     </button>
 
     <!--/teleport-->

@@ -1,6 +1,6 @@
-<template>
-<article class="brick-card tw-border tw-border-gray-100 tw-shadow-sm tw-text-center">
-  <img class="tw-cursor-pointer" :src="thumbnailUrl" @click="openImg"/>
+ap<template>
+<article class="brick-card tw-shadow-brickCard tw-text-center">
+  <img class="tw-cursor-pointer hover:tw-opacity-50 tw-transition-opacity tw-duration-200 tw-ease-in-out" :src="thumbnailUrl" @click="openImg"/>
   <teleport to="body">
     <transition name="fade">
   <ui-modal v-if="showImg" @close="closeImg">
@@ -19,10 +19,12 @@
 <teleport to="body">
   <transition name="fade">
 <ui-modal v-if="showMap" @close="closeMap">
-    <img class="tw-object-contain tw-max-w-7xl" :src="parkLocationImgURL" />
-    <div class="tw-text-center tw-bg-brickLightGreen tw-p-8 tw-text-4">
-      <h3><span class="tw-font-oswald tw-font-bold">Brick Location:</span> {{ parkLocation }}</h3>
-      <h3><span class="tw-font-oswald tw-font-bold">Brick Inscription:</span> {{ brick.inscription }}</h3>
+  <div class="brick__map-wrapper tw-table">
+    <img class="tw-object-contain tw-max-w-full" :src="parkLocationImgURL" />
+    <div class="brick__map-caption tw-table-caption  md:tw-text-center tw-bg-brickLightGreen tw-p-8">
+      <div><span class="tw-font-oswald tw-text-brickL">Brick Location:</span> <span class="tw-font-zilla tw-text-brickL tw-text-brickBabsonGrey">{{ parkLocation }}</span></div>
+      <div><span class="tw-font-oswald tw-text-brickL">Brick Inscription:</span> <span class="tw-font-zilla tw-text-brickL tw-text-brickBabsonGrey">{{ brick.inscription }}</span></div>
+    </div>
     </div>
 </ui-modal>
   </transition>
@@ -104,6 +106,9 @@ export default {
 <style scoped>
 h3 {
   font-size: 2rem;
+}
+.brick__map-caption {
+  caption-side: bottom;
 }
 .fade-enter-active,
 .fade-leave-active {

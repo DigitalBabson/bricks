@@ -1,6 +1,6 @@
 <template>
 <div class="bricks__pagination tw-container
-      tw-mx-auto tw-mt-brick50
+      tw-mx-auto tw-mt-brick9 md:tw-mt-brick35 lg:tw-mt-brick50
       tw-max-w-6xl tw-text-center">
   <button
   class="tw-bg-brickBabsonGreen tw-text-white

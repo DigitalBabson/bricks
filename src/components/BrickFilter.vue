@@ -1,8 +1,14 @@
 <template>
-  <form class="bricks__search-form tw-w-full tw-py-brick30 tw-mb-brick10 tw-bg-brickLightGreen" @submit.prevent>
-  <div class="tw-container tw-mx-auto tw-form-control tw-py-1 tw-text-center tw-text-m">
+  <form class="
+  bricks__search-form
+  tw-w-full
+  tw-py-8 md:tw-py-12 lg:tw-py-brick30
+  tw-mb-brick9 lg:tw-mb-brick10
+  tw-bg-brickLightGreen"
+  @submit.prevent>
+  <div class="tw-container tw-mx-auto tw-form-control tw-py-1 tw-px-8 md:tw-text-center tw-text-m">
     <label for="search-brick">Search for my brick inscription</label>
-    <input id="search-brick" class="tw-mt-4 md:tw-mt0 tw-leading-8"
+    <input id="search-brick" class="tw-mt-4 lg:tw-mt0 tw-leading-8"
     :value="inscription" @input="$emit('update:inscription', $event.target.value)" type="text"/>
   </div>
 </form>
@@ -26,14 +32,25 @@ export default {
   background-color: #C7D28A;
 } */
 form.bricks__search-form label {
-  display: inline;
+  display: block;
   color: #000;
+  margin-bottom: .8rem
 }
 input#search-brick {
-  display: inline-block;
-  width: 300px !important;
+  width: 100% !important;
   border: none;
-  margin-left: 1rem;
+  display: block;
+}
+@media screen and (min-width:767px) {
+  form.bricks__search-form label {
+    display: inline;
+    margin-bottom: 0;
+  }
+  input#search-brick {
+    display: inline-block;
+    width: 370px !important;
+    margin-left: 2rem;
+  }
 }
 </style>
 

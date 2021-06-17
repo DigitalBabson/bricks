@@ -3,14 +3,16 @@
   <div
     class="
       bricks
-      tw-container
+      tw-container xl:tw-max-w-brickMWL
       tw-mx-auto
-      tw-px-4
+      tw-px-8
+      md:tw-px-12
       lg:tw-px-brick20
-      2xl:tw-px-0
+      xl:tw-px-0
       tw-grid tw-grid-cols-1
-      md:tw-grid-cols-4
-      tw-gap-4
+      md:tw-grid-cols-2 lg:tw-grid-cols-4
+      tw-gap-brick3
+      md:tw-gap-brick5
       lg:tw-gap-13
     "
   >
