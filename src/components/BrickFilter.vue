@@ -8,8 +8,11 @@
   @submit.prevent>
   <div class="tw-container tw-mx-auto tw-form-control tw-py-1 tw-px-8 md:tw-text-center tw-text-m">
     <label for="search-brick">Search for my brick inscription</label>
-    <input id="search-brick" class="tw-mt-4 lg:tw-mt0 tw-leading-8"
-    :value="inscription" @input="$emit('update:inscription', $event.target.value)" type="text"/>
+    <div class="bricks__search-form--button tw-inline-block tw-relative tw-w-full md:tw-w-auto">
+      <input id="search-brick" class="tw-leading-8"
+      :value="inscription" @input="$emit('update:inscription', $event.target.value)" type="text"/>
+      <button class="ml-5 tw-absolute tw-right-1 tw-top-0" @click="resetSearch"><i class="fas fa-times tw-text-2xl tw-text-brickMediumGreen"></i></button>
+    </div>
   </div>
 </form>
 </template>
@@ -18,8 +21,11 @@ export default {
   props: {
     inscription: String // previously was `value: String`
   },
-  emits: ['update:inscription', 'reset'],
+  emits: ['update:inscription', 'update:reset'],
   methods: {
+    resetSearch() {
+      this.$emit('update:inscription', '')
+    }
   //  filterName(inscription) {
   //     this.$emit('update:inscription', inscription)
   //   }

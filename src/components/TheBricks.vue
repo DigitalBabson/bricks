@@ -1,5 +1,5 @@
 <template>
-  <brick-filter v-model:inscription="inscription" />
+  <brick-filter v-model:inscription="inscription" v-model:reset="resetForm" />
   <div
     class="
       bricks
@@ -65,7 +65,9 @@ export default {
     },
   },
   methods: {
-
+    resetForm() {
+      this.inscription = '';
+    },
     loadMore() {
       this.fetchBricks(this.inscription, this.offset + 20)
       this.offset += 20
