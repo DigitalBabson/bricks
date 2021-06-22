@@ -4,7 +4,7 @@ ap<template>
   <teleport to="body">
     <transition name="fade">
   <ui-modal v-if="showImg" @close="closeImg">
-    <img class="tw-object-contain" :src="brickImgUrl" />
+    <img class="tw-object-contain tw-max-h-90vh" :src="brickImgUrl" />
 </ui-modal>
     </transition>
   </teleport>
@@ -19,8 +19,8 @@ ap<template>
 <teleport to="body">
   <transition name="fade">
 <ui-modal v-if="showMap" @close="closeMap">
-  <div class="brick__map-wrapper tw-table">
-    <img class="tw-object-contain tw-max-w-full" :src="parkLocationImgURL" />
+  <div class="brick__map-wrapper tw-mx-auto tw-table">
+    <img class="tw-object-contain tw-max-w-full tw-max-h-80vh lg:tw-max-h-70vh" :src="parkLocationImgURL" />
     <div class="brick__map-caption tw-table-caption  md:tw-text-center tw-bg-brickLightGreen tw-p-8">
       <div><span class="tw-font-oswald tw-text-brickL">Brick Location:</span> <span class="tw-font-zilla tw-text-brickL tw-text-brickBabsonGrey">{{ parkLocation }}</span></div>
       <div><span class="tw-font-oswald tw-text-brickL">Brick Inscription:</span> <span class="tw-font-zilla tw-text-brickL tw-text-brickBabsonGrey">{{ brick.inscription }}</span></div>

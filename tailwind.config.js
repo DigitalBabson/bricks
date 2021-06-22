@@ -23,7 +23,7 @@ module.exports = {
         brickCard: "1px 1px 5px 1px rgb(0 0 0 / 10%)",
       },
       maxWidth: {
-        brickMWL: '1170px',
+        brickMWL: "1170px",
       },
       spacing: {
         brick3: "1.7rem",
@@ -41,6 +41,14 @@ module.exports = {
       gap: {
         13: "3.4rem",
       },
+      maxHeight: {
+        "70vh": "80vh",
+        "80vh": "80vh",
+        "90vh": "90vh",
+      },
+      inset: {
+        '1/2': "50%"
+      }
     },
   },
   variants: {

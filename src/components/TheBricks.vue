@@ -1,5 +1,5 @@
 <template>
-  <brick-filter v-model:inscription="inscription" v-model:reset="resetForm" />
+  <brick-filter v-model:inscription="inscription"  />
   <div
     class="
       bricks
@@ -65,9 +65,9 @@ export default {
     },
   },
   methods: {
-    resetForm() {
-      this.inscription = '';
-    },
+    // resetForm() {
+    //   this.inscription = '';
+    // },
     loadMore() {
       this.fetchBricks(this.inscription, this.offset + 20)
       this.offset += 20
@@ -100,14 +100,19 @@ export default {
           brickImage: bricks.relationships.brickImage.data.id,
           brickParkLocation: bricks.relationships.brickParkLocation.data.id,
         }));
-        // If searching, remove existing items
-        if (search.length !== 0) {
+        // Remove existing items
+        if (!offset) {
           this.bricks = []
+        }
+        if (search.length !== 0) {
+
           if (data.length === 0) {
             this.showMessage = true
           } else {
             this.showMessage = false
           }
+        } else {
+          this.showMessage = false
         }
         this.bricks.push(...data);
         if (response.data.links.next && search.length == 0) {

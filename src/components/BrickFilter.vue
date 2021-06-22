@@ -10,8 +10,9 @@
     <label for="search-brick">Search for my brick inscription</label>
     <div class="bricks__search-form--button tw-inline-block tw-relative tw-w-full md:tw-w-auto">
       <input id="search-brick" class="tw-leading-8"
-      :value="inscription" @input="$emit('update:inscription', $event.target.value)" type="text"/>
-      <button class="ml-5 tw-absolute tw-right-1 tw-top-0" @click="resetSearch"><i class="fas fa-times tw-text-2xl tw-text-brickMediumGreen"></i></button>
+      :value="inscription" @input="$emit('update:inscription', $event.target.value)" type="text"  />
+      <input type="submit" class="tw-hidden" />
+      <button class="ml-5 tw-absolute tw-right-2 tw-top-0 tw-bottom-0" @click="resetSearch"><i class="fas fa-times tw-text-brickMediumGreen"></i></button>
     </div>
   </div>
 </form>
@@ -21,11 +22,11 @@ export default {
   props: {
     inscription: String // previously was `value: String`
   },
-  emits: ['update:inscription', 'update:reset'],
+  emits: ['update:inscription'],
   methods: {
     resetSearch() {
       this.$emit('update:inscription', '')
-    }
+    },
   //  filterName(inscription) {
   //     this.$emit('update:inscription', inscription)
   //   }
@@ -46,6 +47,9 @@ input#search-brick {
   width: 100% !important;
   border: none;
   display: block;
+}
+button {
+  font-size: 24px;
 }
 @media screen and (min-width:767px) {
   form.bricks__search-form label {
