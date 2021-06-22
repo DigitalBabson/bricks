@@ -11,7 +11,7 @@
     <div class="bricks__search-form--button tw-inline-block tw-relative tw-w-full md:tw-w-auto">
       <input id="search-brick" class="tw-leading-8"
       :value="inscription" @input="$emit('update:inscription', $event.target.value)" type="text"  />
-      <input type="submit" class="tw-hidden" />
+      <input type="submit" class="form-submit" />
       <button class="ml-5 tw-absolute tw-right-2 tw-top-0 tw-bottom-0" @click="resetSearch"><i class="fas fa-times tw-text-brickMediumGreen"></i></button>
     </div>
   </div>
@@ -61,6 +61,9 @@ button {
     width: 370px !important;
     margin-left: 2rem;
   }
+}
+.form-submit {
+  @apply tw-hidden;
 }
 </style>
 
