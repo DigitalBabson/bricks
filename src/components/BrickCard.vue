@@ -77,10 +77,12 @@ export default {
   // }
   })
     this.thumbnailUrl = response.data.included[0].attributes.image_style_uri.find(({brick}) => brick).brick
-    this.brickImgUrl = this.defaultEnv + response.data.included[0].attributes.uri.url;
+    this.brickImgUrl = response.data.included[0].attributes.image_style_uri.find(({full_img}) => full_img).full_img
+
+    //this.brickImgUrl = this.defaultEnv + response.data.included[0].attributes.uri.url + '?' + this.file_token;
     },
     async getParkLocationImgURL() {
-      const url = this.defaultUrl + `parkLocations/` + this.brick.brickParkLocation + `?fields[file--file]=uri,url`
+      const url = this.defaultUrl + `parkLocations/` + this.brick.brickParkLocation
       //axios.defaults.withCredentials = true;
       const response = await axios.get(url, {}, {
       headers: {
@@ -93,7 +95,9 @@ export default {
   // }
   })
     this.parkLocation = response.data.data.attributes.name
-    this.parkLocationImgURL = this.defaultEnv + response.data.included[1].attributes.uri.url;
+        this.parkLocationImgURL= response.data.included[1].attributes.image_style_uri.find(({full_img}) => full_img).full_img
+
+    //this.parkLocationImgURL = this.defaultEnv + response.data.included[1].attributes.uri.url + '?' + this.file_token;
     }
   },
   mounted() {

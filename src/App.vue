@@ -16,12 +16,12 @@ export default {
 	},
   provide() {
     const drupalEnv = {
-      dev: "https://dev.bell.babson.edu/",
-      stage: "https://stage.bell.babson.edu/",
-      stage2: "https://stage2.bell.babson.edu/",
-      prod: "https://bell.babson.edu/"
+      dev: "https://dev.bell.babson.edu",
+      stage: "https://stage.bell.babson.edu",
+      stage2: "https://stage2.bell.babson.edu",
+      prod: "https://bell.babson.edu"
     }
-    const feedUrl = "jsonapi/"
+    const feedUrl = "/jsonapi/"
     return  {
       defaultEnv:  drupalEnv.prod,
       defaultUrl:  drupalEnv.prod + feedUrl
