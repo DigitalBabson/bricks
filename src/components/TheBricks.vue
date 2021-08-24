@@ -93,13 +93,31 @@ export default {
           }
         );
         const results = response.data.data;
-        let data = results.map((bricks) => ({
-          id: bricks.id,
+        console.log(results);
+        // let data = results.map((bricks) => ({
+        //   id: bricks.id,
+        //   number: bricks.attributes.brickNumber,
+        //   inscription: bricks.attributes.brickInscription,
+        //   brickImage: bricks.relationships.brickImage.data.id,
+        //   brickParkLocation: bricks.relationships.brickParkLocation.data.id,
+        // }));
+        let data = results.map(
+          function(bricks) {
+            var brickImage;
+            if (bricks.relationships.brickImage.data == null)
+            { brickImage = 'default'; }
+            else {
+              brickImage = bricks.relationships.brickImage.data.id;
+            }
+            return {
+                        id: bricks.id,
           number: bricks.attributes.brickNumber,
           inscription: bricks.attributes.brickInscription,
-          brickImage: bricks.relationships.brickImage.data.id,
+          brickImage: brickImage,
           brickParkLocation: bricks.relationships.brickParkLocation.data.id,
-        }));
+
+            }
+          });
         // Remove existing items
         if (!offset) {
           this.bricks = []
