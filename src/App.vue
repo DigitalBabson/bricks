@@ -23,8 +23,8 @@ export default {
     }
     const feedUrl = "/jsonapi/"
     return  {
-      defaultEnv:  drupalEnv.stage,
-      defaultUrl:  drupalEnv.stage + feedUrl
+      defaultEnv:  drupalEnv.prod,
+      defaultUrl:  drupalEnv.prod + feedUrl
     }
   }
 }

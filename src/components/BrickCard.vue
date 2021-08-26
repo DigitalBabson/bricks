@@ -49,14 +49,14 @@ ap<template>
             "
           >
             <div>
-              <span class="tw-font-oswald tw-text-brickL">Brick Location:</span>
+              <span class="tw-font-oswald tw-text-brickL tw-mr-3">Brick Location:</span>
               <span
                 class="tw-font-zilla tw-text-brickL tw-text-brickBabsonGrey"
                 >{{ parkLocation }}</span
               >
             </div>
             <div>
-              <span class="tw-font-oswald tw-text-brickL"
+              <span class="tw-font-oswald tw-text-brickL tw-mr-3"
                 >Brick Inscription:</span
               >
               <span
