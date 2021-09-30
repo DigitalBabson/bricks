@@ -26,7 +26,7 @@ ap<template>
       "
       @click="openMap"
     >
-      See details
+      See location details
     </button>
   </article>
   <teleport to="body">
