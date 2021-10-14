@@ -12,7 +12,7 @@
       <input id="search-brick" class="tw-leading-8"
       :value="inscription" @input="$emit('update:inscription', $event.target.value)" type="text"  />
       <input type="submit" class="form-submit" />
-      <button class="ml-5 tw-absolute tw-right-2 tw-top-0 tw-bottom-0" @click="resetSearch"><i class="fas fa-times tw-text-brickMediumGreen"></i></button>
+      <button class="ml-5 tw-absolute tw-right-2 tw-top-0 tw-bottom-0 tw-focus:outline-none" @click="resetSearch"><i class="fas fa-times tw-text-brickMediumGreen"></i></button>
     </div>
   </div>
 </form>
@@ -50,6 +50,10 @@ input#search-brick {
 }
 button {
   font-size: 24px;
+}
+button:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
 }
 @media screen and (min-width:767px) {
   form.bricks__search-form label {

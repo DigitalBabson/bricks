@@ -60,8 +60,10 @@ export default {
     // },
   },
   watch: {
-    inscription(value) {
-      this.fetchBricks(value);
+    inscription(value) { 
+      if (value.length > 3) {
+        this.fetchBricks(value);
+      }
     },
   },
   methods: {
