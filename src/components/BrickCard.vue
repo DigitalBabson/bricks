@@ -1,4 +1,4 @@
-ap<template>
+<template>
   <article class="brick-card tw-shadow-brickCard tw-text-center">
     <img
       class="
@@ -106,9 +106,9 @@ export default {
     async getBrickImgURL() {
       if (this.brick.brickImage == "default") {
         this.thumbnailUrl =
-          this.defaultEnv + "/sites/default/files/2021-08/coming-soon.jpg?v1";
+          this.defaultEnv + "/sites/default/files/2022-09/coming-soon.jpg?v2";
         this.brickImgUrl =
-          this.defaultEnv + "/sites/default/files/2021-08/coming-soon.jpg?v1";
+          this.defaultEnv + "/sites/default/files/2022-09//coming-soon.jpg?v2";
       } else {
         const url = this.defaultUrl + `media/image/`;
         //axios.defaults.withCredentials = true;
