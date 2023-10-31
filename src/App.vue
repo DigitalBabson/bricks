@@ -16,6 +16,7 @@ export default {
 	},
   provide() {
     const drupalEnv = {
+      local: 'https://d9.ddev.site',
       dev: "https://dev.intranet.babson.edu",
       stage: "https://stage.intranet.babson.edu",
       stage2: "https://stage2.intranet.babson.edu",

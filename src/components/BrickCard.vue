@@ -127,13 +127,9 @@ export default {
           }
         );
         this.thumbnailUrl =
-          response.data.included[0].attributes.image_style_uri.find(
-            ({ brick }) => brick
-          ).brick;
+          response.data.included[0].attributes.image_style_uri.brick;
         this.brickImgUrl =
-          response.data.included[0].attributes.image_style_uri.find(
-            ({ full_img }) => full_img
-          ).full_img;
+          response.data.included[0].attributes.image_style_uri.full_img;
       }
       //this.brickImgUrl = this.defaultEnv + response.data.included[0].attributes.uri.url + '?' + this.file_token;
     },
@@ -157,9 +153,7 @@ export default {
       );
       this.parkLocation = response.data.data.attributes.name;
       this.parkLocationImgURL =
-        response.data.included[1].attributes.image_style_uri.find(
-          ({ full_img }) => full_img
-        ).full_img;
+        response.data.included[1].attributes.image_style_uri.full_img;
 
       //this.parkLocationImgURL = this.defaultEnv + response.data.included[1].attributes.uri.url + '?' + this.file_token;
     },
