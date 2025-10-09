@@ -106,9 +106,9 @@ export default {
     async getBrickImgURL() {
       if (this.brick.brickImage == "default") {
         this.thumbnailUrl =
-          this.defaultEnv + "/sites/default/files/2022-09/coming-soon.jpg?v2";
+          this.defaultEnv + "/sites/default/files/2025-10/coming-soon.jpg";
         this.brickImgUrl =
-          this.defaultEnv + "/sites/default/files/2022-09//coming-soon.jpg?v2";
+          this.defaultEnv + "/sites/default/files/2025-10/coming-soon.jpg";
       } else {
         const url = this.defaultUrl + `media/image/`;
         //axios.defaults.withCredentials = true;
