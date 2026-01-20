@@ -65,6 +65,15 @@ export default {
           inscription: 'JOANNE THOMAS GROVE B\'1977',
           imgLink: 'src/assets/bricks/IMG_2008.jpg',
           zone: 'zone1'
+        },
+        {
+          id: 'test-missing-image',
+          firstName: 'John',
+          lastName: 'Smith',
+          year: '1995',
+          inscription: 'JOHN SMITH CLASS OF 1995 - FOREVER A BEAVER',
+          imgLink: 'invalid-url-to-trigger-placeholder.jpg',
+          zone: 'zone2'
         }
       ]
     }
