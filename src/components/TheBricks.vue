@@ -100,7 +100,7 @@ export default {
           }
         );
         const results = response.data.data;
-        console.log(results);
+        // console.log(results);
         // let data = results.map((bricks) => ({
         //   id: bricks.id,
         //   number: bricks.attributes.brickNumber,

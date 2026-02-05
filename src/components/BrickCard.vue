@@ -1,14 +1,29 @@
 <template>
   <article class="brick-card tw-shadow-brickCard tw-text-center">
-    <img
-      class="
-        tw-cursor-pointer
-        hover:tw-opacity-50
-        tw-transition-opacity tw-duration-200 tw-ease-in-out
-      "
-      :src="thumbnailUrl"
-      @click="openImg"
-    />
+    <div class="brick-card__media">
+      <div
+        v-if="showPlaceholder"
+        class="brick-card__placeholder"
+        role="img"
+        aria-label="Image loading"
+      ></div>
+
+      <img
+        v-else
+        class="
+          tw-cursor-pointer
+          hover:tw-opacity-50
+          tw-transition-opacity tw-duration-200 tw-ease-in-out
+          brick-card__image
+        "
+        :src="thumbnailUrl"
+        :alt="brick?.title || 'Brick image'"
+        loading="lazy"
+        @load="onImgLoad"
+        @error="onImgError"
+        @click="openImg"
+      />
+    </div>
     <teleport to="body">
       <transition name="fade">
         <ui-modal v-if="showImg" @close="closeImg">
@@ -84,11 +99,20 @@ export default {
       thumbnailUrl: "",
       parkLocationImgURL: "",
       parkLocation: "",
+      isImgLoading: true,
+      hasImgError: false,
+      defaultImgPath: "/sites/default/files/2025-10/coming-soon.jpg",
     };
   },
   inject: ["defaultEnv", "defaultUrl"],
   components: {
     UiModal,
+  },
+  computed: {
+    showPlaceholder() {
+      // Show placeholder only while loading before any image is ready
+      return this.isImgLoading && !this.brickImgUrl;
+    },
   },
   methods: {
     openMap() {
@@ -103,15 +127,33 @@ export default {
     closeImg() {
       this.showImg = false;
     },
+    onImgLoad() {
+      this.isImgLoading = false;
+      this.hasImgError = false;
+    },
+    onImgError() {
+      this.isImgLoading = false;
+      const fallback = this.defaultEnv + this.defaultImgPath;
+      this.thumbnailUrl = fallback;
+      this.brickImgUrl = fallback;
+      this.hasImgError = false; // Allow default to render
+    },
     async getBrickImgURL() {
-      if (this.brick.brickImage == "default") {
-        this.thumbnailUrl =
-          this.defaultEnv + "/sites/default/files/2025-10/coming-soon.jpg";
-        this.brickImgUrl =
-          this.defaultEnv + "/sites/default/files/2025-10/coming-soon.jpg";
-      } else {
+      this.isImgLoading = true;
+      this.hasImgError = false;
+
+      // If brick image is explicitly default/missing, use default and stop
+      if (!this.brick.brickImage || this.brick.brickImage === "default") {
+        const fallback = this.defaultEnv + this.defaultImgPath;
+        this.thumbnailUrl = fallback;
+        this.brickImgUrl = fallback;
+        this.isImgLoading = false;
+        this.hasImgError = false; // show default immediately
+        return;
+      }
+
+      try {
         const url = this.defaultUrl + `media/image/`;
-        //axios.defaults.withCredentials = true;
         const response = await axios.get(
           url + this.brick.brickImage,
           {},
@@ -120,18 +162,29 @@ export default {
               crossDomain: true,
               "Content-Type": "application/json",
             },
-            // auth: {
-            //   username: babson,
-            //   password: drupal9
-            // }
           }
         );
-        this.thumbnailUrl =
-          response.data.included[0].attributes.image_style_uri.brick;
-        this.brickImgUrl =
-          response.data.included[0].attributes.image_style_uri.full_img;
+
+        const imageData = response?.data?.included?.[0]?.attributes?.image_style_uri;
+        if (imageData?.brick && imageData?.full_img) {
+          this.thumbnailUrl = imageData.brick;
+          this.brickImgUrl = imageData.full_img;
+          this.isImgLoading = false;
+          this.hasImgError = false;
+        } else {
+          const fallback = this.defaultEnv + this.defaultImgPath;
+          this.thumbnailUrl = fallback;
+          this.brickImgUrl = fallback;
+          this.isImgLoading = false;
+          this.hasImgError = false; // allow default to render
+        }
+      } catch (error) {
+        const fallback = this.defaultEnv + this.defaultImgPath;
+        this.thumbnailUrl = fallback;
+        this.brickImgUrl = fallback;
+        this.isImgLoading = false;
+        this.hasImgError = false; // allow default to render
       }
-      //this.brickImgUrl = this.defaultEnv + response.data.included[0].attributes.uri.url + '?' + this.file_token;
     },
     async getParkLocationImgURL() {
       const url =
@@ -181,4 +234,27 @@ h3 {
 .fade-leave-to {
   opacity: 0;
 }
+.brick-card__media {
+  position: relative;
+}
+.brick-card__placeholder {
+  width: 100%;
+  padding-top: 56.25%; /* 16:9 */
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(0,0,0,0.06),
+    rgba(0,0,0,0.06) 12px,
+    rgba(0,0,0,0.10) 12px,
+    rgba(0,0,0,0.10) 24px
+  );
+  border-radius: 4px;
+  animation: brick-card-pulse 1.2s ease-in-out infinite;
+}
+.brick-card__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
 </style>
