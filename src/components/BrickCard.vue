@@ -178,15 +178,17 @@ export default {
       }
     },
     async getParkLocationImgURL() {
-      const url =
-        this.defaultUrl + `parkLocations/` + this.brick.brickParkLocation;
-      //axios.defaults.withCredentials = true;
-      const response = await axios.get(url);
-      this.parkLocation = response.data.data.attributes.name;
-      this.parkLocationImgURL =
-        response.data.included[1].attributes.image_style_uri.full_img;
-
-      //this.parkLocationImgURL = this.defaultEnv + response.data.included[1].attributes.uri.url + '?' + this.file_token;
+      try {
+        const url =
+          this.defaultUrl + `parkLocations/` + this.brick.brickParkLocation;
+        const response = await axios.get(url);
+        this.parkLocation = response?.data?.data?.attributes?.name || "";
+        this.parkLocationImgURL =
+          response?.data?.included?.[1]?.attributes?.image_style_uri?.full_img || "";
+      } catch (error) {
+        this.parkLocation = "";
+        this.parkLocationImgURL = "";
+      }
     },
   },
   mounted() {
