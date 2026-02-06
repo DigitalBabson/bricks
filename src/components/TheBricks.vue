@@ -84,19 +84,11 @@ export default {
         //axios.defaults.withCredentials = true;
         const response = await axios.get(
           url,
-          {},
           {
             headers: {
               crossDomain: true,
               "Content-Type": "application/json",
             },
-            rejectUnauthorized: false,//add when working with https sites
-            requestCert: false,//add when working with https sites
-            agent: false,//add when working with https sites
-            // auth: {
-            //   username: babson,
-            //   password: drupal9
-            // }
           }
         );
         const results = response.data.data;

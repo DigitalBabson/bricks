@@ -1,6 +1,5 @@
 module.exports = {
-  purge: ["./index.html", "./src/**/*.{vue,js,ts,jsx,tsx}"],
-  darkMode: false, // or 'media' or 'class'
+  content: ["./index.html", "./src/**/*.{vue,js,ts,jsx,tsx}"],
   prefix: "tw-",
   theme: {
     extend: {
@@ -50,9 +49,6 @@ module.exports = {
         '1/2': "50%"
       }
     },
-  },
-  variants: {
-    extend: {},
   },
   plugins: [],
 };

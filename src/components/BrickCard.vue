@@ -156,7 +156,6 @@ export default {
         const url = this.defaultUrl + `media/image/`;
         const response = await axios.get(
           url + this.brick.brickImage,
-          {},
           {
             headers: {
               crossDomain: true,
@@ -192,16 +191,11 @@ export default {
       //axios.defaults.withCredentials = true;
       const response = await axios.get(
         url,
-        {},
         {
           headers: {
             crossDomain: true,
             "Content-Type": "application/json",
           },
-          // auth: {
-          //   username: babson,
-          //   password: drupal9
-          // }
         }
       );
       this.parkLocation = response.data.data.attributes.name;

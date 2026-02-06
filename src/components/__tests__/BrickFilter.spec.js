@@ -27,7 +27,7 @@ describe('BrickFilter', () => {
       expect(label.text()).toBe('Search for my brick inscription')
     })
 
-    it('renders clear button with correct text', () => {
+    it('renders clear button with icon', () => {
       const wrapper = mount(BrickFilter, {
         props: {
           inscription: ''
@@ -35,7 +35,8 @@ describe('BrickFilter', () => {
       })
 
       const button = wrapper.find('button')
-      expect(button.text()).toBe('Clear')
+      expect(button.exists()).toBe(true)
+      expect(button.find('i.fas.fa-times').exists()).toBe(true)
     })
   })
 
@@ -97,7 +98,7 @@ describe('BrickFilter', () => {
       expect(wrapper.emitted('update:inscription')[2]).toEqual(['Joh'])
     })
 
-    it('emits update:reset event when clear button is clicked', async () => {
+    it('emits update:inscription with empty string when clear button is clicked', async () => {
       const wrapper = mount(BrickFilter, {
         props: {
           inscription: 'some text'
@@ -107,13 +108,13 @@ describe('BrickFilter', () => {
       const button = wrapper.find('button')
       await button.trigger('click')
 
-      expect(wrapper.emitted()).toHaveProperty('update:reset')
-      expect(wrapper.emitted('update:reset')).toHaveLength(1)
+      expect(wrapper.emitted()).toHaveProperty('update:inscription')
+      expect(wrapper.emitted('update:inscription')[0]).toEqual([''])
     })
   })
 
   describe('Styling', () => {
-    it('has correct background color on form', () => {
+    it('applies Tailwind CSS classes to form', () => {
       const wrapper = mount(BrickFilter, {
         props: {
           inscription: ''
@@ -121,44 +122,8 @@ describe('BrickFilter', () => {
       })
 
       const form = wrapper.find('form')
-      // Check that the scoped style is applied (component has the style)
-      expect(wrapper.html()).toContain('background-color: #C7D28A')
-    })
-
-    it('applies correct CSS classes', () => {
-      const wrapper = mount(BrickFilter, {
-        props: {
-          inscription: ''
-        }
-      })
-
-      const form = wrapper.find('form')
-      expect(form.classes()).toContain('w-full')
-      expect(form.classes()).toContain('py-8')
-      expect(form.classes()).toContain('mb-5')
-    })
-  })
-
-  describe('User Interaction Flow', () => {
-    it('handles complete search and clear flow', async () => {
-      const wrapper = mount(BrickFilter, {
-        props: {
-          inscription: ''
-        }
-      })
-
-      // User types in search box
-      const input = wrapper.find('input#search-brick')
-      await input.setValue('Jane Smith')
-
-      expect(wrapper.emitted('update:inscription')).toHaveLength(1)
-      expect(wrapper.emitted('update:inscription')[0]).toEqual(['Jane Smith'])
-
-      // User clicks clear button
-      const button = wrapper.find('button')
-      await button.trigger('click')
-
-      expect(wrapper.emitted('update:reset')).toHaveLength(1)
+      expect(form.classes()).toContain('tw-w-full')
+      expect(form.classes()).toContain('tw-bg-brickLightGreen')
     })
   })
 })

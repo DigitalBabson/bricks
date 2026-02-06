@@ -38,8 +38,8 @@ describe('UiModal', () => {
       attachTo: document.body
     })
 
-    // Find the backdrop (the outer div with absolute positioning)
-    const backdrop = wrapper.find('[class*="absolute inset-0"]')
+    // Backdrop is the div with tw-fixed tw-inset-0 tw-bg-gray-900
+    const backdrop = wrapper.find('.tw-bg-gray-900')
     await backdrop.trigger('click')
 
     expect(wrapper.emitted()).toHaveProperty('close')
@@ -53,16 +53,13 @@ describe('UiModal', () => {
       attachTo: document.body
     })
 
-    // Click on the modal content area (not backdrop)
     const modalContent = wrapper.find('.modal-body')
     await modalContent.trigger('click')
 
-    // Should not emit close event when clicking inside modal
-    // (This depends on implementation - may need adjustment based on actual UiModal.vue)
     expect(wrapper.html()).toContain('Content')
   })
 
-  it('renders close button with X symbol', () => {
+  it('renders close button with FontAwesome icon', () => {
     const wrapper = mount(UiModal, {
       slots: {
         default: '<div>Content</div>'
@@ -72,10 +69,10 @@ describe('UiModal', () => {
 
     const closeButton = wrapper.find('button')
     expect(closeButton.exists()).toBe(true)
-    expect(closeButton.text()).toBe('X')
+    expect(closeButton.find('i.fas.fa-times').exists()).toBe(true)
   })
 
-  it('has correct CSS classes for modal styling', () => {
+  it('uses fixed positioning for modal overlay', () => {
     const wrapper = mount(UiModal, {
       slots: {
         default: '<div>Content</div>'
@@ -83,8 +80,7 @@ describe('UiModal', () => {
       attachTo: document.body
     })
 
-    // Check for backdrop classes (absolute positioning, dark overlay)
-    expect(wrapper.html()).toContain('absolute')
-    expect(wrapper.html()).toContain('inset-0')
+    expect(wrapper.html()).toContain('tw-fixed')
+    expect(wrapper.html()).toContain('tw-inset-0')
   })
 })
