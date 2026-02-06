@@ -98,7 +98,6 @@ describe('BrickCard', () => {
 
     it('initializes with loading state', () => {
       expect(wrapper.vm.isImgLoading).toBeDefined()
-      expect(wrapper.vm.hasImgError).toBe(false)
     })
   })
 })

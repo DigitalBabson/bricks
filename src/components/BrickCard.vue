@@ -100,7 +100,6 @@ export default {
       parkLocationImgURL: "",
       parkLocation: "",
       isImgLoading: true,
-      hasImgError: false,
       defaultImgPath: "/sites/default/files/2025-10/coming-soon.jpg",
     };
   },
@@ -129,18 +128,15 @@ export default {
     },
     onImgLoad() {
       this.isImgLoading = false;
-      this.hasImgError = false;
     },
     onImgError() {
       this.isImgLoading = false;
       const fallback = this.defaultEnv + this.defaultImgPath;
       this.thumbnailUrl = fallback;
       this.brickImgUrl = fallback;
-      this.hasImgError = false; // Allow default to render
     },
     async getBrickImgURL() {
       this.isImgLoading = true;
-      this.hasImgError = false;
 
       // If brick image is explicitly default/missing, use default and stop
       if (!this.brick.brickImage || this.brick.brickImage === "default") {
@@ -148,7 +144,6 @@ export default {
         this.thumbnailUrl = fallback;
         this.brickImgUrl = fallback;
         this.isImgLoading = false;
-        this.hasImgError = false; // show default immediately
         return;
       }
 
@@ -161,20 +156,17 @@ export default {
           this.thumbnailUrl = imageData.brick;
           this.brickImgUrl = imageData.full_img;
           this.isImgLoading = false;
-          this.hasImgError = false;
         } else {
           const fallback = this.defaultEnv + this.defaultImgPath;
           this.thumbnailUrl = fallback;
           this.brickImgUrl = fallback;
           this.isImgLoading = false;
-          this.hasImgError = false; // allow default to render
         }
       } catch (error) {
         const fallback = this.defaultEnv + this.defaultImgPath;
         this.thumbnailUrl = fallback;
         this.brickImgUrl = fallback;
         this.isImgLoading = false;
-        this.hasImgError = false; // allow default to render
       }
     },
     async getParkLocationImgURL() {

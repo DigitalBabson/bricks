@@ -1,11 +1,11 @@
 <template>
 <teleport to="body">
-<div class="absolute inset-0 bg-gray-900 opacity-50" @click="$emit('close')"></div>
-<dialog class="absolute inset-0 h-5/6 p-0" open>
+<div class="tw-absolute tw-inset-0 tw-bg-gray-900 tw-opacity-50" @click="$emit('close')"></div>
+<dialog class="tw-absolute tw-inset-0 tw-h-5/6 tw-p-0" open>
 blah
-  <img class="object-contain max-h-full" :src="'src/assets/maps/'+zone+'.jpg'" />
+  <img class="tw-object-contain tw-max-h-full" :src="'src/assets/maps/'+zone+'.jpg'" />
 </dialog>
-<button class="absolute top-5 right-5" @click="$emit('close')">X</button>
+<button class="tw-absolute tw-top-5 tw-right-5" @click="$emit('close')">X</button>
 </teleport>
 </template>
 

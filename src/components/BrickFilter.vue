@@ -12,7 +12,7 @@
       <input id="search-brick" class="tw-leading-8"
       :value="inscription" @input="$emit('update:inscription', $event.target.value)" type="text"  />
       <input type="submit" class="form-submit" />
-      <button class="ml-5 tw-absolute tw-right-2 tw-top-0 tw-bottom-0 tw-focus:outline-none" @click="resetSearch"><i class="fas fa-times tw-text-brickMediumGreen"></i></button>
+      <button class="tw-ml-5 tw-absolute tw-right-2 tw-top-0 tw-bottom-0 tw-focus:outline-none" @click="resetSearch"><i class="fas fa-times tw-text-brickMediumGreen"></i></button>
     </div>
   </div>
 </form>
@@ -27,9 +27,6 @@ export default {
     resetSearch() {
       this.$emit('update:inscription', '')
     },
-  //  filterName(inscription) {
-  //     this.$emit('update:inscription', inscription)
-  //   }
   }
 }
 </script>

@@ -49,16 +49,7 @@ export default {
     };
   },
   inject: ["defaultEnv", "defaultUrl"],
-  computed: {
-    // filterBricksByName() {
-    //   return this.bricks.filter((brick) =>
-    //     brick.inscription
-    //       .toString()
-    //       .match(new RegExp(this.filter.inscription.trim().toString(), "i"))
-    //   );
-    //   return this.fetchBricks(filter.inscription)
-    // },
-  },
+  computed: {},
   watch: {
     inscription(value) {
       if (value.length == 0) {
@@ -69,9 +60,6 @@ export default {
     },
   },
   methods: {
-    // resetForm() {
-    //   this.inscription = '';
-    // },
     loadMore() {
       this.fetchBricks(this.inscription, this.offset + 20)
       this.offset += 20
@@ -81,17 +69,8 @@ export default {
         const url =
           this.defaultUrl + `bricks?page[limit]=20&filter[brickInscription][operator]=CONTAINS&filter[brickInscription][value]=` +
           search + '&page[offset]=' + offset;
-        //axios.defaults.withCredentials = true;
         const response = await axios.get(url);
         const results = response.data.data;
-        // console.log(results);
-        // let data = results.map((bricks) => ({
-        //   id: bricks.id,
-        //   number: bricks.attributes.brickNumber,
-        //   inscription: bricks.attributes.brickInscription,
-        //   brickImage: bricks.relationships.brickImage.data.id,
-        //   brickParkLocation: bricks.relationships.brickParkLocation.data.id,
-        // }));
         let data = results.map(
           function(bricks) {
             var brickImage;
@@ -129,15 +108,7 @@ export default {
         } else this.nextPage = false
         if (offset) this.offset = offset;
       } catch (err) {
-        if (err.response) {
-          // client received an error response (5xx, 4xx)
-          console.log("Server Error:", err);
-        } else if (err.request) {
-          // client never received a response, or request never left
-          console.log("Network Error:", err);
-        } else {
-          console.log("Client Error:", err);
-        }
+        // Silently handle fetch errors — UI will show empty state
       }
     },
   },
