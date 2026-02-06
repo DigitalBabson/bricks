@@ -154,15 +154,7 @@ export default {
 
       try {
         const url = this.defaultUrl + `media/image/`;
-        const response = await axios.get(
-          url + this.brick.brickImage,
-          {
-            headers: {
-              crossDomain: true,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const response = await axios.get(url + this.brick.brickImage);
 
         const imageData = response?.data?.included?.[0]?.attributes?.image_style_uri;
         if (imageData?.brick && imageData?.full_img) {
@@ -189,15 +181,7 @@ export default {
       const url =
         this.defaultUrl + `parkLocations/` + this.brick.brickParkLocation;
       //axios.defaults.withCredentials = true;
-      const response = await axios.get(
-        url,
-        {
-          headers: {
-            crossDomain: true,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await axios.get(url);
       this.parkLocation = response.data.data.attributes.name;
       this.parkLocationImgURL =
         response.data.included[1].attributes.image_style_uri.full_img;

@@ -82,15 +82,7 @@ export default {
           this.defaultUrl + `bricks?page[limit]=20&filter[brickInscription][operator]=CONTAINS&filter[brickInscription][value]=` +
           search + '&page[offset]=' + offset;
         //axios.defaults.withCredentials = true;
-        const response = await axios.get(
-          url,
-          {
-            headers: {
-              crossDomain: true,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const response = await axios.get(url);
         const results = response.data.data;
         // console.log(results);
         // let data = results.map((bricks) => ({
