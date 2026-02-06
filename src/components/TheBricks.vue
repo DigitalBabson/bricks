@@ -49,7 +49,6 @@ export default {
     };
   },
   inject: ["defaultEnv", "defaultUrl"],
-  computed: {},
   watch: {
     inscription(value) {
       if (value.length == 0) {
