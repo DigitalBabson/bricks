@@ -60,4 +60,4 @@ Configured in `App.vue` provide block. Switch by changing `drupalEnv.prod` to `d
 
 ## Deployment
 
-Build output in `dist/` is uploaded to Terminal Four CMS (bricks directory in media). The app is embedded in the Babson intranet.
+Build output in `dist/` is uploaded to Terminal Four CMS (bricks directory in media). The app is embedded in the Babson.edu. Prod url: https://www.babson.edu/kmhpbricks/ Test url: https://test-www.babson.edu/kmhpbricks/
