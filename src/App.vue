@@ -4,28 +4,15 @@
 </div>
 </template>
 
-<script>
-import TheBricks from './components/TheBricks.vue';
+<script lang="ts">
+import { defineComponent } from 'vue'
+import TheBricks from './components/TheBricks.vue'
 
-export default {
-	components: {
-		TheBricks,
-	},
-  provide() {
-    const drupalEnv = {
-      local: 'https://d9.ddev.site',
-      dev: "https://dev.intranet.babson.edu",
-      stage: "https://stage.intranet.babson.edu",
-      stage2: "https://stage2.intranet.babson.edu",
-      prod: "https://intranet.babson.edu"
-    }
-    const feedUrl = "/jsonapi/"
-    return  {
-      defaultEnv:  drupalEnv.prod,
-      defaultUrl:  drupalEnv.prod + feedUrl
-    }
-  }
-}
+export default defineComponent({
+  components: {
+    TheBricks,
+  },
+})
 </script>
 
 <style>

@@ -17,7 +17,7 @@
           brick-card__image
         "
         :src="thumbnailUrl"
-        :alt="brick?.title || 'Brick image'"
+        :alt="brick?.inscription || 'Brick image'"
         loading="lazy"
         @load="onImgLoad"
         @error="onImgError"
@@ -86,11 +86,17 @@
   </teleport>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, type PropType } from "vue";
 import UiModal from "./UiModal.vue";
 import axios from "axios";
-export default {
-  props: ["brick"],
+import { defaultEnvKey, defaultUrlKey } from "../types/index"
+import type { Brick, MediaImageApiResponse, ParkLocationApiResponse } from "../types/index"
+
+export default defineComponent({
+  props: {
+    brick: { type: Object as PropType<Brick>, required: true }
+  },
   data() {
     return {
       showMap: false,
@@ -103,7 +109,10 @@ export default {
       defaultImgPath: "/sites/default/files/2025-10/coming-soon.jpg",
     };
   },
-  inject: ["defaultEnv", "defaultUrl"],
+  inject: {
+    defaultEnv: { from: defaultEnvKey, default: '' },
+    defaultUrl: { from: defaultUrlKey, default: '' }
+  },
   components: {
     UiModal,
   },
@@ -111,6 +120,12 @@ export default {
     showPlaceholder() {
       // Show placeholder only while loading before any image is ready
       return this.isImgLoading && !this.brickImgUrl;
+    },
+    env(): string {
+      return this.defaultEnv as string;
+    },
+    apiUrl(): string {
+      return this.defaultUrl as string;
     },
   },
   methods: {
@@ -131,7 +146,7 @@ export default {
     },
     onImgError() {
       this.isImgLoading = false;
-      const fallback = this.defaultEnv + this.defaultImgPath;
+      const fallback = this.env + this.defaultImgPath;
       this.thumbnailUrl = fallback;
       this.brickImgUrl = fallback;
     },
@@ -140,7 +155,7 @@ export default {
 
       // If brick image is explicitly default/missing, use default and stop
       if (!this.brick.brickImage || this.brick.brickImage === "default") {
-        const fallback = this.defaultEnv + this.defaultImgPath;
+        const fallback = this.env + this.defaultImgPath;
         this.thumbnailUrl = fallback;
         this.brickImgUrl = fallback;
         this.isImgLoading = false;
@@ -148,8 +163,8 @@ export default {
       }
 
       try {
-        const url = this.defaultUrl + `media/image/`;
-        const response = await axios.get(url + this.brick.brickImage);
+        const url = this.apiUrl + `media/image/`;
+        const response = await axios.get<MediaImageApiResponse>(url + this.brick.brickImage);
 
         const imageData = response?.data?.included?.[0]?.attributes?.image_style_uri;
         if (imageData?.brick && imageData?.full_img) {
@@ -157,13 +172,13 @@ export default {
           this.brickImgUrl = imageData.full_img;
           this.isImgLoading = false;
         } else {
-          const fallback = this.defaultEnv + this.defaultImgPath;
+          const fallback = this.env + this.defaultImgPath;
           this.thumbnailUrl = fallback;
           this.brickImgUrl = fallback;
           this.isImgLoading = false;
         }
       } catch (error) {
-        const fallback = this.defaultEnv + this.defaultImgPath;
+        const fallback = this.env + this.defaultImgPath;
         this.thumbnailUrl = fallback;
         this.brickImgUrl = fallback;
         this.isImgLoading = false;
@@ -171,9 +186,8 @@ export default {
     },
     async getParkLocationImgURL() {
       try {
-        const url =
-          this.defaultUrl + `parkLocations/` + this.brick.brickParkLocation;
-        const response = await axios.get(url);
+        const url = this.apiUrl + `parkLocations/` + this.brick.brickParkLocation;
+        const response = await axios.get<ParkLocationApiResponse>(url);
         this.parkLocation = response?.data?.data?.attributes?.name || "";
         this.parkLocationImgURL =
           response?.data?.included?.[1]?.attributes?.image_style_uri?.full_img || "";
@@ -187,7 +201,7 @@ export default {
     this.getBrickImgURL();
     this.getParkLocationImgURL();
   },
-};
+})
 </script>
 
 <style scoped>

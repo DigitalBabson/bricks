@@ -27,13 +27,16 @@
   <pagination v-if="nextPage" @loadmore="loadMore" />
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from "vue"
 import axios from "axios";
 import BrickCard from "./BrickCard.vue";
 import BrickFilter from "./BrickFilter.vue";
 import Pagination from "./Pagination.vue";
+import { defaultEnvKey, defaultUrlKey } from "../types/index"
+import type { Brick, BrickApiResponse } from "../types/index"
 
-export default {
+export default defineComponent({
   components: {
     BrickCard,
     BrickFilter,
@@ -42,15 +45,23 @@ export default {
   data() {
     return {
       inscription: "",
-      bricks: [],
+      bricks: [] as Brick[],
       offset: 0,
       nextPage: false,
       showMessage: false
     };
   },
-  inject: ["defaultEnv", "defaultUrl"],
+  inject: {
+    defaultEnv: { from: defaultEnvKey, default: '' },
+    defaultUrl: { from: defaultUrlKey, default: '' }
+  },
+  computed: {
+    apiUrl(): string {
+      return this.defaultUrl as string;
+    },
+  },
   watch: {
-    inscription(value) {
+    inscription(value: string) {
       if (value.length == 0) {
         this.fetchBricks(value);
       } else if (value.length > 3) {
@@ -61,38 +72,32 @@ export default {
   methods: {
     loadMore() {
       this.fetchBricks(this.inscription, this.offset + 20)
-      this.offset += 20
     },
-    async fetchBricks(search = "", offset = "") {
+    async fetchBricks(search = "", offset: number = 0) {
       try {
-        const url =
-          this.defaultUrl + `bricks?page[limit]=20&filter[brickInscription][operator]=CONTAINS&filter[brickInscription][value]=` +
-          search + '&page[offset]=' + offset;
-        const response = await axios.get(url);
+        const url = this.apiUrl +
+          `bricks?page[limit]=20&filter[brickInscription][operator]=CONTAINS` +
+          `&filter[brickInscription][value]=${encodeURIComponent(search)}` +
+          `&page[offset]=${offset}`;
+        const response = await axios.get<BrickApiResponse>(url);
         const results = response.data.data;
-        let data = results.map(
-          function(bricks) {
-            var brickImage;
-            if (bricks.relationships.brickImage.data == null)
-            { brickImage = 'default'; }
-            else {
-              brickImage = bricks.relationships.brickImage.data.id;
-            }
-            return {
-                        id: bricks.id,
-          number: bricks.attributes.brickNumber,
-          inscription: bricks.attributes.brickInscription,
-          brickImage: brickImage,
-          brickParkLocation: bricks.relationships.brickParkLocation.data.id,
-
-            }
-          });
+        const data: Brick[] = results.map((bricks) => {
+          const brickImage: string = bricks.relationships.brickImage.data == null
+            ? 'default'
+            : bricks.relationships.brickImage.data.id;
+          return {
+            id: bricks.id,
+            number: bricks.attributes.brickNumber,
+            inscription: bricks.attributes.brickInscription,
+            brickImage,
+            brickParkLocation: bricks.relationships.brickParkLocation.data?.id ?? '',
+          }
+        });
         // Remove existing items
-        if (!offset) {
+        if (offset === 0) {
           this.bricks = []
         }
         if (search.length !== 0) {
-
           if (data.length === 0) {
             this.showMessage = true
           } else {
@@ -105,7 +110,7 @@ export default {
         if (response.data.links.next && search.length == 0) {
           this.nextPage = true
         } else this.nextPage = false
-        if (offset) this.offset = offset;
+        this.offset = offset;
       } catch (err) {
         // Silently handle fetch errors — UI will show empty state
       }
@@ -114,5 +119,5 @@ export default {
   mounted() {
     this.fetchBricks();
   },
-};
+});
 </script>
