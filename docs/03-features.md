@@ -48,7 +48,10 @@
 ```
 
 - `<` (previous) and `>` (next) arrow buttons at the ends.
-- First `maxVisible` page numbers shown, then `...` ellipsis, then the **last page number** (e.g., 50).
+- Use a **dynamic ellipsis window**:
+  - near the start: first `maxVisible` page numbers, then `...`, then the last page
+  - in the middle: first page, `...`, a small window around the current page, `...`, last page
+  - near the end: first page, `...`, then the last `maxVisible` page numbers
 - Current page is underlined / visually highlighted.
 - Arrows disabled at boundaries (page 1 disables `<`, last page disables `>`).
 - Accessible: `aria-label="Page navigation"`, `aria-current="page"` on active item.
@@ -63,16 +66,16 @@
 ### 3.2.2 TheBricks.vue state changes
 
 - Replace `offset: 0` with `currentPage: 1`.
-- **Total page count:** The Drupal bricks endpoint does not return a total count in `meta`. Derive `totalPages` by checking whether `response.data.links.next` exists (there are more pages) or not (last page). This means pagination shows prev/next arrows and numbered pages but cannot show "of XX" for Drupal-sourced results. For Searchstax results, `numFound` provides an exact total.
+- **Total page count:** The Drupal bricks endpoint returns `meta.count` (for example, `6280` on the base `/jsonapi/bricks` listing). Use that count to calculate `totalPages` for default browse mode and location-filtered Drupal queries. For Searchstax results, continue to use `numFound`.
 - `fetchBricks()` calculates `page[offset]` from `(currentPage - 1) * pageSize`.
 - On page change: **replace** the bricks array (not append).
-- Scroll to top of grid on page change.
+- Scroll to the **top of the brick grid** on page change. Implement this with a template ref on the grid container rather than relying on `this.$el`.
 
 ### 3.2.3 Responsive Brick Grid (from XD wireframes)
 
-- **Desktop (≥1024px):** 4 columns of brick cards (current behavior).
-- **Mobile (<768px):** **2 columns** of brick cards per row. Each card spans roughly half the viewport width with consistent gutter spacing.
-- Implemented via Tailwind responsive grid: e.g., `tw-grid tw-grid-cols-2 md:tw-grid-cols-4 tw-gap-4`.
+- **Desktop (current implementation, `lg` / ≥1024px):** 4 columns of brick cards.
+- **Mobile / tablet below `lg`:** **2 columns** of brick cards per row. Each card spans roughly half the viewport width with consistent gutter spacing.
+- Implemented via Tailwind responsive grid: e.g., `tw-grid tw-grid-cols-2 lg:tw-grid-cols-4 tw-gap-4`.
 
 **Files affected:** `Pagination.vue` (rewrite), `TheBricks.vue`
 
@@ -82,7 +85,7 @@
 
 **Requirement:** Two search mechanisms with a results summary bar and "Clear All" button.
 
-**Current state:** `BrickFilter.vue` has a single text input bound to `inscription` via `v-model:inscription`. Searches fire when the input is empty or has 4+ characters.
+**Current state:** `BrickFilter.vue` has a single text input bound to `inscription` via `v-model:inscription`. Searches fire when the input is empty or has 3+ characters.
 
 **Changes needed:**
 
@@ -94,8 +97,8 @@ The filter component becomes a two-part filter bar:
 
 - Label: "Search by Brick Inscription" (Oswald font, light green text above the input).
 - Text input field.
-- Emits on input; the parent determines when to fetch results.
-- **Minimum character threshold:** 4 characters. Empty string (0 chars) resets to default browse.
+- Emits on input, but the parent should debounce fetches by **500ms** to avoid sending a request on every keystroke.
+- **Minimum character threshold:** 3 characters. Empty string (0 chars) resets to default browse.
 - A clear/reset icon button inside the field clears the current query.
 
 **Section B — "Brick Locations" (scrollable list)**
@@ -150,12 +153,14 @@ const isLoading = ref(false)
 
 ```
 watchEffect:
-  if keyword is present:
+  if keyword.length >= 3:
     → call Searchstax emselect with fq=tcngramm_X3b_en_description:{keyword}
        &rows=20&start={offset}
     → receive ss_uuid[] and numFound
     → for each ss_uuid → GET /brick/{ss_uuid} to hydrate full brick data
     → (optimization: use Promise.all to parallelize hydration calls)
+  else if keyword.length > 0:
+    → do not fetch yet; wait until the query reaches 3 characters
   else if locationId is present:
     → call Drupal /bricks?filter[brickParkLocation.id]={locId}
        &sort=brickInscription&page[limit]=20&page[offset]={offset}
@@ -164,6 +169,7 @@ watchEffect:
        &page[limit]=20&page[offset]={offset}
 
   on any filter change → reset currentPage to 1
+  debounce keyword-driven fetches by 500ms
 ```
 
 **New method: `fetchLocations()`**
@@ -508,6 +514,122 @@ The footer is a duplicate of the header's first line only — "BABSON COLLEGE" i
 - Max-width inner container: `tw-max-w-brickMWL tw-mx-auto`.
 
 **Files affected:** `src/components/AppFooter.vue` (new), `src/App.vue`
+
+---
+
+## 3.9 BrickCard Hover, Focus & Keyboard Interaction
+
+**Requirement:** Each brick card has two interactive zones with distinct hover states, plus full keyboard accessibility via sequential tab stops. See `docs/wireframes/hovers.png` for the visual reference.
+
+**Current state:** The brick image has a simple `hover:tw-opacity-50` effect and is clickable to enlarge. The "See location details" button has a hover background-color change. There is no visible "Enlarge Brick" label, no card-level focus outline, and no structured tab order.
+
+**Changes needed:**
+
+### 3.9.1 Hover States (Mouse)
+
+The wireframe defines two hover zones:
+
+**Zone 1 — Card body (image area)**
+
+- On hover over the image area, display an **"ENLARGE BRICK"** label overlay in the top-right corner of the image. The label includes a magnifying-glass icon (🔍) and white text on a dark semi-transparent background.
+- The overlay is hidden by default and appears only on `:hover` of the card's media container.
+- Clicking anywhere on the image opens the full-size image modal (existing behavior).
+
+**Zone 2 — "VIEW LOCATION DETAILS" button**
+
+- Rename the existing "See location details" button text to **"VIEW LOCATION DETAILS"** (uppercase, Oswald font) to match the wireframe.
+- On hover, the button background changes to `tw-bg-brickMediumGreen` with `tw-text-white` (existing behavior, confirmed by wireframe).
+
+### 3.9.2 Keyboard / Tab Order
+
+The wireframe specifies two sequential tab stops per card for keyboard navigation:
+
+| Tab Stop | Element | Action on Enter/Space |
+|---|---|---|
+| **1st Tab** | Whole card (image + location button wrapper) | Opens the location details modal |
+| **2nd Tab** | "ENLARGE BRICK" button | Opens the full-size image modal |
+
+- The **1st tab stop** wraps the entire card in a focusable container (`tabindex="0"`) with a visible focus ring (solid dark border matching the wireframe's thick black outline). Pressing Enter or Space on this focused card triggers `openMap()`.
+- The **2nd tab stop** is a dedicated `<button>` for "ENLARGE BRICK" that sits visually in the top-right corner of the image area. It receives focus after the card wrapper. Pressing Enter or Space triggers `openImg()`.
+- Focus styles: a solid `tw-ring-2 tw-ring-brickSummerNight` outline on the card wrapper (1st tab), and the standard focus ring on the enlarge button (2nd tab).
+
+### 3.9.3 "Coming Soon" Brick — Hover & Keyboard Variant
+
+For bricks with no image (`isComingSoon === true`):
+
+- The "ENLARGE BRICK" overlay and 2nd tab stop are **not rendered** (there is no image to enlarge).
+- The card still has the 1st tab stop (whole card focus → opens location details).
+- The "VIEW LOCATION DETAILS" button hover behavior remains the same.
+- The card body shows the inscription text and "Image Coming Soon" overlay on the gray placeholder (as defined in section 3.4), with no hover opacity change.
+
+### 3.9.4 Implementation
+
+```html
+<!-- BrickCard.vue — updated template structure -->
+<article
+  class="brick-card tw-shadow-brickCard tw-text-center"
+  tabindex="0"
+  role="button"
+  aria-label="View location details for {{ brick.inscription }}"
+  @click="openMap"
+  @keydown.enter.prevent="openMap"
+  @keydown.space.prevent="openMap"
+>
+  <div class="brick-card__media tw-relative tw-group">
+    <!-- Existing image or placeholder -->
+    <img v-if="!isComingSoon" ... />
+
+    <!-- "ENLARGE BRICK" hover overlay + 2nd tab stop -->
+    <button
+      v-if="!isComingSoon"
+      class="
+        tw-absolute tw-top-2 tw-right-2
+        tw-bg-black/70 tw-text-white tw-font-oswald tw-uppercase
+        tw-px-3 tw-py-1 tw-text-sm
+        tw-opacity-0 group-hover:tw-opacity-100
+        focus:tw-opacity-100
+        tw-transition-opacity tw-duration-200
+      "
+      aria-label="Enlarge brick image"
+      @click.stop="openImg"
+      @keydown.enter.stop="openImg"
+    >
+      Enlarge Brick 🔍
+    </button>
+
+    <!-- Coming Soon overlay (from 3.4) -->
+    <div v-if="isComingSoon" class="...">...</div>
+  </div>
+
+  <button
+    class="
+      tw-w-full tw-py-4 tw-text-brickSummerNight tw-font-oswald tw-uppercase
+      hover:tw-bg-brickMediumGreen hover:tw-text-white
+      tw-transition-background tw-duration-200 tw-ease-in-out
+    "
+    tabindex="-1"
+    @click.stop="openMap"
+  >
+    View Location Details
+  </button>
+</article>
+```
+
+**Key implementation notes:**
+
+- The `<article>` wrapper gains `tabindex="0"` and click/keyboard handlers for the 1st tab stop.
+- The "ENLARGE BRICK" `<button>` uses Tailwind's `group-hover` to appear on card hover and `focus:tw-opacity-100` to appear on keyboard focus.
+- The "VIEW LOCATION DETAILS" button uses `tabindex="-1"` since the card wrapper already handles location-detail activation on the 1st tab stop; the button remains clickable by mouse but is skipped in the tab order to avoid redundancy.
+- `.stop` modifier on inner click handlers prevents the card-level `@click="openMap"` from also firing.
+- The `aria-label` on the article provides screen reader context.
+
+**Accessibility considerations:**
+
+- `role="button"` on the article informs assistive tech that the card is interactive.
+- Two distinct `aria-label` values distinguish the card action ("View location details") from the enlarge action ("Enlarge brick image").
+- Focus ring is visible and high-contrast, meeting WCAG 2.1 AA focus-indicator requirements.
+
+**Files affected:** `BrickCard.vue`
 
 ---
 

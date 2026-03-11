@@ -15,8 +15,8 @@
 | `LocationExplorer.vue` | Renders location list; highlights selected location; swaps map image on click; emits `close` on × button; emits `close` on backdrop click |
 | `Pagination.vue` | Renders correct page range; handles ellipsis; emits correct page on click; disables arrows at boundaries; highlights active page |
 | `BrickFilter.vue` | Renders keyword input + location dropdown; emits on changes; shows/hides active filter pills; "Clear All" resets both filters |
-| `BrickCard.vue` | Shows inscription overlay when image is "coming-soon"; hides overlay for normal images |
-| `TheBricks.vue` | Passes correct sort/pagination/filter params to API; resets page on filter change; handles Searchstax response |
+| `BrickCard.vue` | Shows inscription overlay when image is "coming-soon"; hides overlay for normal images; renders "ENLARGE BRICK" overlay on hover (via group-hover class); hides enlarge overlay for "Coming Soon" bricks; card wrapper is focusable (`tabindex="0"`) and triggers `openMap` on Enter/Space; enlarge button triggers `openImg` on Enter/Space; inner click handlers do not propagate to card wrapper; `role="button"` and `aria-label` attributes are present |
+| `TheBricks.vue` | Passes correct sort/pagination/filter params to API; resets page on Drupal-backed query changes; handles Drupal `meta.count`; later handles Searchstax response |
 | `searchstax.ts` | Correctly formats search request; parses response; handles errors |
 
 ## E2E Tests (Playwright)
@@ -30,10 +30,15 @@
 | Hero search | Search form is visually overlaid on the hero image |
 | Default browse | Page loads with alphabetical bricks, pagination shows at bottom |
 | Page navigation | Click page 2 → URL/state updates, new bricks load, scroll to top |
-| Keyword search | Type 3+ chars, wait 500ms → results update, pagination resets, active filter pill shows |
+| Keyword search | Post-Phase 3: type 3+ chars, wait 500ms → Searchstax results update, pagination resets, active filter pill shows |
 | Location filter | Select a zone from dropdown → bricks filtered, active filter pill appears |
-| Combined filters | Keyword + location → both pills shown, results narrow |
+| Combined filters | Post-Phase 3: keyword + location → both pills shown, results narrow |
 | Clear All | Click "Clear All" → all filters removed, default browse restored |
+| BrickCard hover — enlarge overlay | Hovering over a brick card's image area reveals the "ENLARGE BRICK" label; moving away hides it |
+| BrickCard hover — view location | Hovering over "VIEW LOCATION DETAILS" changes background to green with white text |
+| BrickCard keyboard — 1st tab | Tabbing to a brick card shows a visible focus ring; pressing Enter opens the location details modal |
+| BrickCard keyboard — 2nd tab | Tabbing again focuses the "ENLARGE BRICK" button (becomes visible); pressing Enter opens the full-size image modal |
+| BrickCard keyboard — Coming Soon | A "Coming Soon" brick has only one tab stop (card-level); no enlarge button is rendered or focusable |
 | Coming Soon overlay | A brick without an image shows the inscription text on the placeholder |
 | Mobile brick grid | 2-column grid on mobile viewports (< 768px), 4-column on desktop |
 | Mobile location trigger | Trigger appears as a floating bottom-right control (not in hero) on mobile and remains visible while scrolling |

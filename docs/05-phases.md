@@ -27,7 +27,7 @@
 1. Add `sort=brickInscription` to the default fetch call in TheBricks.
 2. Rewrite `Pagination.vue` with numbered pages.
 3. Update TheBricks to track `currentPage` and `totalPages` instead of `offset`.
-4. Ensure the API returns a total count (or derive from `links.last`).
+4. Read `meta.count` from the Drupal response and calculate `totalPages` from that value.
 5. Update unit tests for Pagination.
 6. Update E2E tests for navigation.
 
@@ -35,7 +35,9 @@
 
 ## Phase 3 — Searchstax Integration (Medium Risk)
 
-**Goal:** Fast keyword search via Searchstax instead of Drupal's `CONTAINS` filter. This phase is placed early because the location filter (Phase 4) and location explorer (Phase 5) depend on the search infrastructure and `.env`-based configuration established here.
+**Goal:** Fast keyword search via Searchstax instead of Drupal's `CONTAINS` filter.
+
+**Implementation order note:** Searchstax is not required to complete Phase 2 pagination or Phase 4 location filtering. The recommended delivery order is Phase 2 → Phase 4 → Phase 5 → Phase 3 → Phase 6, with keyword search allowed to remain a placeholder until Searchstax is wired.
 
 1. Create `.env` / `.env.example` with `DEV_SEARCHSTAX_ENDPOINT` and `DEV_SEARCHSTAX_TOKEN`.
 2. Update `src/main.ts` to read `import.meta.env.DEV_*` and provide via inject (replacing hardcoded `drupalEnv`).
@@ -44,7 +46,7 @@
    - Sends `Authorization: Token {DEV_SEARCHSTAX_TOKEN}` header.
    - Parses `response.numFound` (total) and `response.docs[].ss_uuid` (brick UUIDs).
 4. Create hydration logic: for each `ss_uuid`, call `GET /brick/{ss_uuid}` to get full brick data (use `Promise.all` for parallelism, consider batching or a queue if result sets are large).
-5. Update TheBricks fetch logic: keyword searches go through Searchstax → hydrate → display.
+5. Update TheBricks fetch logic: keyword searches go through Searchstax → hydrate → display, with a 3-character minimum and 500ms debounce.
 6. Use `numFound` for pagination `totalPages` calculation during search.
 7. Add unit tests for the Searchstax service (mock HTTP responses).
 8. Full E2E regression against dev environment.
@@ -57,7 +59,7 @@
 
 **Goal:** Filter bricks by park location/zone with active-filter pills.
 
-**Depends on:** Phase 3 (`.env`-based config and `import.meta.env` plumbing).
+**Depends on:** Phase 2 pagination/state work. This phase continues to use Drupal JSON:API filtering and Drupal `meta.count`; it does not depend on Searchstax.
 
 1. Create `fetchLocations()` in App.vue — calls `/parkLocations?fields[parkLocation]=name&include=field_brick_zone_image&sort=name`. Store as shared `locations: ParkLocation[]` state.
 2. Add scrollable location list to BrickFilter (populated from `locations` prop).
@@ -67,6 +69,8 @@
 6. E2E tests for location filtering and "Clear all".
 
 **Estimated effort:** 2–3 days
+
+> **Pagination note:** When a park location is selected, continue to calculate `totalPages` from Drupal `meta.count` on the filtered response.
 
 ## Phase 5 — Location Explorer Overlay (Medium Risk)
 
@@ -84,15 +88,21 @@
 
 **Estimated effort:** 1–2 days
 
-## Phase 6 — "Coming Soon" Overlay (Low Risk)
+## Phase 6 — BrickCard Enhancements: "Coming Soon" Overlay + Hover/Focus/Keyboard (Low Risk)
 
-**Goal:** Identifiable bricks even without photos.
+**Goal:** Identifiable bricks even without photos, plus polished hover states and full keyboard accessibility per the `hovers.png` wireframe.
 
 1. Add `isComingSoon` computed property to BrickCard.
-2. Add inscription text overlay with Tailwind styling.
-3. Update BrickCard unit tests.
+2. Add inscription text overlay with Tailwind styling for "Coming Soon" bricks.
+3. Add "ENLARGE BRICK" hover overlay (top-right, semi-transparent dark background, magnifying-glass icon) using Tailwind `group-hover`.
+4. Wrap card `<article>` in a focusable container (`tabindex="0"`) with keyboard handlers for 1st tab stop (Enter/Space → open location details).
+5. Add dedicated "ENLARGE BRICK" `<button>` as the 2nd tab stop (Enter/Space → open image modal). Hidden by default, visible on card hover and on focus.
+6. Rename "See location details" to "VIEW LOCATION DETAILS"; set `tabindex="-1"` on the bottom button to avoid redundant tab stop.
+7. Add `role="button"` and `aria-label` attributes for screen reader support.
+8. Suppress hover overlay and 2nd tab stop for "Coming Soon" bricks (no image to enlarge).
+9. Update BrickCard unit tests for hover overlay rendering, keyboard interaction, and "Coming Soon" variant.
 
-**Estimated effort:** 0.5 day
+**Estimated effort:** 1 day
 
 ---
 

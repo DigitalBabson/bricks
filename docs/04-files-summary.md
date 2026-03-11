@@ -15,7 +15,7 @@
 | `src/components/TheBricks.vue` | **Modify** | Add sorting param, new search/filter state, location fetch, Searchstax integration, page-based pagination logic. Move BrickFilter rendering to hero. |
 | `src/components/BrickFilter.vue` | **Rewrite** | Keyword input + location dropdown + active filters bar + Clear All |
 | `src/components/Pagination.vue` | **Rewrite** | Clickable numbered pagination with arrows and ellipsis |
-| `src/components/BrickCard.vue` | **Modify** | Add inscription overlay for "Coming Soon" images |
+| `src/components/BrickCard.vue` | **Modify** | Add inscription overlay for "Coming Soon" images; add "ENLARGE BRICK" hover overlay, card-level focus wrapper with keyboard handlers (tab stop 1 → location details, tab stop 2 → enlarge), rename button text to "VIEW LOCATION DETAILS", accessibility attributes |
 | `src/types/index.ts` | **Modify** | Add `ParkLocation`, `SearchstaxResponse`, `SearchstaxDoc` types; update `BrickApiResponse` for total count |
 | `src/services/searchstax.ts` | **Create** | Searchstax API client: builds `emselect` URL with `fq=tcngramm_X3b_en_description:{keyword}`, sends `Authorization: Token` header, parses `ss_uuid[]` + `numFound` |
 | `src/services/drupal.ts` | **Create** (optional) | Drupal API client: wraps brick fetch, zone fetch, brick-by-UUID hydration |

@@ -109,6 +109,8 @@ GET {DEV_DRUPAL_ENDPOINT}/bricks
     &page[offset]={offset}
 ```
 
+Returns paginated brick data plus `meta.count`, which the frontend uses to calculate `totalPages`.
+
 ### Drupal — Location-Filtered Listing
 
 ```
@@ -118,6 +120,8 @@ GET {DEV_DRUPAL_ENDPOINT}/bricks
     &page[limit]=20
     &page[offset]={offset}
 ```
+
+The filtered response is expected to return `meta.count` as well, allowing numbered pagination to remain accurate while a location filter is active.
 
 ### Drupal — All Park Locations (names only, for dropdown)
 

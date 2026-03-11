@@ -15,7 +15,7 @@
    System roles, new component hierarchy, data-flow sequences, and all API endpoints (Searchstax + Drupal).
 
 3. [Feature Breakdown](./03-features.md)
-   Detailed specs for all 8 features: alphabetical sorting, clickable pagination, keyword + location search, "Coming Soon" overlay, header, location explorer, hero image, and footer.
+   Detailed specs for all 9 features: alphabetical sorting, clickable pagination, keyword + location search, "Coming Soon" overlay, header, location explorer, hero image, footer, and BrickCard hover/focus/keyboard interaction.
 
 4. [New & Modified Files Summary](./04-files-summary.md)
    Complete list of every file to create, rewrite, or modify — with scope descriptions.
