@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="brickGrid"
     class="
       bricks
       tw-container xl:tw-max-w-brickMWL
@@ -8,8 +9,8 @@
       md:tw-px-12
       lg:tw-px-brick20
       xl:tw-px-0
-      tw-grid tw-grid-cols-1
-      md:tw-grid-cols-2 lg:tw-grid-cols-4
+      tw-grid tw-grid-cols-2
+      lg:tw-grid-cols-4
       tw-gap-brick3
       md:tw-gap-brick5
       lg:tw-gap-13
@@ -23,7 +24,11 @@
   >
     No bricks match your criteria
   </h3>
-  <pagination v-if="nextPage" @loadmore="loadMore" />
+  <pagination
+    :currentPage="currentPage"
+    :totalPages="totalPages"
+    @update:page="goToPage"
+  />
 </template>
 
 <script lang="ts">
@@ -45,8 +50,9 @@ export default defineComponent({
   data() {
     return {
       bricks: [] as Brick[],
-      offset: 0,
-      nextPage: false,
+      currentPage: 1,
+      totalPages: 1,
+      pageSize: 20,
       showMessage: false
     };
   },
@@ -61,6 +67,7 @@ export default defineComponent({
   },
   watch: {
     inscription(value: string) {
+      this.currentPage = 1;
       if (value.length == 0) {
         this.fetchBricks(value);
       } else if (value.length > 3) {
@@ -69,15 +76,19 @@ export default defineComponent({
     },
   },
   methods: {
-    loadMore() {
-      this.fetchBricks(this.inscription, this.offset + 20)
+    goToPage(page: number) {
+      this.currentPage = page;
+      this.fetchBricks(this.inscription);
     },
-    async fetchBricks(search = "", offset: number = 0) {
+    async fetchBricks(search = "") {
       try {
+        const offset = (this.currentPage - 1) * this.pageSize;
         const url = this.apiUrl +
-          `bricks?page[limit]=20&filter[brickInscription][operator]=CONTAINS` +
+          `bricks?page[limit]=${this.pageSize}` +
+          `&filter[brickInscription][operator]=CONTAINS` +
           `&filter[brickInscription][value]=${encodeURIComponent(search)}` +
-          `&page[offset]=${offset}`;
+          `&page[offset]=${offset}` +
+          `&sort=brickInscription`;
         const response = await axios.get<BrickApiResponse>(url);
         const results = response.data.data;
         const data: Brick[] = results.map((bricks) => {
@@ -92,24 +103,27 @@ export default defineComponent({
             brickParkLocation: bricks.relationships.brickParkLocation.data?.id ?? '',
           }
         });
-        // Remove existing items
-        if (offset === 0) {
-          this.bricks = []
-        }
+
         if (search.length !== 0) {
-          if (data.length === 0) {
-            this.showMessage = true
-          } else {
-            this.showMessage = false
-          }
+          this.showMessage = data.length === 0;
         } else {
-          this.showMessage = false
+          this.showMessage = false;
         }
-        this.bricks.push(...data);
-        if (response.data.links.next && search.length == 0) {
-          this.nextPage = true
-        } else this.nextPage = false
-        this.offset = offset;
+
+        // Replace bricks array (not append)
+        this.bricks = data;
+
+        // Calculate total pages from meta.count
+        const totalCount = response.data.meta?.count ?? 0;
+        this.totalPages = Math.ceil(totalCount / this.pageSize) || 1;
+
+        // Scroll grid to top on page change
+        if (this.currentPage > 1) {
+          this.$nextTick(() => {
+            const grid = this.$refs.brickGrid as HTMLElement | undefined;
+            grid?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+          });
+        }
       } catch (err) {
         // Silently handle fetch errors — UI will show empty state
       }

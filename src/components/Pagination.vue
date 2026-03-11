@@ -1,26 +1,93 @@
 <template>
-<div class="bricks__pagination tw-container
-      tw-mx-auto tw-mt-brick9 md:tw-mt-brick35 lg:tw-mt-brick50
-      tw-max-w-6xl tw-text-center">
-  <button
-  class="tw-bg-brickBabsonGreen tw-text-white
-  tw-font-oswald tw-px-9
-  tw-py-4 tw-uppercase
-  hover:tw-bg-brickLightGreen hover:tw-text-black
-  focus:tw-outline-none active:tw-outline-none
-  tw-transition-background tw-duration-200 tw-ease-in-out
-  "
-  @click="$emit('loadmore')">Load more</button>
-  </div>
+  <nav
+    v-if="totalPages > 1"
+    aria-label="Page navigation"
+    class="
+      bricks__pagination
+      tw-container tw-mx-auto
+      tw-mt-brick9 md:tw-mt-brick35 lg:tw-mt-brick50
+      tw-flex tw-justify-center tw-items-center tw-gap-2
+      tw-font-oswald tw-text-[20px]
+    "
+  >
+    <button
+      :disabled="currentPage === 1"
+      aria-label="Previous page"
+      class="tw-px-3 tw-py-2 tw-text-[#464646]"
+      :class="currentPage === 1 ? 'tw-opacity-30 tw-cursor-not-allowed' : 'hover:tw-text-brickBabsonGreen'"
+      @click="currentPage > 1 && $emit('update:page', currentPage - 1)"
+    >
+      &lt;
+    </button>
+
+    <template v-for="(page, index) in visiblePages" :key="`${page}-${index}`">
+      <span v-if="page === '...'" class="tw-px-2 tw-text-[#464646]">...</span>
+      <button
+        v-else
+        class="tw-px-3 tw-py-2 tw-min-w-[2.5rem] tw-text-[#464646] hover:tw-text-brickBabsonGreen"
+        :class="
+          page === currentPage
+            ? 'tw-underline tw-underline-offset-4 tw-decoration-2'
+            : ''
+        "
+        :aria-current="page === currentPage ? 'page' : undefined"
+        @click="$emit('update:page', page)"
+      >
+        {{ page }}
+      </button>
+    </template>
+
+    <button
+      :disabled="currentPage === totalPages"
+      aria-label="Next page"
+      class="tw-px-3 tw-py-2 tw-text-[#464646]"
+      :class="currentPage === totalPages ? 'tw-opacity-30 tw-cursor-not-allowed' : 'hover:tw-text-brickBabsonGreen'"
+      @click="currentPage < totalPages && $emit('update:page', currentPage + 1)"
+    >
+      &gt;
+    </button>
+  </nav>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+
 export default defineComponent({
-  emits: ['loadmore'],
+  props: {
+    currentPage: { type: Number, required: true },
+    totalPages: { type: Number, required: true },
+    maxVisible: { type: Number, default: 5 },
+  },
+  emits: ['update:page'],
+  computed: {
+    visiblePages(): (number | string)[] {
+      const { currentPage, totalPages, maxVisible } = this
+
+      if (totalPages <= maxVisible + 2) {
+        return Array.from({ length: totalPages }, (_, i) => i + 1)
+      }
+
+      if (currentPage <= maxVisible) {
+        const pages: (number | string)[] = []
+        for (let i = 1; i <= maxVisible; i++) pages.push(i)
+        pages.push('...')
+        pages.push(totalPages)
+        return pages
+      }
+
+      if (currentPage > totalPages - maxVisible) {
+        const pages: (number | string)[] = [1, '...']
+        for (let i = totalPages - maxVisible + 1; i <= totalPages; i++) pages.push(i)
+        return pages
+      }
+
+      const half = Math.floor(maxVisible / 2)
+      const pages: (number | string)[] = [1, '...']
+      for (let i = currentPage - half; i <= currentPage + half; i++) pages.push(i)
+      pages.push('...')
+      pages.push(totalPages)
+      return pages
+    },
+  },
 })
 </script>
-
-<style scoped>
-
-</style>

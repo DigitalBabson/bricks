@@ -24,6 +24,7 @@ export interface BrickApiItem {
 export interface BrickApiResponse {
   data: BrickApiItem[]
   links: { next?: { href: string } }
+  meta?: { count?: number }
 }
 
 export interface ImageStyleUri {
