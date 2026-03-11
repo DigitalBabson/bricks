@@ -5,6 +5,7 @@ export default {
     extend: {
       colors: {
         brickLightGreen: "#C7D28A",
+        brickCourtyardGreen: "#587C32",
         brickMediumGreen: "#597c31",
         brickBabsonGreen: "#064",
         brickSummerNight: "#005172",

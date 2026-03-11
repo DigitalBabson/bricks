@@ -1,5 +1,4 @@
 <template>
-  <brick-filter v-model:inscription="inscription"  />
   <div
     class="
       bricks
@@ -31,7 +30,6 @@
 import { defineComponent } from "vue"
 import axios from "axios";
 import BrickCard from "./BrickCard.vue";
-import BrickFilter from "./BrickFilter.vue";
 import Pagination from "./Pagination.vue";
 import { defaultEnvKey, defaultUrlKey } from "../types/index"
 import type { Brick, BrickApiResponse } from "../types/index"
@@ -39,12 +37,13 @@ import type { Brick, BrickApiResponse } from "../types/index"
 export default defineComponent({
   components: {
     BrickCard,
-    BrickFilter,
     Pagination,
+  },
+  props: {
+    inscription: { type: String, default: '' }
   },
   data() {
     return {
-      inscription: "",
       bricks: [] as Brick[],
       offset: 0,
       nextPage: false,

@@ -24,7 +24,7 @@ describe('BrickFilter', () => {
       })
 
       const label = wrapper.find('label[for="search-brick"]')
-      expect(label.text()).toBe('Search for my brick inscription')
+      expect(label.text()).toBe('Search by Brick Inscription')
     })
 
     it('renders clear button with icon', () => {
@@ -123,7 +123,8 @@ describe('BrickFilter', () => {
 
       const form = wrapper.find('form')
       expect(form.classes()).toContain('tw-w-full')
-      expect(form.classes()).toContain('tw-bg-brickLightGreen')
+      expect(form.classes()).toContain('tw-bg-brickCourtyardGreen')
+      expect(form.classes()).toContain('tw-mx-auto')
     })
   })
 })

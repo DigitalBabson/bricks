@@ -106,7 +106,8 @@ export default defineComponent({
       parkLocationImgURL: "",
       parkLocation: "",
       isImgLoading: true,
-      defaultImgPath: "/sites/default/files/2025-10/coming-soon.jpg",
+      defaultImgPath: import.meta.env.DEV_PLACEHOLDER_IMAGE
+        || '/sites/default/files/2026-03/coming-soon-gray.jpg',
     };
   },
   inject: {
@@ -127,6 +128,13 @@ export default defineComponent({
     apiUrl(): string {
       return this.defaultUrl as string;
     },
+    fallbackImgUrl(): string {
+      // If defaultImgPath is already a full URL (from env var), use it directly
+      if (this.defaultImgPath.startsWith('http')) {
+        return this.defaultImgPath;
+      }
+      return this.env + this.defaultImgPath;
+    },
   },
   methods: {
     openMap() {
@@ -146,7 +154,7 @@ export default defineComponent({
     },
     onImgError() {
       this.isImgLoading = false;
-      const fallback = this.env + this.defaultImgPath;
+      const fallback = this.fallbackImgUrl;
       this.thumbnailUrl = fallback;
       this.brickImgUrl = fallback;
     },
@@ -155,7 +163,7 @@ export default defineComponent({
 
       // If brick image is explicitly default/missing, use default and stop
       if (!this.brick.brickImage || this.brick.brickImage === "default") {
-        const fallback = this.env + this.defaultImgPath;
+        const fallback = this.fallbackImgUrl;
         this.thumbnailUrl = fallback;
         this.brickImgUrl = fallback;
         this.isImgLoading = false;
@@ -172,13 +180,13 @@ export default defineComponent({
           this.brickImgUrl = imageData.full_img;
           this.isImgLoading = false;
         } else {
-          const fallback = this.env + this.defaultImgPath;
+          const fallback = this.fallbackImgUrl;
           this.thumbnailUrl = fallback;
           this.brickImgUrl = fallback;
           this.isImgLoading = false;
         }
       } catch (error) {
-        const fallback = this.env + this.defaultImgPath;
+        const fallback = this.fallbackImgUrl;
         this.thumbnailUrl = fallback;
         this.brickImgUrl = fallback;
         this.isImgLoading = false;

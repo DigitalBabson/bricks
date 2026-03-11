@@ -1,0 +1,60 @@
+{
+  "source": "https://xd.adobe.com/view/45e9dae9-23d7-4ab5-8c51-2576194b2032-10ba/grid/",
+  "count": 9,
+  "items": [
+    {
+      "order": 1,
+      "tileIndex": 0,
+      "url": "https://xd.adobe.com/view/45e9dae9-23d7-4ab5-8c51-2576194b2032-10ba/",
+      "file": "/Users/ngabrieleva/Documents/project/bricks_specs/wireframes/01-45e9dae9-23d7-4ab5-8c51-2576194b2032-10ba.png"
+    },
+    {
+      "order": 2,
+      "tileIndex": 1,
+      "url": "https://xd.adobe.com/view/45e9dae9-23d7-4ab5-8c51-2576194b2032-10ba/screen/30207baf-e4de-48b1-875e-2a724378b8d1",
+      "file": "/Users/ngabrieleva/Documents/project/bricks_specs/wireframes/02-30207baf-e4de-48b1-875e-2a724378b8d1.png"
+    },
+    {
+      "order": 3,
+      "tileIndex": 2,
+      "url": "https://xd.adobe.com/view/45e9dae9-23d7-4ab5-8c51-2576194b2032-10ba/screen/cd15ab87-c248-457d-acec-2776486b5c05",
+      "file": "/Users/ngabrieleva/Documents/project/bricks_specs/wireframes/03-cd15ab87-c248-457d-acec-2776486b5c05.png"
+    },
+    {
+      "order": 4,
+      "tileIndex": 3,
+      "url": "https://xd.adobe.com/view/45e9dae9-23d7-4ab5-8c51-2576194b2032-10ba/screen/fb8b3e61-313d-41a1-8b2a-faef1f5c95da",
+      "file": "/Users/ngabrieleva/Documents/project/bricks_specs/wireframes/04-fb8b3e61-313d-41a1-8b2a-faef1f5c95da.png"
+    },
+    {
+      "order": 5,
+      "tileIndex": 4,
+      "url": "https://xd.adobe.com/view/45e9dae9-23d7-4ab5-8c51-2576194b2032-10ba/screen/98427a0f-8c1b-408a-ab90-3742596fa2d5",
+      "file": "/Users/ngabrieleva/Documents/project/bricks_specs/wireframes/05-98427a0f-8c1b-408a-ab90-3742596fa2d5.png"
+    },
+    {
+      "order": 6,
+      "tileIndex": 5,
+      "url": "https://xd.adobe.com/view/45e9dae9-23d7-4ab5-8c51-2576194b2032-10ba/screen/3d2e3d11-db28-46e9-8b1e-b36c2485f671",
+      "file": "/Users/ngabrieleva/Documents/project/bricks_specs/wireframes/06-3d2e3d11-db28-46e9-8b1e-b36c2485f671.png"
+    },
+    {
+      "order": 7,
+      "tileIndex": 6,
+      "url": "https://xd.adobe.com/view/45e9dae9-23d7-4ab5-8c51-2576194b2032-10ba/screen/913722ec-e876-463c-a51b-8aa5170b9605",
+      "file": "/Users/ngabrieleva/Documents/project/bricks_specs/wireframes/07-913722ec-e876-463c-a51b-8aa5170b9605.png"
+    },
+    {
+      "order": 8,
+      "tileIndex": 7,
+      "url": "https://xd.adobe.com/view/45e9dae9-23d7-4ab5-8c51-2576194b2032-10ba/screen/01ab7640-b06b-4213-a17d-5e63d21c5017",
+      "file": "/Users/ngabrieleva/Documents/project/bricks_specs/wireframes/08-01ab7640-b06b-4213-a17d-5e63d21c5017.png"
+    },
+    {
+      "order": 9,
+      "tileIndex": 8,
+      "url": "https://xd.adobe.com/view/45e9dae9-23d7-4ab5-8c51-2576194b2032-10ba/screen/b7289f6d-1bfc-4032-b100-3697f4f7ba40",
+      "file": "/Users/ngabrieleva/Documents/project/bricks_specs/wireframes/09-b7289f6d-1bfc-4032-b100-3697f4f7ba40.png"
+    }
+  ]
+}
