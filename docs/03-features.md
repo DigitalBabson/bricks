@@ -95,7 +95,7 @@ The filter component becomes a two-part filter bar:
 
 **Section A — "Search by Brick Inscription"**
 
-- Label: "Search by Brick Inscription" (Oswald font, light green text above the input).
+- Label: "Search by Brick Inscription" (Oswald font, white text above the input).
 - Text input field.
 - Emits on input, but the parent should debounce fetches by **500ms** to avoid sending a request on every keystroke.
 - **Minimum character threshold:** 3 characters. Empty string (0 chars) resets to default browse.
@@ -103,7 +103,7 @@ The filter component becomes a two-part filter bar:
 
 **Section B — "Brick Locations" (scrollable list)**
 
-- Label: "Brick Locations" (Oswald font, light green text above the list).
+- Label: "Brick Locations" (Oswald font, white text above the list).
 - **Scrollable list box** (not a `<select>` dropdown) — shows multiple locations visible at once, with a vertical scrollbar. Per the XD wireframe, this is a multi-row visible list with scroll, similar to an HTML `<select multiple>` or a custom scrollable `<ul>`.
 - Clicking a location selects it (single-select). Clicking again or selecting a different one changes the filter.
 - Values populated from `locations` prop (fetched on mount from `/parkLocations`).

@@ -62,18 +62,16 @@
 
 **Depends on:** Phase 2 pagination/state work.
 
-**Data-source routing:** The location list itself always comes from Drupal (`/parkLocations`). How filtered brick results are fetched depends on whether a keyword is also active:
-
-- **Location only (no keyword):** Drupal JSON:API with `filter[brickParkLocation.id]={locationId}`. Uses Drupal `meta.count` for `totalPages`.
-- **Keyword + location (combined):** Routes through Searchstax with `fq=ss_body:{locationId}` as an additional filter. Uses Searchstax `numFound` for `totalPages`. This path depends on Phase 3 being complete; if Phase 4 ships before Phase 3, combined filtering should be stubbed or disabled until the Searchstax service is available.
+**Scope:** This phase handles location-only filtering via the Drupal JSON:API. All keyword-related paths (keyword-only and combined keyword + location via Searchstax `ss_body`) are owned by Phase 3. Do not add temporary Searchstax stubs, fallback branches, or partial combined-filter behavior in Phase 4.
 
 1. Create `fetchLocations()` in App.vue — calls `/parkLocations?fields[parkLocation]=name&include=field_brick_zone_image&sort=name`. Store as shared `locations: ParkLocation[]` state.
 2. Add scrollable location list to BrickFilter (populated from `locations` prop).
-3. Wire location-only filter into TheBricks fetch logic (Drupal `filter[brickParkLocation.id]={locationId}`).
-4. Wire combined keyword + location filter to pass `locationId` to the Searchstax service as an `fq=ss_body:{locationId}` parameter (Phase 3 dependency).
-5. Add active-filter pills and "Clear all" button to BrickFilter.
-6. Unit tests for BrickFilter filter/pill behavior.
-7. E2E tests for location-only filtering, combined keyword + location filtering, and "Clear all".
+3. Wire location-only filter into TheBricks fetch logic (Drupal `filter[brickParkLocation.id]={locationId}`). Uses Drupal `meta.count` for `totalPages`.
+4. Add active-filter pills and "Clear all" button to BrickFilter.
+5. Unit tests for BrickFilter filter/pill behavior.
+6. E2E tests for location-only filtering and "Clear all".
+
+**Estimated effort:** 2–3 days
 
 ## Phase 5 — Location Explorer Overlay (Medium Risk)
 
