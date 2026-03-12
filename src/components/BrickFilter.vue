@@ -2,7 +2,7 @@
   <form
     class="
       bricks__search-form
-      tw-mx-auto tw-h-full tw-w-full tw-max-w-[425px] md:tw-h-auto md:tw-max-w-[540px]
+      tw-mx-auto tw-h-full tw-w-full tw-max-w-[700px] md:tw-h-auto md:tw-min-h-[310px]
       tw-bg-brickCourtyardGreen tw-px-12 tw-py-5
       tw-flex tw-flex-col tw-justify-between
     "
@@ -39,7 +39,7 @@
         :aria-activedescendant="activeDescendantId"
         tabindex="0"
         class="
-          tw-max-h-[108px] tw-overflow-y-auto tw-border tw-border-gray-300 tw-bg-white
+          tw-max-h-[108px] tw-overflow-y-auto tw-bg-white
           focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-brickSummerNight
         "
         @keydown.arrow-down.prevent="moveActive(1)"
@@ -49,6 +49,7 @@
         @keydown.enter.prevent="toggleActiveSelection"
         @keydown.space.prevent="toggleActiveSelection"
         @focus="onListboxFocus"
+        @blur="onListboxBlur"
       >
         <li
           v-for="(location, index) in locations"
@@ -69,13 +70,12 @@
       <div
         class="
           bricks__filter-actions
-          tw-flex tw-h-[51px] tw-flex-wrap tw-items-center tw-gap-2
+          tw-flex tw-min-h-[51px] tw-flex-wrap tw-items-center tw-gap-2
           tw-bg-[rgba(255,255,255,0.53)] tw-px-2 tw-py-2
         "
       >
         <span
           v-for="filter in activeFilters"
-          v-show="activeFilters.length > 0"
           :key="`${filter.type}-${filter.value}`"
           class="
             tw-inline-flex tw-items-center tw-gap-2 tw-rounded-[23px]
@@ -91,21 +91,23 @@
               tw-rounded-full tw-bg-black tw-text-[20px] tw-leading-none tw-text-white
               focus:tw-outline-none
             "
-            :aria-label="`Remove ${filter.label} filter`"
-            @click="removeFilter(filter.type)"
+            :aria-label="`Remove ${filter.label}: ${filter.value}`"
+            @click="removeFilter(filter.type, filter.locationId)"
           >
             ×
           </button>
         </span>
 
         <button
-          v-show="activeFilters.length > 0"
           class="
-            tw-rounded-[23px] tw-bg-white tw-px-3 tw-py-1
-            tw-font-oswald tw-text-sm tw-font-semibold tw-text-black
+            tw-rounded-[23px] tw-px-3 tw-py-1
+            tw-font-oswald tw-text-sm tw-font-semibold
             tw-transition-colors tw-duration-200
-            hover:tw-bg-gray-100
           "
+          :class="activeFilters.length === 0
+            ? 'tw-bg-[#CCD8C0] tw-text-[#31451D] tw-cursor-not-allowed'
+            : 'tw-bg-white tw-text-black hover:tw-bg-gray-100 tw-cursor-pointer'"
+          :disabled="activeFilters.length === 0"
           type="button"
           @click="$emit('clearAll')"
         >
@@ -126,6 +128,7 @@ type ActiveFilter = {
   type: 'inscription' | 'location'
   label: string
   value: string
+  locationId?: string
 }
 
 export default defineComponent({
@@ -148,6 +151,7 @@ export default defineComponent({
   data() {
     return {
       activeIndex: -1,
+      isListboxFocused: false,
     }
   },
   computed: {
@@ -169,19 +173,18 @@ export default defineComponent({
         })
       }
 
-      if (this.locationIds.length === 1) {
-        const location = this.locations.find((item) => item.id === this.locationIds[0])
-        filters.push({
-          type: 'location',
-          label: 'Brick Location',
-          value: location?.name ?? this.locationIds[0],
+      if (this.locationIds.length > 0) {
+        const locationFilters = this.locationIds.map((locationId) => {
+          const location = this.locations.find((item) => item.id === locationId)
+          return {
+            type: 'location' as const,
+            label: 'Brick Location',
+            value: location?.name ?? locationId,
+            locationId,
+          }
         })
-      } else if (this.locationIds.length > 1) {
-        filters.push({
-          type: 'location',
-          label: 'Brick Locations',
-          value: `${this.locationIds.length} selected`,
-        })
+
+        filters.push(...locationFilters)
       }
 
       return filters
@@ -191,6 +194,11 @@ export default defineComponent({
     locationIds() {
       if (!this.locations.length) {
         this.activeIndex = -1
+        return
+      }
+
+      const currentActiveId = this.locations[this.activeIndex]?.id
+      if (currentActiveId && this.locationIds.includes(currentActiveId)) {
         return
       }
 
@@ -217,20 +225,32 @@ export default defineComponent({
     },
     optionClasses(id: string, index: number): string[] {
       const classes: string[] = []
+      const isSelected = this.locationIds.includes(id)
+      const isActive = index === this.activeIndex && this.isListboxFocused
 
-      if (this.locationIds.includes(id)) {
-        classes.push('tw-bg-brickLightGreen', 'tw-font-bold')
+      if (isSelected) {
+        if (isActive) {
+          classes.push('tw-bg-[rgb(179,215,255)]')
+        } else {
+          classes.push('tw-bg-[#CECECE]')
+        }
       } else {
         classes.push('hover:tw-bg-gray-100')
       }
 
-      if (index === this.activeIndex) {
+      if (isActive && !isSelected) {
         classes.push('tw-ring-2', 'tw-ring-inset', 'tw-ring-brickSummerNight')
       }
 
       return classes
     },
     selectLocation(id: string) {
+      const listbox = this.$refs.locationListbox as HTMLElement | undefined
+      if (listbox && document.activeElement !== listbox) {
+        listbox.focus()
+      }
+
+      this.isListboxFocused = true
       const selectedIndex = this.locations.findIndex((location) => location.id === id)
       this.activeIndex = selectedIndex
       const newIds = this.locationIds.includes(id)
@@ -238,15 +258,25 @@ export default defineComponent({
         : [...this.locationIds, id]
       this.$emit('update:locationIds', newIds)
     },
-    removeFilter(type: ActiveFilter['type']) {
+    removeFilter(type: ActiveFilter['type'], locationId?: string) {
       if (type === 'inscription') {
         this.$emit('update:inscription', '')
         return
       }
 
-      this.$emit('update:locationIds', [])
+      if (!locationId) {
+        this.$emit('update:locationIds', [])
+        return
+      }
+
+      this.$emit(
+        'update:locationIds',
+        this.locationIds.filter((selectedLocationId) => selectedLocationId !== locationId),
+      )
     },
     onListboxFocus() {
+      this.isListboxFocused = true
+
       if (!this.locations.length) {
         return
       }
@@ -257,6 +287,9 @@ export default defineComponent({
 
       const selectedIndex = this.locations.findIndex((location) => this.locationIds.includes(location.id))
       this.activeIndex = selectedIndex >= 0 ? selectedIndex : 0
+    },
+    onListboxBlur() {
+      this.isListboxFocused = false
     },
     moveActive(delta: number) {
       if (!this.locations.length) {

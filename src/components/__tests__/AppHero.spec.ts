@@ -33,6 +33,8 @@ describe('AppHero', () => {
     })
     expect(wrapper.find('.slot-content').exists()).toBe(true)
     expect(wrapper.text()).toContain('Search Form')
+    expect(wrapper.find('.tw-max-w-\\[700px\\]').exists()).toBe(true)
+    expect(wrapper.find('.lg\\:-tw-mt-\\[245px\\]').exists()).toBe(true)
   })
 
   it('renders LocationExplorerTrigger', () => {
@@ -62,5 +64,14 @@ describe('AppHero', () => {
     })
     const backdrop = wrapper.find('.tw-bg-white\\/80')
     expect(backdrop.exists()).toBe(true)
+  })
+
+  it('uses CSS-only spacing for the desktop search panel overlap and grid gap', () => {
+    const wrapper = mount(AppHero, {
+      slots: { default: '<div class="slot-content">Search Form</div>' }
+    })
+
+    expect(wrapper.find('.lg\\:tw-mb-\\[60px\\]').exists()).toBe(true)
+    expect(wrapper.find('.lg\\:-tw-mt-\\[245px\\]').exists()).toBe(true)
   })
 })

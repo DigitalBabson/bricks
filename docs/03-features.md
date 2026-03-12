@@ -508,7 +508,7 @@ This returns location names and their included map images in a single call. The 
 - **Hero image** is hosted on Drupal: `DEV_HERO_IMAGE` env var → `https://babsondev.prod.acquia-sites.com/sites/default/files/2026-03/find-my-brick-hero.jpg` (dev).
 - **Desktop trigger placement** — `LocationExplorerTrigger` renders in the top-right area of the hero, styled as a green pill/button. On click, emits `@openLocations` to the parent (opens the LocationExplorer overlay). The trigger is positioned flush to the viewport right edge on most screens, but at the `3xl` breakpoint (≥ 2048px) it anchors to the right edge of the content column instead (see §3.5.2 for implementation details).
 - **Search form** — rendered as a courtyard-green panel inside the hero. On mobile it fills the hero vertically from top to bottom. On desktop it intentionally overhangs the bottom edge of the hero image. The hero image itself has a full-coverage semi-transparent white wash.
-- Below the hero: the brick grid. On desktop there is roughly `140px` of spacing between the hero image and the grid region to accommodate the overhanging search panel. On mobile, the gap above the grid matches the grid’s horizontal inset (`32px` / `tw-pt-8`).
+- Below the hero: the brick grid. On desktop the search panel stays in normal flow and is pulled upward with CSS, so taller panel content naturally extends downward without colliding with the grid; the current desktop layout resolves to roughly `160px` of space between the hero image and the grid. On mobile, the gap above the grid matches the grid’s horizontal inset (`32px` / `tw-pt-8`).
 
 **Emits:** `@openLocations` — parent (App.vue) toggles the location-explorer overlay.
 
@@ -531,8 +531,8 @@ This returns location names and their included map images in a single call. The 
 - `tw-relative tw-w-full` wrapper with `tw-bg-cover tw-bg-center` for the background image.
 - Fixed height: `355px` on mobile, ~350px minimum on tablet, and a fixed `276px` desktop hero height.
 - Hero wash: full-coverage semi-transparent white overlay above the background image.
-- Search form container: on mobile it fills the hero height with a **425px max width** and stays centered; on desktop it is centered with a **576px max width** and `48px` horizontal padding. The panel itself has square corners (no border radius).
-- On desktop, the search panel overhangs the bottom edge of the hero and the hero reserves about `140px` of space below before the grid starts.
+- Search form container: it fills the hero height on mobile, stays centered, and uses a **700px max width** across breakpoints. On desktop it remains centered with `48px` horizontal padding. The panel itself has square corners (no border radius).
+- On desktop, the search panel overhangs the bottom edge of the hero via a CSS negative top margin while staying in normal flow, and the current layout resolves to about `160px` of space below the hero image before the grid starts.
 - Desktop `LocationExplorerTrigger`: `tw-bg-brickCourtyardGreen tw-text-white tw-font-oswald tw-uppercase tw-px-6 tw-py-3`. Positioned flush to the viewport right edge (`tw-right-6`) on most screens; at `3xl` (≥ 2048px) anchors to the content column edge via `3xl:tw-right-[calc((100%-1170px)/2+24px)]`. The trigger sits directly inside the full-width hero `<section>`, not inside the `max-w-brickMWL` content container.
 - Hero image URL: read from `DEV_HERO_IMAGE` env var.
 

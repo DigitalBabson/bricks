@@ -17,11 +17,14 @@ test.describe('Location Filter', () => {
   test('renders the location list inside the hero search form', async ({ page }) => {
     const listbox = page.locator('[role="listbox"]')
     const options = page.locator('[role="option"]')
+    const clearAll = page.getByRole('button', { name: 'Clear all' })
 
     await expect(listbox).toBeVisible()
     await expect(options.first()).toBeVisible()
     await expect(options).toHaveCount(await options.count())
     await expect(listbox).toHaveAttribute('aria-labelledby', 'locations-label')
+    await expect(clearAll).toBeVisible()
+    await expect(clearAll).toBeDisabled()
   })
 
   test('selects and deselects a location with pill feedback', async ({ page }) => {
@@ -61,7 +64,8 @@ test.describe('Location Filter', () => {
     ])
 
     await expect(page.getByText(`Brick Location: ${firstLocationName}`)).toHaveCount(0)
-    await expect(clearAll).toHaveCount(0)
+    await expect(clearAll).toBeVisible()
+    await expect(clearAll).toBeDisabled()
     const currentPage = page.locator('nav[aria-label="Page navigation"] [aria-current="page"]')
     if (await currentPage.count()) {
       await expect(currentPage).toHaveText('1')
@@ -71,7 +75,7 @@ test.describe('Location Filter', () => {
   })
 
   test('resets pagination to page 1 when a location is selected', async ({ page }) => {
-    const pageTwoButton = page.getByRole('button', { name: '2' })
+    const pageTwoButton = page.getByRole('button', { name: '2', exact: true })
     await Promise.all([
       waitForBrickResponse(page),
       pageTwoButton.click(),
@@ -145,7 +149,7 @@ test.describe('Location Filter', () => {
       firstOption.click(),
     ])
 
-    const filteredPageTwo = page.getByRole('button', { name: '2' })
+    const filteredPageTwo = page.getByRole('button', { name: '2', exact: true })
     test.skip(!(await filteredPageTwo.isVisible()), 'Selected location has only one page in current dev data')
 
     await Promise.all([
@@ -167,6 +171,31 @@ test.describe('Location Filter', () => {
     } else {
       await expect(page.locator('nav[aria-label="Page navigation"]')).toHaveCount(0)
     }
+  })
+
+  test('renders one pill per selected location and removes only the targeted pill', async ({ page }) => {
+    const options = page.locator('[role="option"]')
+    const firstOption = options.first()
+    const secondOption = options.nth(1)
+    const firstLocationName = (await firstOption.textContent())?.trim() ?? ''
+    const secondLocationName = (await secondOption.textContent())?.trim() ?? ''
+
+    await Promise.all([
+      waitForBrickResponse(page),
+      firstOption.click(),
+    ])
+    await Promise.all([
+      waitForBrickResponse(page),
+      secondOption.click(),
+    ])
+
+    await expect(page.getByText(`Brick Location: ${firstLocationName}`)).toBeVisible()
+    await expect(page.getByText(`Brick Location: ${secondLocationName}`)).toBeVisible()
+
+    await page.getByRole('button', { name: `Remove Brick Location: ${firstLocationName}` }).click()
+
+    await expect(page.getByText(`Brick Location: ${firstLocationName}`)).toHaveCount(0)
+    await expect(page.getByText(`Brick Location: ${secondLocationName}`)).toBeVisible()
   })
 
   test('shows the empty-results message for a location with no bricks when such data exists', async ({ page }) => {

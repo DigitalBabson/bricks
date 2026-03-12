@@ -56,12 +56,17 @@ describe('BrickFilter', () => {
   it('renders a focusable multiselect listbox with the updated sizing and corners', async () => {
     const wrapper = mountBrickFilter()
     const listbox = wrapper.get('[role="listbox"]')
+    const form = wrapper.get('form')
 
     expect(listbox.attributes('tabindex')).toBe('0')
     expect(listbox.attributes('aria-labelledby')).toBe('locations-label')
     expect(listbox.attributes('aria-multiselectable')).toBe('true')
     expect(listbox.classes()).toContain('tw-max-h-[108px]')
     expect(listbox.classes()).not.toContain('tw-rounded')
+    expect(listbox.classes()).toContain('tw-bg-white')
+    expect(listbox.classes()).not.toContain('tw-border')
+    expect(form.classes()).toContain('tw-max-w-[700px]')
+    expect(form.classes()).toContain('md:tw-min-h-[310px]')
 
     await listbox.trigger('focus')
     expect(listbox.attributes('aria-activedescendant')).toBe('location-option-loc-1')
@@ -77,14 +82,16 @@ describe('BrickFilter', () => {
     expect(wrapper.emitted('update:locationIds')).toEqual([[['loc-1', 'loc-2']], [[]]])
   })
 
-  it('highlights all selected locations', () => {
+  it('uses the idle selected background without bold text', () => {
     const wrapper = mountBrickFilter({ locationIds: ['loc-1', 'loc-2'] })
     const options = wrapper.findAll('[role="option"]')
 
-    expect(options[0].classes()).toContain('tw-bg-brickLightGreen')
-    expect(options[1].classes()).toContain('tw-bg-brickLightGreen')
-    expect(options[0].classes()).toContain('tw-font-bold')
-    expect(options[1].classes()).toContain('tw-font-bold')
+    expect(options[0].classes()).toContain('tw-bg-[#CECECE]')
+    expect(options[1].classes()).toContain('tw-bg-[#CECECE]')
+    expect(options[0].classes()).not.toContain('tw-font-bold')
+    expect(options[1].classes()).not.toContain('tw-font-bold')
+    expect(options[0].classes()).not.toContain('tw-text-white')
+    expect(options[1].classes()).not.toContain('tw-text-white')
   })
 
   it('supports keyboard navigation with wrapping, boundaries, and multi-select toggles', async () => {
@@ -113,19 +120,48 @@ describe('BrickFilter', () => {
     await wrapper.setProps({ locationIds: ['loc-2', 'loc-3'] })
     await listbox.trigger('keydown', { key: ' ' })
 
-    expect(wrapper.emitted('update:locationIds')).toEqual([[['loc-2', 'loc-3']], [['loc-3']]])
+    expect(wrapper.emitted('update:locationIds')).toEqual([[['loc-2', 'loc-3']], [['loc-2']]])
   })
 
-  it('gives the active option a visual indicator separate from selection', async () => {
+  it('uses the active selected background while the listbox is focused', async () => {
     const wrapper = mountBrickFilter({ locationIds: ['loc-2'] })
     const listbox = wrapper.get('[role="listbox"]')
 
     await listbox.trigger('focus')
+    const activeSelected = wrapper.findAll('[role="option"]')[1]
+    expect(activeSelected.classes()).toContain('tw-bg-[rgb(179,215,255)]')
+
     await listbox.trigger('keydown', { key: 'ArrowDown' })
 
-    const active = wrapper.findAll('[role="option"]')[2]
-    expect(active.classes()).toContain('tw-ring-2')
-    expect(active.classes()).toContain('tw-ring-inset')
+    const activeUnselected = wrapper.findAll('[role="option"]')[2]
+    expect(activeUnselected.classes()).toContain('tw-ring-2')
+    expect(activeUnselected.classes()).toContain('tw-ring-inset')
+  })
+
+  it('keeps the most recently clicked selected item active after multi-select updates', async () => {
+    const wrapper = mountBrickFilter({ locationIds: ['loc-1'] })
+    const listbox = wrapper.get('[role="listbox"]')
+    const options = wrapper.findAll('[role="option"]')
+
+    await listbox.trigger('focus')
+    await options[1].trigger('click')
+    await wrapper.setProps({ locationIds: ['loc-1', 'loc-2'] })
+
+    expect(options[0].classes()).toContain('tw-bg-[#CECECE]')
+    expect(options[1].classes()).toContain('tw-bg-[rgb(179,215,255)]')
+    expect(listbox.attributes('aria-activedescendant')).toBe('location-option-loc-2')
+  })
+
+  it('uses the active selected background after pointer selection even if the listbox was not focused first', async () => {
+    const wrapper = mountBrickFilter({ locationIds: [] })
+    const listbox = wrapper.get('[role="listbox"]')
+    const options = wrapper.findAll('[role="option"]')
+
+    await options[1].trigger('click')
+    await wrapper.setProps({ locationIds: ['loc-2'] })
+
+    expect(listbox.attributes('aria-activedescendant')).toBe('location-option-loc-2')
+    expect(options[1].classes()).toContain('tw-bg-[rgb(179,215,255)]')
   })
 
   it('emits keyword updates and does not render an inline clear button', async () => {
@@ -138,7 +174,7 @@ describe('BrickFilter', () => {
     expect(wrapper.find('button[aria-label="Clear search"]').exists()).toBe(false)
   })
 
-  it('renders pills, remove actions, and clear all button', () => {
+  it('renders individual location pills, remove actions, and clear all button', () => {
     const wrapper = mountBrickFilter({
       inscription: 'Sample keyword',
       locationIds: ['loc-1', 'loc-2'],
@@ -150,9 +186,11 @@ describe('BrickFilter', () => {
 
     const text = wrapper.text()
     expect(text).toContain('Brick Inscription: Sample keyword')
-    expect(text).toContain('Brick Locations: 2 selected')
-    expect(wrapper.findAll('button[aria-label^="Remove"]')).toHaveLength(2)
+    expect(text).toContain('Brick Location: Class Walk of 2019')
+    expect(text).toContain('Brick Location: Rodger Babson Statue')
+    expect(wrapper.findAll('button[aria-label^="Remove"]')).toHaveLength(3)
     expect(actionStrip.classes()).toContain('tw-bg-[rgba(255,255,255,0.53)]')
+    expect(actionStrip.classes()).toContain('tw-min-h-[51px]')
     expect(clearAllButton?.classes()).toContain('tw-bg-white')
     expect(clearAllButton?.classes()).toContain('tw-text-black')
     expect(clearAllButton?.classes()).toContain('tw-font-oswald')
@@ -164,29 +202,30 @@ describe('BrickFilter', () => {
     expect(wrapper.find('button[aria-label^="Remove"]').classes()).toContain('tw-text-[20px]')
   })
 
-  it('emits pill removals and clearAll, and hides pills when inactive', async () => {
+  it('removes only the targeted location pill, clears inscription, and disables clear all when inactive', async () => {
     const wrapper = mountBrickFilter({
       inscription: 'Sample keyword',
       locationIds: ['loc-1', 'loc-2'],
     })
 
-    const removeButtons = wrapper.findAll('button[aria-label^="Remove"]')
-    await removeButtons[0].trigger('click')
-    await removeButtons[1].trigger('click')
+    await wrapper.get('button[aria-label="Remove Brick Location: Class Walk of 2019"]').trigger('click')
+    await wrapper.get('button[aria-label="Remove Brick Inscription: Sample keyword"]').trigger('click')
     await wrapper
       .findAll('button')
       .find((button) => button.text() === 'Clear all')
       ?.trigger('click')
 
     expect(wrapper.emitted('update:inscription')).toEqual([['']])
-    expect(wrapper.emitted('update:locationIds')).toEqual([[[]]])
+    expect(wrapper.emitted('update:locationIds')).toEqual([[['loc-2']]])
     expect(wrapper.emitted('clearAll')).toHaveLength(1)
 
     const inactive = mountBrickFilter()
-    expect(inactive.find('.bricks__filter-actions').exists()).toBe(true)
-    const hiddenClearAll = inactive
+    const disabledClearAll = inactive
       .findAll('button')
       .find((button) => button.text() === 'Clear all')
-    expect(hiddenClearAll?.attributes('style')).toContain('display: none;')
+    expect(disabledClearAll?.attributes('disabled')).toBeDefined()
+    expect(disabledClearAll?.classes()).toContain('tw-bg-[#CCD8C0]')
+    expect(disabledClearAll?.classes()).toContain('tw-text-[#31451D]')
+    expect(disabledClearAll?.classes()).toContain('tw-cursor-not-allowed')
   })
 })
