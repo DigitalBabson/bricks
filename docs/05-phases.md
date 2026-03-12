@@ -64,12 +64,14 @@
 
 **Scope:** This phase handles location-only filtering via the Drupal JSON:API. All keyword-related paths (keyword-only and combined keyword + location via Searchstax `ss_body`) are owned by Phase 3. Do not add temporary Searchstax stubs, fallback branches, or partial combined-filter behavior in Phase 4.
 
-1. Create `fetchLocations()` in App.vue — calls `/parkLocations?fields[parkLocation]=name&include=field_brick_zone_image&sort=name`. Store as shared `locations: ParkLocation[]` state.
+1. Create `fetchLocations()` in App.vue — calls `/parkLocations?fields[parkLocation]=name&include=brick_zone_image&sort=name`. Store as shared `locations: ParkLocation[]` state.
 2. Add scrollable location list to BrickFilter (populated from `locations` prop).
-3. Wire location-only filter into TheBricks fetch logic (Drupal `filter[brickParkLocation.id]={locationId}`). Uses Drupal `meta.count` for `totalPages`.
+3. Wire location-only filter into TheBricks fetch logic (Drupal `filter[brickParkLocation.id][operator]=IN&filter[brickParkLocation.id][value]={locationIds...}`). Uses Drupal `meta.count` for `totalPages`.
 4. Add active-filter pills and "Clear all" button to BrickFilter.
 5. Unit tests for BrickFilter filter/pill behavior.
 6. E2E tests for location-only filtering and "Clear all".
+
+> **Implementation note:** Keep the translucent action strip visible even when no filters are active. The latest UX direction is to also keep the `Clear all` button visible in that idle state, but disabled until a keyword or location filter is active. That disabled-idle behavior is documented here as a follow-up and should be implemented once final UX details are provided.
 
 **Estimated effort:** 2–3 days
 
@@ -80,7 +82,7 @@
 **Depends on:** Phase 4 (`fetchLocations()` and the shared `ParkLocation[]` data).
 
 1. Create `LocationExplorer.vue` with sidebar list + full-size map viewer.
-2. Wire `LocationExplorerTrigger` in both placements → opens overlay in App.vue.
+2. Wire `LocationExplorerTrigger` in both placements → opens overlay in App.vue. Reposition the desktop trigger: move it outside the `max-w-brickMWL` container so it sits flush to the viewport right edge. Add a custom `3xl` Tailwind breakpoint (`2048px`) so that at very wide viewports the trigger anchors to the content column edge instead. Requires `tailwind.config.js` update (`screens: { '3xl': '2048px' }`).
 3. Populate sidebar from the same `locations` data used for the filter list.
 4. Default selection: first location in the sorted list.
 5. Clicking a location highlights it in the sidebar and swaps the map image.

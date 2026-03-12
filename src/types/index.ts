@@ -27,6 +27,26 @@ export interface BrickApiResponse {
   meta?: { count?: number }
 }
 
+export interface ParkLocation {
+  id: string
+  name: string
+  mapImageUrl: string
+}
+
+export interface ParkLocationsApiResponse {
+  data: Array<{
+    id: string
+    attributes: { name: string }
+    relationships: {
+      brick_zone_image?: { data: { id: string } | null }
+    }
+  }>
+  included?: Array<{
+    id: string
+    attributes: { image_style_uri?: { full_img?: string } }
+  }>
+}
+
 export interface ImageStyleUri {
   brick?: string
   full_img?: string

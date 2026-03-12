@@ -1,149 +1,125 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '@playwright/test'
+import type { Page } from '@playwright/test'
 
 test.describe('Brick Search Functionality', () => {
+  async function waitForInitialBricks(page: Page) {
+    await expect(page.locator('.brick-card').first()).toBeVisible({ timeout: 10000 })
+  }
+
+  async function waitForKeywordRequest(page: Page) {
+    await page.waitForResponse((response) =>
+      response.url().includes('filter[brickInscription][operator]=CONTAINS') && response.ok(),
+    )
+  }
+
+  async function waitForBrowseRequest(page: Page) {
+    await page.waitForResponse((response) =>
+      response.url().includes('/jsonapi/bricks?page[limit]=20') &&
+      !response.url().includes('filter[brickInscription][operator]=CONTAINS') &&
+      !response.url().includes('filter[brickParkLocation.id]=') &&
+      response.ok(),
+    )
+  }
+
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-    // Wait for the app to load and bricks to render
-    await page.waitForSelector('.brick-card', { timeout: 10000 });
-  });
+    await page.goto('/')
+    await page.waitForSelector('input#search-brick', { timeout: 10000 })
+    await waitForInitialBricks(page)
+  })
 
-  test('displays search input and clear button', async ({ page }) => {
-    // Check that search form elements exist
-    const searchInput = page.locator('input#search-brick');
-    const clearButton = page.getByRole('button', { name: /clear/i });
+  test('displays the search input without an inline clear button', async ({ page }) => {
+    const searchInput = page.locator('input#search-brick')
 
-    await expect(searchInput).toBeVisible();
-    await expect(clearButton).toBeVisible();
-  });
+    await expect(searchInput).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Clear search' })).toHaveCount(0)
+  })
 
   test('filters bricks by inscription text', async ({ page }) => {
-    // Get initial count of brick cards
-    const initialCards = await page.locator('.brick-card').count();
-    expect(initialCards).toBeGreaterThan(0);
+    const initialCards = await page.locator('.brick-card').count()
+    expect(initialCards).toBeGreaterThan(0)
 
-    // Type in search box
-    const searchInput = page.locator('input#search-brick');
-    await searchInput.fill('John');
+    const searchInput = page.locator('input#search-brick')
+    await searchInput.fill('John')
+    await waitForKeywordRequest(page)
 
-    // Wait for results to update
-    await page.waitForTimeout(500);
+    const filteredCards = await page.locator('.brick-card').count()
+    expect(filteredCards).toBeLessThanOrEqual(initialCards)
 
-    // Count filtered results
-    const filteredCards = await page.locator('.brick-card').count();
-
-    // Results should be less than or equal to initial count
-    expect(filteredCards).toBeLessThanOrEqual(initialCards);
-
-    // If there are results, verify they contain the search term
     if (filteredCards > 0) {
-      const cards = page.locator('.brick-card');
-      const firstCard = cards.first();
-      await expect(firstCard).toBeVisible();
+      await expect(page.locator('.brick-card').first()).toBeVisible()
     }
-  });
+  })
 
   test('shows "No bricks match your criteria" when no results found', async ({ page }) => {
-    const searchInput = page.locator('input#search-brick');
+    const searchInput = page.locator('input#search-brick')
 
-    // Search for something that definitely won't exist
-    await searchInput.fill('ZZZZZZNONEXISTENT123456');
+    await searchInput.fill('ZZZZZZNONEXISTENT123456')
+    await waitForKeywordRequest(page)
 
-    // Wait for results to update
-    await page.waitForTimeout(500);
+    const noResultsMessage = page.getByText(/no bricks match your criteria/i)
+    await expect(noResultsMessage).toBeVisible()
 
-    // Check for no results message
-    const noResultsMessage = page.getByText(/no bricks match your criteria/i);
-    await expect(noResultsMessage).toBeVisible();
+    const cardCount = await page.locator('.brick-card').count()
+    expect(cardCount).toBe(0)
+  })
 
-    // Verify no brick cards are displayed
-    const cardCount = await page.locator('.brick-card').count();
-    expect(cardCount).toBe(0);
-  });
+  test('clearing the field manually resets the search filter', async ({ page }) => {
+    const initialCards = await page.locator('.brick-card').count()
 
-  test('clear button resets search filter', async ({ page }) => {
-    // Get initial count
-    const initialCards = await page.locator('.brick-card').count();
+    const searchInput = page.locator('input#search-brick')
+    await searchInput.fill('test search')
+    await waitForKeywordRequest(page)
 
-    // Perform search
-    const searchInput = page.locator('input#search-brick');
-    await searchInput.fill('test search');
-    await page.waitForTimeout(500);
+    await searchInput.clear()
+    await waitForBrowseRequest(page)
 
-    // Click clear button
-    const clearButton = page.getByRole('button', { name: /clear/i });
-    await clearButton.click();
-
-    // Wait for results to reset
-    await page.waitForTimeout(500);
-
-    // Verify input is cleared
-    await expect(searchInput).toHaveValue('');
-
-    // Verify all bricks are shown again
-    const resetCards = await page.locator('.brick-card').count();
-    expect(resetCards).toBe(initialCards);
-  });
+    await expect(searchInput).toHaveValue('')
+    const resetCards = await page.locator('.brick-card').count()
+    expect(resetCards).toBe(initialCards)
+  })
 
   test('search is case-insensitive', async ({ page }) => {
-    const searchInput = page.locator('input#search-brick');
+    const searchInput = page.locator('input#search-brick')
 
-    // Search with lowercase
-    await searchInput.fill('john');
-    await page.waitForTimeout(500);
-    const lowercaseCount = await page.locator('.brick-card').count();
+    await searchInput.fill('john')
+    await waitForKeywordRequest(page)
+    const lowercaseCount = await page.locator('.brick-card').count()
 
-    // Clear and search with uppercase
-    const clearButton = page.getByRole('button', { name: /clear/i });
-    await clearButton.click();
-    await searchInput.fill('JOHN');
-    await page.waitForTimeout(500);
-    const uppercaseCount = await page.locator('.brick-card').count();
+    await searchInput.fill('JOHN')
+    await waitForKeywordRequest(page)
+    const uppercaseCount = await page.locator('.brick-card').count()
 
-    // Results should be the same regardless of case
-    expect(lowercaseCount).toBe(uppercaseCount);
-  });
+    expect(lowercaseCount).toBe(uppercaseCount)
+  })
 
   test('search updates in real-time as user types', async ({ page }) => {
-    const searchInput = page.locator('input#search-brick');
+    const searchInput = page.locator('input#search-brick')
+    const initialCount = await page.locator('.brick-card').count()
 
-    // Get initial count
-    const initialCount = await page.locator('.brick-card').count();
+    await searchInput.pressSequentially('Joh', { delay: 100 })
+    await waitForKeywordRequest(page)
 
-    // Type one character at a time
-    await searchInput.pressSequentially('Joh', { delay: 100 });
-
-    // Wait for debounce/update
-    await page.waitForTimeout(500);
-
-    // Should have filtered results
-    const filteredCount = await page.locator('.brick-card').count();
-
-    // Either shows filtered results or "no results" message
-    const noResultsVisible = await page.getByText(/no bricks match your criteria/i).isVisible().catch(() => false);
+    const filteredCount = await page.locator('.brick-card').count()
+    const noResultsVisible = await page.getByText(/no bricks match your criteria/i).isVisible().catch(() => false)
 
     if (noResultsVisible) {
-      expect(filteredCount).toBe(0);
+      expect(filteredCount).toBe(0)
     } else {
-      expect(filteredCount).toBeLessThanOrEqual(initialCount);
+      expect(filteredCount).toBeLessThanOrEqual(initialCount)
     }
-  });
+  })
 
   test('empty search shows all bricks', async ({ page }) => {
-    const searchInput = page.locator('input#search-brick');
+    const searchInput = page.locator('input#search-brick')
+    const initialCount = await page.locator('.brick-card').count()
 
-    // Get initial count
-    const initialCount = await page.locator('.brick-card').count();
+    await searchInput.fill('test')
+    await waitForKeywordRequest(page)
 
-    // Enter search
-    await searchInput.fill('test');
-    await page.waitForTimeout(500);
+    await searchInput.clear()
+    await waitForBrowseRequest(page)
 
-    // Clear manually
-    await searchInput.clear();
-    await page.waitForTimeout(500);
-
-    // Should show all bricks again
-    const finalCount = await page.locator('.brick-card').count();
-    expect(finalCount).toBe(initialCount);
-  });
-});
+    const finalCount = await page.locator('.brick-card').count()
+    expect(finalCount).toBe(initialCount)
+  })
+})

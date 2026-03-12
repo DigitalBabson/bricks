@@ -33,6 +33,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue"
+import type { PropType } from "vue"
 import axios from "axios";
 import BrickCard from "./BrickCard.vue";
 import Pagination from "./Pagination.vue";
@@ -45,8 +46,13 @@ export default defineComponent({
     Pagination,
   },
   props: {
-    inscription: { type: String, default: '' }
+    inscription: { type: String, default: '' },
+    locationIds: {
+      type: Array as PropType<string[]>,
+      default: () => [],
+    },
   },
+  emits: ['update:totalCount'],
   data() {
     return {
       bricks: [] as Brick[],
@@ -68,27 +74,54 @@ export default defineComponent({
   watch: {
     inscription(value: string) {
       this.currentPage = 1;
-      if (value.length == 0) {
-        this.fetchBricks(value);
-      } else if (value.length > 3) {
-        this.fetchBricks(value);
+      if (value.length === 0) {
+        this.fetchBricks();
+      } else if (value.length >= 3 && this.locationIds.length === 0) {
+        this.fetchBricks();
       }
+    },
+    locationIds: {
+      handler() {
+        this.currentPage = 1;
+        this.fetchBricks();
+      },
+      deep: true,
     },
   },
   methods: {
     goToPage(page: number) {
       this.currentPage = page;
-      this.fetchBricks(this.inscription);
+      this.fetchBricks();
     },
-    async fetchBricks(search = "") {
-      try {
-        const offset = (this.currentPage - 1) * this.pageSize;
-        const url = this.apiUrl +
+    buildUrl(offset: number): string {
+      if (this.locationIds.length > 0) {
+        const encodedIds = this.locationIds.map((locationId) => encodeURIComponent(locationId)).join(',')
+        return this.apiUrl +
+          `bricks?page[limit]=${this.pageSize}` +
+          `&sort=brickInscription` +
+          `&filter[brickParkLocation.id][operator]=IN` +
+          `&filter[brickParkLocation.id][value]=${encodedIds}` +
+          `&page[offset]=${offset}`;
+      }
+
+      if (this.inscription.length >= 3) {
+        return this.apiUrl +
           `bricks?page[limit]=${this.pageSize}` +
           `&filter[brickInscription][operator]=CONTAINS` +
-          `&filter[brickInscription][value]=${encodeURIComponent(search)}` +
+          `&filter[brickInscription][value]=${encodeURIComponent(this.inscription)}` +
           `&page[offset]=${offset}` +
           `&sort=brickInscription`;
+      }
+
+      return this.apiUrl +
+        `bricks?page[limit]=${this.pageSize}` +
+        `&page[offset]=${offset}` +
+        `&sort=brickInscription`;
+    },
+    async fetchBricks() {
+      try {
+        const offset = (this.currentPage - 1) * this.pageSize;
+        const url = this.buildUrl(offset);
         const response = await axios.get<BrickApiResponse>(url);
         const results = response.data.data;
         const data: Brick[] = results.map((bricks) => {
@@ -104,11 +137,8 @@ export default defineComponent({
           }
         });
 
-        if (search.length !== 0) {
-          this.showMessage = data.length === 0;
-        } else {
-          this.showMessage = false;
-        }
+        const hasActiveFilter = this.locationIds.length > 0 || this.inscription.length >= 3;
+        this.showMessage = hasActiveFilter && data.length === 0;
 
         // Replace bricks array (not append)
         this.bricks = data;
@@ -116,6 +146,7 @@ export default defineComponent({
         // Calculate total pages from meta.count
         const totalCount = response.data.meta?.count ?? 0;
         this.totalPages = Math.ceil(totalCount / this.pageSize) || 1;
+        this.$emit('update:totalCount', totalCount);
 
         // Scroll grid to top on page change
         if (this.currentPage > 1) {
@@ -126,6 +157,10 @@ export default defineComponent({
         }
       } catch {
         // Silently handle fetch errors — UI will show empty state
+        this.bricks = [];
+        this.totalPages = 1;
+        this.showMessage = this.locationIds.length > 0 || this.inscription.length >= 3;
+        this.$emit('update:totalCount', 0);
       }
     },
   },

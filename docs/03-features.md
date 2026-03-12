@@ -95,43 +95,46 @@ The filter component becomes a two-part filter bar:
 
 **Section A — "Search by Brick Inscription"**
 
-- Label: "Search by Brick Inscription" (Oswald font, white text above the input).
+- Label: "Search by Brick Inscription" (Zilla Slab, white, `18px`, title case as shown in the wireframe rather than forced all-caps).
 - Text input field.
 - Emits on input, but the parent should debounce fetches by **500ms** to avoid sending a request on every keystroke.
 - **Minimum character threshold:** 3 characters. Empty string (0 chars) resets to default browse.
-- A clear/reset icon button inside the field clears the current query.
+- There is no inline clear/reset icon inside the field. Clearing happens through the form-level filter controls (`×` on the inscription pill or `Clear all`) or by manually clearing the input value.
 
 **Section B — "Brick Locations" (scrollable list)**
 
-- Label: "Brick Locations" (Oswald font, white text above the list).
-- **Scrollable list box** (not a `<select>` dropdown) — shows multiple locations visible at once, with a vertical scrollbar. Per the XD wireframe, this is a multi-row visible list with scroll, similar to an HTML `<select multiple>` or a custom scrollable `<ul>`.
-- Clicking a location selects it (single-select). Clicking again or selecting a different one changes the filter.
+- Label: "Brick Locations" (Zilla Slab, white, `18px`, title case as shown in the wireframe rather than forced all-caps).
+- **Scrollable list box** (not a `<select>` dropdown) — it shows at most three visible locations before scrolling on both mobile and desktop. It uses a vertical scrollbar, square corners, and remains a compact scrollable `<ul>` rather than a dropdown. List items use Oswald at `16px`.
+- Clicking a location toggles it in the active selection set (multi-select).
 - Values populated from `locations` prop (fetched on mount from `/parkLocations`).
 - On selection change, emit the selected location ID.
 
 **Section C — Active Filters / Results Bar**
 
 - Sits below the search inputs, inside the same form container.
-- Shows olive/green pill-style tags for each active filter, e.g.: `Brick Inscription: Sample keyword ×`
+- The action row sits on a separate translucent white rectangle (`white` at roughly `0.53` opacity) behind the chips/buttons.
+- The action-row rectangle stays visible even when no filters are active, so the panel height and visual structure stay stable.
+- Active filters render as white chips with dark text and rounded `23px` corners, using Oswald for the chip/button text, e.g. `Brick Inscription: Sample keyword ×`.
 - Each pill has a `×` (close) button to remove that individual filter.
-- A **"Clear all"** button (text-style, bordered) sits to the right of the pills, resets all filters.
-- When no filters are active, this bar is hidden.
+- The `×` close affordance is a white `x` centered inside a black circular button sized `20px`.
+- A **"Clear all"** button with black text on a white rounded button (`23px` radius) sits in the same action strip and resets all filters.
+- The design does **not** include a `Showing X bricks` counter in this action row.
+- When no filters are active, the strip remains visible but the pills and `Clear all` controls are hidden.
 
 **New props:**
 
 | Prop | Type | Description |
 |---|---|---|
 | `inscription` (v-model) | `String` | Current keyword search text |
-| `locationId` (v-model) | `String` | Selected location ID (empty = all) |
+| `locationIds` (v-model) | `String[]` | Selected location IDs (empty array = all) |
 | `locations` | `Array<{id, name}>` | All available locations |
-| `resultCount` | `Number` | Total matching bricks (shown in results bar) |
 
 **New emits:**
 
 | Event | Payload | Description |
 |---|---|---|
 | `update:inscription` | `String` | Keyword changed |
-| `update:locationId` | `String` | Location filter changed |
+| `update:locationIds` | `String[]` | Location filter changed |
 | `clearAll` | — | Reset all filters |
 
 ### 3.3.2 TheBricks.vue search logic
@@ -140,7 +143,7 @@ The filter component becomes a two-part filter bar:
 
 ```typescript
 const inscription = ref('')       // keyword search text
-const locationId = ref('')        // selected location filter
+const locationIds = ref<string[]>([])  // selected location filters
 const locations = ref<ParkLocation[]>([])  // all park locations (from parkLocations endpoint)
 const currentPage = ref(1)
 const totalCount = ref(0)         // total matching bricks (from numFound or meta)
@@ -155,11 +158,11 @@ There are four filter combinations. The routing rule is: **any request involving
 
 ```
 watchEffect:
-  if keyword.length >= 3 AND locationId is present:
+  if keyword.length >= 3 AND locationIds.length > 0:
     → COMBINED (keyword + location) — route through Searchstax
     → call Searchstax emselect with:
        fq=tcngramm_X3b_en_description:{keyword}
-       &fq=ss_body:{locationId}
+       &fq=ss_body:{locationIds...}
        &rows=20&start={offset}&fl=*&wt=json
     → receive ss_uuid[] and numFound
     → hydrate each ss_uuid via GET /brick/{ss_uuid}
@@ -174,7 +177,7 @@ watchEffect:
   else if keyword.length > 0:
     → do not fetch yet; wait until the query reaches 3 characters
 
-  else if locationId is present:
+  else if locationIds.length > 0:
     → LOCATION ONLY — route through Drupal
     → call Drupal /bricks?filter[brickParkLocation.id]={locId}
        &sort=brickInscription&page[limit]=20&page[offset]={offset}
@@ -195,7 +198,7 @@ watchEffect:
 **New method: `fetchLocations()`**
 
 - Called once on `onMounted`.
-- `GET /parkLocations?fields[parkLocation]=name&include=field_brick_zone_image&sort=name`
+- `GET /parkLocations?fields[parkLocation]=name&include=brick_zone_image&sort=name`
 - Transforms response to `ParkLocation[]` array (id, name, mapImageUrl).
 - Used by both the BrickFilter location list and the LocationExplorer overlay.
 
@@ -207,7 +210,7 @@ Add to `src/types/index.ts`:
 interface ParkLocation {
   id: string
   name: string
-  mapImageUrl: string   // from included field_brick_zone_image → image_style_uri.full_img
+  mapImageUrl: string   // from included brick_zone_image → image_style_uri.full_img
 }
 
 interface SearchstaxResponse {
@@ -332,6 +335,47 @@ Create a small reusable CTA component responsible only for rendering the **"VIEW
 - `App.vue` remains the owner of `showLocationExplorer` state; the trigger never opens the overlay directly.
 - Uses the courtyard green CTA surface (`#587C32`), while the header and footer remain on Babson green (`#006644`).
 
+**Desktop trigger positioning — progressive anchoring:**
+
+On most screens the trigger should sit flush against the right edge of the viewport (with a small padding). On very wide screens (≥ 2048px) the trigger should stop drifting outward and instead anchor to the right edge of the content column (`max-w-brickMWL`, 1170px).
+
+Implementation: add a custom `3xl` breakpoint at `2048px` in `tailwind.config.js`. Position the trigger **outside** the `max-w-brickMWL` inner container, directly inside the full-width hero `<section>`:
+
+```html
+<!-- AppHero.vue — trigger sits in the full-width section, not the content container -->
+<section class="tw-relative tw-w-full ...">
+  <!-- wash overlay -->
+
+  <!-- Desktop trigger: flush to viewport edge, anchored to content at 3xl -->
+  <location-explorer-trigger
+    class="
+      tw-hidden md:tw-block
+      tw-absolute tw-top-12
+      tw-right-6
+      3xl:tw-right-[calc((100%-1170px)/2+24px)]
+    "
+    @openLocations="$emit('openLocations')"
+  />
+
+  <!-- Content container (search form) -->
+  <div class="tw-max-w-brickMWL tw-mx-auto ...">
+    <slot />
+  </div>
+</section>
+```
+
+Below `3xl` (< 2048px): `tw-right-6` places the button 24px from the viewport edge.
+At `3xl` (≥ 2048px): `calc((100% - 1170px) / 2 + 24px)` computes the distance from the viewport right edge to the content container's right edge plus the same 24px padding, so the button aligns with the content column.
+
+**Tailwind config addition:**
+
+```js
+// tailwind.config.js → theme.extend
+screens: {
+  '3xl': '2048px',
+},
+```
+
 **Props:**
 
 | Prop | Type | Description |
@@ -383,7 +427,7 @@ Create a small reusable CTA component responsible only for rendering the **"VIEW
 ```
 
 - **Left sidebar:** scrollable **flat list** of all zones, sorted alphanumerically in ascending order (matching the API's `sort=name`). No hierarchy or grouping — zones are listed as they come from the API. The active/selected zone is visually highlighted (bold, underline, or background highlight).
-- **Right panel:** the map image for the currently selected zone. Uses `image_style_uri.full_img` from the included `field_brick_zone_image`.
+- **Right panel:** the map image for the currently selected zone. Uses `image_style_uri.full_img` from the included `brick_zone_image`.
 - **Close button (×):** top-right corner, closes the overlay.
 - The overlay uses `<teleport to="body">` with a dark semi-transparent backdrop, consistent with the existing `UiModal` pattern.
 
@@ -409,7 +453,7 @@ Create a small reusable CTA component responsible only for rendering the **"VIEW
 The same `fetchLocations()` call used for the filter list (see 3.3.2) provides all the data needed:
 
 ```
-GET /parkLocations?fields[parkLocation]=name&include=field_brick_zone_image&sort=name
+GET /parkLocations?fields[parkLocation]=name&include=brick_zone_image&sort=name
 ```
 
 This returns location names and their included map images in a single call. The `ParkLocation[]` array is shared between the BrickFilter location list and the LocationExplorer overlay — fetched once at App-level on mount.
@@ -462,9 +506,9 @@ This returns location names and their included map images in a single call. The 
 
 - Full-width section with a background image (aerial park photo).
 - **Hero image** is hosted on Drupal: `DEV_HERO_IMAGE` env var → `https://babsondev.prod.acquia-sites.com/sites/default/files/2026-03/find-my-brick-hero.jpg` (dev).
-- **Desktop trigger placement** — `LocationExplorerTrigger` renders in the top-right area of the hero, styled as a green pill/button. On click, emits `@openLocations` to the parent (opens the LocationExplorer overlay).
-- **Search form** — left/center area, rendered as a courtyard-green panel inside the hero. The hero image itself has a full-coverage semi-transparent white wash.
-- Below the hero: the brick grid.
+- **Desktop trigger placement** — `LocationExplorerTrigger` renders in the top-right area of the hero, styled as a green pill/button. On click, emits `@openLocations` to the parent (opens the LocationExplorer overlay). The trigger is positioned flush to the viewport right edge on most screens, but at the `3xl` breakpoint (≥ 2048px) it anchors to the right edge of the content column instead (see §3.5.2 for implementation details).
+- **Search form** — rendered as a courtyard-green panel inside the hero. On mobile it fills the hero vertically from top to bottom. On desktop it intentionally overhangs the bottom edge of the hero image. The hero image itself has a full-coverage semi-transparent white wash.
+- Below the hero: the brick grid. On desktop there is roughly `140px` of spacing between the hero image and the grid region to accommodate the overhanging search panel. On mobile, the gap above the grid matches the grid’s horizontal inset (`32px` / `tw-pt-8`).
 
 **Emits:** `@openLocations` — parent (App.vue) toggles the location-explorer overlay.
 
@@ -478,23 +522,24 @@ This returns location names and their included map images in a single call. The 
 ```html
 <!-- In App.vue or TheBricks.vue -->
 <app-hero @openLocations="showLocationExplorer = true">
-  <brick-filter v-model:inscription="inscription" v-model:locationId="locationId" ... />
+  <brick-filter v-model:inscription="inscription" v-model:locationIds="locationIds" ... />
 </app-hero>
 ```
 
 **Styling:**
 
 - `tw-relative tw-w-full` wrapper with `tw-bg-cover tw-bg-center` for the background image.
-- Minimum height: ~350px desktop, ~250px mobile.
+- Fixed height: `355px` on mobile, ~350px minimum on tablet, and a fixed `276px` desktop hero height.
 - Hero wash: full-coverage semi-transparent white overlay above the background image.
-- Search form container: courtyard-green panel, left-aligned on desktop, with a **540px max width**.
-- Desktop `LocationExplorerTrigger`: `tw-bg-brickCourtyardGreen tw-text-white tw-font-oswald tw-uppercase tw-px-6 tw-py-3`, positioned top-right on desktop.
+- Search form container: on mobile it fills the hero height with a **425px max width** and stays centered; on desktop it is centered with a **576px max width** and `48px` horizontal padding. The panel itself has square corners (no border radius).
+- On desktop, the search panel overhangs the bottom edge of the hero and the hero reserves about `140px` of space below before the grid starts.
+- Desktop `LocationExplorerTrigger`: `tw-bg-brickCourtyardGreen tw-text-white tw-font-oswald tw-uppercase tw-px-6 tw-py-3`. Positioned flush to the viewport right edge (`tw-right-6`) on most screens; at `3xl` (≥ 2048px) anchors to the content column edge via `3xl:tw-right-[calc((100%-1170px)/2+24px)]`. The trigger sits directly inside the full-width hero `<section>`, not inside the `max-w-brickMWL` content container.
 - Hero image URL: read from `DEV_HERO_IMAGE` env var.
 
 **Responsive behavior (from XD mobile wireframe):**
 
-- **Desktop:** `LocationExplorerTrigger` sits in the top-right area of the hero. Search form overlays the left/center of the hero image.
-- **Mobile:** The hero image is still full-width but the `LocationExplorerTrigger` becomes a floating fixed-position control in the **bottom-right corner of the viewport**, remaining visible while the user scrolls. The search form fills the width of the hero area with no side-by-side layout. Implementation: render the trigger in both locations and toggle visibility with Tailwind responsive classes (`tw-hidden md:tw-block` in hero, `md:tw-hidden` on the floating mobile instance).
+- **Desktop:** `LocationExplorerTrigger` sits in the top-right area of the hero, flush to the viewport edge until the `3xl` breakpoint where it anchors to the content column. Search form overlays the left/center of the hero image.
+- **Mobile:** The hero image is full-width and `355px` tall. The search form fills the hero vertically from top to bottom, and the `LocationExplorerTrigger` becomes a floating fixed-position control in the **bottom-right corner of the viewport**, remaining visible while the user scrolls. Implementation: render the trigger in both locations and toggle visibility with Tailwind responsive classes (`tw-hidden md:tw-block` in hero, `md:tw-hidden` on the floating mobile instance).
 
 **Files affected:** `src/components/AppHero.vue` (new), `src/components/TheBricks.vue` (move BrickFilter out), `src/App.vue`
 

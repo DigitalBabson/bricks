@@ -1,19 +1,19 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount, flushPromises } from '@vue/test-utils'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { flushPromises, mount } from '@vue/test-utils'
+import axios from 'axios'
 import TheBricks from '../TheBricks.vue'
 import { defaultEnvKey, defaultUrlKey } from '../../types/index'
-import axios from 'axios'
 
 vi.mock('axios')
 const mockedAxios = vi.mocked(axios, true)
 
-function makeBrick(id: string, inscription: string) {
+function makeBrick(id: string, inscription: string, locationId = 'loc-1') {
   return {
     id,
     attributes: { brickNumber: id, brickInscription: inscription },
     relationships: {
       brickImage: { data: null },
-      brickParkLocation: { data: null },
+      brickParkLocation: { data: { id: locationId } },
     },
   }
 }
@@ -28,7 +28,12 @@ function mockApiResponse(bricks: ReturnType<typeof makeBrick>[], count: number) 
   }
 }
 
-function mountTheBricks(props: { inscription?: string } = {}) {
+function mountTheBricks(
+  props: Partial<{
+    inscription: string
+    locationIds: string[]
+  }> = {}
+) {
   return mount(TheBricks, {
     props,
     global: {
@@ -59,117 +64,157 @@ describe('TheBricks', () => {
     )
   })
 
-  describe('Sorting', () => {
-    it('fetchBricks URL includes &sort=brickInscription', async () => {
-      mountTheBricks()
-      await flushPromises()
-      const url = mockedAxios.get.mock.calls[0][0] as string
-      expect(url).toContain('&sort=brickInscription')
-    })
+  it('includes sort=brickInscription in browse requests', async () => {
+    mountTheBricks()
+    await flushPromises()
+
+    const url = mockedAxios.get.mock.calls[0][0] as string
+    expect(url).toContain('&sort=brickInscription')
   })
 
-  describe('Pagination state', () => {
-    it('initializes with currentPage 1 and totalPages 1', () => {
-      // Suppress the mounted fetch
-      mockedAxios.get.mockResolvedValue(mockApiResponse([], 0))
-      const wrapper = mountTheBricks()
-      const vm = wrapper.vm as any
-      expect(vm.currentPage).toBe(1)
-      expect(vm.totalPages).toBe(1)
-    })
+  it('uses Drupal IN filtering when locationIds are present', async () => {
+    mountTheBricks({ locationIds: ['loc-2', 'loc-3'] })
+    await flushPromises()
 
-    it('calculates totalPages from meta.count', async () => {
-      const wrapper = mountTheBricks()
-      await flushPromises()
-      const vm = wrapper.vm as any
-      // 100 items / 20 per page = 5 pages
-      expect(vm.totalPages).toBe(5)
-    })
-
-    it('goToPage sets currentPage and fetches with correct offset', async () => {
-      const wrapper = mountTheBricks()
-      await flushPromises()
-      vi.clearAllMocks()
-
-      mockedAxios.get.mockResolvedValue(
-        mockApiResponse([makeBrick('3', 'Charlie')], 100)
-      )
-
-      const vm = wrapper.vm as any
-      vm.goToPage(3)
-      await flushPromises()
-
-      expect(vm.currentPage).toBe(3)
-      const url = mockedAxios.get.mock.calls[0][0] as string
-      expect(url).toContain('page[offset]=40')
-    })
-
-    it('replaces bricks array on page change (not append)', async () => {
-      const wrapper = mountTheBricks()
-      await flushPromises()
-      const vm = wrapper.vm as any
-      expect(vm.bricks).toHaveLength(2)
-
-      mockedAxios.get.mockResolvedValue(
-        mockApiResponse([makeBrick('3', 'Charlie')], 100)
-      )
-      vm.goToPage(2)
-      await flushPromises()
-
-      // Should be replaced, not appended
-      expect(vm.bricks).toHaveLength(1)
-      expect(vm.bricks[0].id).toBe('3')
-    })
+    const url = mockedAxios.get.mock.calls[0][0] as string
+    expect(url).toContain('filter[brickParkLocation.id][operator]=IN')
+    expect(url).toContain('filter[brickParkLocation.id][value]=loc-2,loc-3')
+    expect(url).not.toContain('filter[brickInscription][operator]=CONTAINS')
   })
 
-  describe('Query reset', () => {
-    it('resets currentPage to 1 when inscription changes', async () => {
-      const wrapper = mountTheBricks({ inscription: '' })
-      await flushPromises()
+  it('omits the location filter when locationIds is empty', async () => {
+    mountTheBricks({ locationIds: [] })
+    await flushPromises()
 
-      const vm = wrapper.vm as any
-      vm.currentPage = 3
-
-      await wrapper.setProps({ inscription: 'testquery' })
-      await flushPromises()
-
-      expect(vm.currentPage).toBe(1)
-    })
+    const url = mockedAxios.get.mock.calls[0][0] as string
+    expect(url).not.toContain('filter[brickParkLocation.id][value]=')
   })
 
-  describe('Template integration', () => {
-    it('passes currentPage and totalPages to Pagination', async () => {
-      const wrapper = mountTheBricks()
-      await flushPromises()
+  it('uses Drupal CONTAINS filtering for keyword-only search during testing', async () => {
+    mountTheBricks({ inscription: 'John', locationIds: [] })
+    await flushPromises()
 
-      const pagination = wrapper.find('.stub-pagination')
-      // With 100 items, pagination should be visible (totalPages=5 > 1)
-      expect(pagination.exists()).toBe(true)
-    })
-
-    it('hides Pagination when totalPages <= 1', async () => {
-      mockedAxios.get.mockResolvedValue(mockApiResponse([makeBrick('1', 'A')], 5))
-      const wrapper = mountTheBricks()
-      await flushPromises()
-
-      // 5 items / 20 per page = 1 page → no pagination
-      const pagination = wrapper.find('.stub-pagination')
-      expect(pagination.exists()).toBe(false)
-    })
+    const url = mockedAxios.get.mock.calls[0][0] as string
+    expect(url).toContain('filter[brickInscription][operator]=CONTAINS')
+    expect(url).toContain('filter[brickInscription][value]=John')
+    expect(url).not.toContain('filter[brickParkLocation.id][value]=')
   })
 
-  describe('No results message', () => {
-    it('shows no results message for empty search', async () => {
-      const wrapper = mountTheBricks({ inscription: '' })
-      await flushPromises()
+  it('refetches when inscription reaches the keyword threshold without a location filter', async () => {
+    const wrapper = mountTheBricks({ inscription: '', locationIds: [] })
+    await flushPromises()
+    vi.clearAllMocks()
 
-      // Now mock empty response and change inscription
-      mockedAxios.get.mockResolvedValue(mockApiResponse([], 0))
-      await wrapper.setProps({ inscription: 'zzzzz' })
-      await flushPromises()
+    await wrapper.setProps({ inscription: 'John' })
+    await flushPromises()
 
-      const vm = wrapper.vm as any
-      expect(vm.showMessage).toBe(true)
-    })
+    expect(mockedAxios.get).toHaveBeenCalledTimes(1)
+    const url = mockedAxios.get.mock.calls[0][0] as string
+    expect(url).toContain('filter[brickInscription][operator]=CONTAINS')
+  })
+
+  it('does not refetch from inscription changes while a location filter is active', async () => {
+    const wrapper = mountTheBricks({ inscription: '', locationIds: ['loc-1'] })
+    await flushPromises()
+    vi.clearAllMocks()
+
+    await wrapper.setProps({ inscription: 'John' })
+    await flushPromises()
+
+    expect(mockedAxios.get).not.toHaveBeenCalled()
+  })
+
+  it('initializes with currentPage 1 and totalPages 1', () => {
+    mockedAxios.get.mockResolvedValue(mockApiResponse([], 0))
+    const wrapper = mountTheBricks()
+    const vm = wrapper.vm as InstanceType<typeof TheBricks> & { currentPage: number; totalPages: number }
+
+    expect(vm.currentPage).toBe(1)
+    expect(vm.totalPages).toBe(1)
+  })
+
+  it('calculates totalPages from meta.count and emits totalCount', async () => {
+    const wrapper = mountTheBricks({ locationIds: ['loc-1'] })
+    await flushPromises()
+
+    const vm = wrapper.vm as InstanceType<typeof TheBricks> & { totalPages: number }
+    expect(vm.totalPages).toBe(5)
+    expect(wrapper.emitted('update:totalCount')).toEqual([[100]])
+  })
+
+  it('goToPage sets currentPage and fetches with the correct offset', async () => {
+    const wrapper = mountTheBricks({ locationIds: ['loc-1'] })
+    await flushPromises()
+    vi.clearAllMocks()
+
+    mockedAxios.get.mockResolvedValue(mockApiResponse([makeBrick('3', 'Charlie')], 100))
+
+    const vm = wrapper.vm as InstanceType<typeof TheBricks> & { goToPage: (page: number) => void; currentPage: number }
+    vm.goToPage(3)
+    await flushPromises()
+
+    expect(vm.currentPage).toBe(3)
+    const url = mockedAxios.get.mock.calls[0][0] as string
+    expect(url).toContain('page[offset]=40')
+  })
+
+  it('replaces bricks instead of appending on page changes', async () => {
+    const wrapper = mountTheBricks()
+    await flushPromises()
+
+    const vm = wrapper.vm as InstanceType<typeof TheBricks> & { bricks: Array<{ id: string }>; goToPage: (page: number) => void }
+    expect(vm.bricks).toHaveLength(2)
+
+    mockedAxios.get.mockResolvedValue(mockApiResponse([makeBrick('3', 'Charlie')], 100))
+    vm.goToPage(2)
+    await flushPromises()
+
+    expect(vm.bricks).toHaveLength(1)
+    expect(vm.bricks[0].id).toBe('3')
+  })
+
+  it('resets currentPage to 1 and refetches when locationIds changes', async () => {
+    const wrapper = mountTheBricks({ locationIds: [] })
+    await flushPromises()
+
+    const vm = wrapper.vm as InstanceType<typeof TheBricks> & { currentPage: number }
+    vm.currentPage = 3
+    vi.clearAllMocks()
+
+    await wrapper.setProps({ locationIds: ['loc-1', 'loc-2'] })
+    await flushPromises()
+
+    expect(vm.currentPage).toBe(1)
+    const url = mockedAxios.get.mock.calls[0][0] as string
+    expect(url).toContain('filter[brickParkLocation.id][value]=loc-1,loc-2')
+  })
+
+  it('shows the no-results message when a location filter returns zero results', async () => {
+    mockedAxios.get.mockResolvedValue(mockApiResponse([], 0))
+    const wrapper = mountTheBricks({ locationIds: ['loc-empty'] })
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('No bricks match your criteria')
+  })
+
+  it('keeps default browse working when there are no active filters', async () => {
+    const wrapper = mountTheBricks({ inscription: '', locationIds: [] })
+    await flushPromises()
+
+    expect(wrapper.findAll('.stub-brick')).toHaveLength(2)
+    const url = mockedAxios.get.mock.calls[0][0] as string
+    expect(url).toContain('bricks?page[limit]=20')
+    expect(url).not.toContain('filter[brickParkLocation.id][value]=')
+  })
+
+  it('renders pagination only when more than one page is available', async () => {
+    const wrapper = mountTheBricks()
+    await flushPromises()
+    expect(wrapper.find('.stub-pagination').exists()).toBe(true)
+
+    mockedAxios.get.mockResolvedValue(mockApiResponse([makeBrick('1', 'Alpha')], 5))
+    const singlePageWrapper = mountTheBricks()
+    await flushPromises()
+    expect(singlePageWrapper.find('.stub-pagination').exists()).toBe(false)
   })
 })
