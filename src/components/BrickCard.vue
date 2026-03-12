@@ -185,7 +185,7 @@ export default defineComponent({
           this.brickImgUrl = fallback;
           this.isImgLoading = false;
         }
-      } catch (error) {
+      } catch {
         const fallback = this.fallbackImgUrl;
         this.thumbnailUrl = fallback;
         this.brickImgUrl = fallback;
@@ -199,7 +199,7 @@ export default defineComponent({
         this.parkLocation = response?.data?.data?.attributes?.name || "";
         this.parkLocationImgURL =
           response?.data?.included?.[1]?.attributes?.image_style_uri?.full_img || "";
-      } catch (error) {
+      } catch {
         this.parkLocation = "";
         this.parkLocationImgURL = "";
       }

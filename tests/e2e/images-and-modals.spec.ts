@@ -185,7 +185,7 @@ test.describe('Image Error Handling (Future)', () => {
     // expect(inscriptionText.length).toBeGreaterThan(0);
   });
 
-  test.skip('placeholder image has proper styling', async ({ page }) => {
+  test.skip('placeholder image has proper styling', async () => {
     // Test that placeholder with inscription has correct CSS
     // await page.goto('/');
     // const overlay = page.locator('.inscription-overlay').first();

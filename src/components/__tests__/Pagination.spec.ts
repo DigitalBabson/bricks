@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { mount, type VueWrapper } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
 import Pagination from '../Pagination.vue'
 
 function mountPagination(props: { currentPage: number; totalPages: number; maxVisible?: number }) {

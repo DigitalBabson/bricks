@@ -10,6 +10,8 @@ The project uses two testing frameworks:
 
 ## Quick Start
 
+Node requirement: use Node.js `22.13.0` or newer. The lint toolchain depends on ESLint 10, which requires Node 22.13+ (or a newer supported major).
+
 ```bash
 # Run unit tests
 npm run test
@@ -229,9 +231,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22.13.0'
 
       - name: Install dependencies
         run: npm ci

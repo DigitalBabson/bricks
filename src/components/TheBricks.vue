@@ -124,7 +124,7 @@ export default defineComponent({
             grid?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
           });
         }
-      } catch (err) {
+      } catch {
         // Silently handle fetch errors — UI will show empty state
       }
     },

@@ -151,26 +151,46 @@ const isLoading = ref(false)
 
 **Fetch logic (pseudocode):**
 
+There are four filter combinations. The routing rule is: **any request involving a keyword goes through Searchstax** (even when a location filter is also active). Location-only and default browse stay on the Drupal JSON:API path.
+
 ```
 watchEffect:
-  if keyword.length >= 3:
-    → call Searchstax emselect with fq=tcngramm_X3b_en_description:{keyword}
-       &rows=20&start={offset}
+  if keyword.length >= 3 AND locationId is present:
+    → COMBINED (keyword + location) — route through Searchstax
+    → call Searchstax emselect with:
+       fq=tcngramm_X3b_en_description:{keyword}
+       &fq=ss_body:{locationId}
+       &rows=20&start={offset}&fl=*&wt=json
     → receive ss_uuid[] and numFound
-    → for each ss_uuid → GET /brick/{ss_uuid} to hydrate full brick data
-    → (optimization: use Promise.all to parallelize hydration calls)
+    → hydrate each ss_uuid via GET /brick/{ss_uuid}
+
+  else if keyword.length >= 3:
+    → KEYWORD ONLY — route through Searchstax
+    → call Searchstax emselect with fq=tcngramm_X3b_en_description:{keyword}
+       &rows=20&start={offset}&fl=*&wt=json
+    → receive ss_uuid[] and numFound
+    → hydrate each ss_uuid via GET /brick/{ss_uuid}
+
   else if keyword.length > 0:
     → do not fetch yet; wait until the query reaches 3 characters
+
   else if locationId is present:
+    → LOCATION ONLY — route through Drupal
     → call Drupal /bricks?filter[brickParkLocation.id]={locId}
        &sort=brickInscription&page[limit]=20&page[offset]={offset}
+
   else:
+    → DEFAULT BROWSE — route through Drupal
     → call Drupal /bricks?sort=brickInscription
        &page[limit]=20&page[offset]={offset}
 
   on any filter change → reset currentPage to 1
   debounce keyword-driven fetches by 500ms
 ```
+
+**Key routing rule:** Searchstax uses the `ss_body` field to filter by park location when a keyword is also active. The `ss_body` field in the Searchstax index stores the park-location reference that corresponds to the Drupal `brickParkLocation` relationship. Location-only filtering (no keyword) uses Drupal's `filter[brickParkLocation.id]` since Searchstax is not needed for simple location browsing.
+
+**Pagination source:** Drupal-backed requests use `meta.count` for `totalPages`. Searchstax-backed requests (keyword-only or combined) use `numFound`.
 
 **New method: `fetchLocations()`**
 

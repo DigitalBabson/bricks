@@ -35,21 +35,22 @@
 
 ## Phase 3 — Searchstax Integration (Medium Risk)
 
-**Goal:** Fast keyword search via Searchstax instead of Drupal's `CONTAINS` filter.
+**Goal:** Fast keyword search via Searchstax instead of Drupal's `CONTAINS` filter, including combined keyword + location filtering.
 
-**Implementation order note:** Searchstax is not required to complete Phase 2 pagination or Phase 4 location filtering. The recommended delivery order is Phase 2 → Phase 4 → Phase 5 → Phase 3 → Phase 6, with keyword search allowed to remain a placeholder until Searchstax is wired.
+**Implementation order note:** Searchstax is not required to complete Phase 2 pagination or Phase 4 location-only filtering. The recommended delivery order is Phase 2 → Phase 4 → Phase 5 → Phase 3 → Phase 6, with keyword search allowed to remain a placeholder until Searchstax is wired. However, **combined keyword + location search** depends on Phase 3 because it routes through Searchstax (see step 3b below).
 
-1. Create `.env` / `.env.example` with `DEV_SEARCHSTAX_ENDPOINT` and `DEV_SEARCHSTAX_TOKEN`.
+1. ~~Create `.env` / `.env.example` with `DEV_SEARCHSTAX_ENDPOINT` and `DEV_SEARCHSTAX_TOKEN`.~~ **Done** — completed in Task 1.7. Both variables already exist in `.env` and `.env.example`.
 2. Update `src/main.ts` to read `import.meta.env.DEV_*` and provide via inject (replacing hardcoded `drupalEnv`).
 3. Create `src/services/searchstax.ts`:
-   - Builds the emselect URL: `{base}?q=*:*&fq=tcngramm_X3b_en_description:{keyword}&rows={pageSize}&start={offset}&fl=*&wt=json`
-   - Sends `Authorization: Token {DEV_SEARCHSTAX_TOKEN}` header.
-   - Parses `response.numFound` (total) and `response.docs[].ss_uuid` (brick UUIDs).
+   a. **Keyword-only search:** Builds the emselect URL with `fq=tcngramm_X3b_en_description:{keyword}&rows={pageSize}&start={offset}&fl=*&wt=json`.
+   b. **Combined keyword + location search:** Appends a second `fq` parameter: `&fq=ss_body:{locationId}`. The `ss_body` field in the Searchstax index stores the park-location reference corresponding to the Drupal `brickParkLocation` relationship.
+   c. Sends `Authorization: Token {DEV_SEARCHSTAX_TOKEN}` header.
+   d. Parses `response.numFound` (total) and `response.docs[].ss_uuid` (brick UUIDs).
 4. Create hydration logic: for each `ss_uuid`, call `GET /brick/{ss_uuid}` to get full brick data (use `Promise.all` for parallelism, consider batching or a queue if result sets are large).
-5. Update TheBricks fetch logic: keyword searches go through Searchstax → hydrate → display, with a 3-character minimum and 500ms debounce.
-6. Use `numFound` for pagination `totalPages` calculation during search.
-7. Add unit tests for the Searchstax service (mock HTTP responses).
-8. Full E2E regression against dev environment.
+5. Update TheBricks fetch logic with the routing rule: **any request involving a keyword (≥ 3 chars) goes through Searchstax**, whether or not a location filter is also active. Location-only filtering (no keyword) stays on the Drupal JSON:API path. Apply a 3-character minimum and 500ms debounce to keyword-driven fetches.
+6. Use `numFound` for pagination `totalPages` calculation during any Searchstax-backed search (keyword-only or combined).
+7. Add unit tests for the Searchstax service (mock HTTP responses), covering keyword-only and combined keyword + location queries.
+8. Full E2E regression against dev environment, including combined filter scenarios.
 
 **Estimated effort:** 2–3 days
 
@@ -59,18 +60,20 @@
 
 **Goal:** Filter bricks by park location/zone with active-filter pills.
 
-**Depends on:** Phase 2 pagination/state work. This phase continues to use Drupal JSON:API filtering and Drupal `meta.count`; it does not depend on Searchstax.
+**Depends on:** Phase 2 pagination/state work.
+
+**Data-source routing:** The location list itself always comes from Drupal (`/parkLocations`). How filtered brick results are fetched depends on whether a keyword is also active:
+
+- **Location only (no keyword):** Drupal JSON:API with `filter[brickParkLocation.id]={locationId}`. Uses Drupal `meta.count` for `totalPages`.
+- **Keyword + location (combined):** Routes through Searchstax with `fq=ss_body:{locationId}` as an additional filter. Uses Searchstax `numFound` for `totalPages`. This path depends on Phase 3 being complete; if Phase 4 ships before Phase 3, combined filtering should be stubbed or disabled until the Searchstax service is available.
 
 1. Create `fetchLocations()` in App.vue — calls `/parkLocations?fields[parkLocation]=name&include=field_brick_zone_image&sort=name`. Store as shared `locations: ParkLocation[]` state.
 2. Add scrollable location list to BrickFilter (populated from `locations` prop).
-3. Wire location filter into TheBricks fetch logic (Drupal `filter[brickParkLocation.id]={locationId}`).
-4. Add active-filter pills and "Clear all" button to BrickFilter.
-5. Unit tests for BrickFilter filter/pill behavior.
-6. E2E tests for location filtering and "Clear all".
-
-**Estimated effort:** 2–3 days
-
-> **Pagination note:** When a park location is selected, continue to calculate `totalPages` from Drupal `meta.count` on the filtered response.
+3. Wire location-only filter into TheBricks fetch logic (Drupal `filter[brickParkLocation.id]={locationId}`).
+4. Wire combined keyword + location filter to pass `locationId` to the Searchstax service as an `fq=ss_body:{locationId}` parameter (Phase 3 dependency).
+5. Add active-filter pills and "Clear all" button to BrickFilter.
+6. Unit tests for BrickFilter filter/pill behavior.
+7. E2E tests for location-only filtering, combined keyword + location filtering, and "Clear all".
 
 ## Phase 5 — Location Explorer Overlay (Medium Risk)
 
