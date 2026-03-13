@@ -114,6 +114,55 @@ export default defineComponent({
     },
   },
   methods: {
+    getPlaceholderImageUuid(): string {
+      return import.meta.env.DEV_PLACEHOLDER_IMAGE_UUID ?? '';
+    },
+    normalizeDrupalAssetPath(value?: string): string {
+      if (!value) {
+        return '';
+      }
+
+      const withoutQuery = value.split('?')[0];
+      if (withoutQuery.startsWith('public://')) {
+        return `/sites/default/files/${withoutQuery.slice('public://'.length)}`;
+      }
+
+      try {
+        return new URL(withoutQuery).pathname;
+      } catch {
+        return withoutQuery;
+      }
+    },
+    getPlaceholderImagePath(): string {
+      const placeholderPath = import.meta.env.DEV_PLACEHOLDER_IMAGE
+        || '/sites/default/files/images/bricks/coming-soon-gray.jpg';
+      return this.normalizeDrupalAssetPath(placeholderPath);
+    },
+    isDefaultDrupalImage(
+      fileId?: string,
+      file?: { attributes?: { uri?: { value?: string; url?: string } } }
+    ): boolean {
+      const placeholderUuid = this.getPlaceholderImageUuid();
+      if (placeholderUuid && fileId === placeholderUuid) {
+        return true;
+      }
+
+      if (!file?.attributes) {
+        return false;
+      }
+
+      const placeholderPath = this.getPlaceholderImagePath();
+      if (!placeholderPath) {
+        return false;
+      }
+
+      const candidates = [
+        this.normalizeDrupalAssetPath(file.attributes.uri?.value),
+        this.normalizeDrupalAssetPath(file.attributes.uri?.url),
+      ];
+
+      return candidates.some((value) => value === placeholderPath);
+    },
     buildDrupalImageQuery(): string {
       return '&include=field_brick_image' +
         '&fields[brick]=field_brick_inscription,field_brick_image,field_brick_zone' +
@@ -166,6 +215,7 @@ export default defineComponent({
         ? 'default'
         : brickItem.relationships.field_brick_image.data.id;
       const imageFile = brickImage === 'default' ? undefined : includedFiles.get(brickImage);
+      const isPlaceholderImage = brickImage === 'default' || this.isDefaultDrupalImage(brickImage, imageFile);
       const previewUrl = this.resolveAssetUrl(
         imageFile?.attributes?.image_style_uri?.brick_preview ??
         imageFile?.attributes?.image_style_uri?.brick ??
@@ -183,9 +233,10 @@ export default defineComponent({
         id: brickItem.id,
         inscription: brickItem.attributes.field_brick_inscription,
         brickImage,
+        isPlaceholderImage,
         brickParkLocation,
-        brickImagePreviewUrl: previewUrl,
-        brickImageFullUrl: fullUrl,
+        brickImagePreviewUrl: isPlaceholderImage ? undefined : previewUrl,
+        brickImageFullUrl: isPlaceholderImage ? undefined : fullUrl,
         parkLocationName: location?.name,
         parkLocationImgURL: location?.mapImageUrl,
       };
@@ -215,6 +266,7 @@ export default defineComponent({
 
       const hydratedBricks = bricks.map((brick) => {
         const imageFile = imageFiles.get(brick.brickImage);
+        const isPlaceholderImage = brick.brickImage === 'default' || this.isDefaultDrupalImage(brick.brickImage, imageFile);
         const previewUrl = this.resolveAssetUrl(
           imageFile?.attributes?.image_style_uri?.brick_preview ??
           imageFile?.attributes?.image_style_uri?.brick ??
@@ -229,8 +281,9 @@ export default defineComponent({
 
         return {
           ...brick,
-          brickImagePreviewUrl: previewUrl,
-          brickImageFullUrl: fullUrl,
+          isPlaceholderImage,
+          brickImagePreviewUrl: isPlaceholderImage ? undefined : previewUrl,
+          brickImageFullUrl: isPlaceholderImage ? undefined : fullUrl,
           parkLocationName: location?.name,
           parkLocationImgURL: location?.mapImageUrl,
         };

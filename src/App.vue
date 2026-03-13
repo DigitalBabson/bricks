@@ -76,6 +76,17 @@ export default defineComponent({
     },
   },
   methods: {
+    resolveAssetUrl(url?: string): string {
+      if (!url) {
+        return ''
+      }
+
+      if (url.startsWith('http')) {
+        return url
+      }
+
+      return `${this.apiBaseOrigin}${url}`
+    },
     clearAllFilters() {
       this.inscription = ''
       this.locationIds = []
@@ -87,7 +98,7 @@ export default defineComponent({
           `?include=field_brick_zone_image,field_brick_zone_image.field_media_image` +
           `&fields[parkLocation]=name,field_brick_zone_image` +
           `&fields[media--image]=field_media_image` +
-          `&fields[file--file]=uri,url` +
+          `&fields[file--file]=uri,url,image_style_uri` +
           `&sort=name`
         const response = await axios.get<ParkLocationsApiResponse>(url)
         const included = response.data.included ?? []
@@ -102,12 +113,16 @@ export default defineComponent({
           const file = fileId
             ? included.find((item) => item.id === fileId && item.type === 'file--file')
             : undefined
-          const imagePath = file?.attributes?.uri?.url ?? ''
+          const imagePath =
+            file?.attributes?.image_style_uri?.brick_large ??
+            file?.attributes?.image_style_uri?.full_img ??
+            file?.attributes?.uri?.url ??
+            ''
 
           return {
             id: location.id,
             name: location.attributes.name,
-            mapImageUrl: imagePath ? `${this.apiBaseOrigin}${imagePath}` : '',
+            mapImageUrl: this.resolveAssetUrl(imagePath),
           }
         })
 

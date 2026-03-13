@@ -45,6 +45,20 @@ describe('UiModal', () => {
     expect(wrapper.emitted()).toHaveProperty('close')
   })
 
+  it('emits close event when Escape is pressed', () => {
+    const wrapper = mount(UiModal, {
+      slots: {
+        default: '<div>Content</div>'
+      },
+      attachTo: document.body
+    })
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+
+    expect(wrapper.emitted()).toHaveProperty('close')
+    expect(wrapper.emitted('close')).toHaveLength(1)
+  })
+
   it('does not emit close when modal content is clicked', async () => {
     const wrapper = mount(UiModal, {
       slots: {

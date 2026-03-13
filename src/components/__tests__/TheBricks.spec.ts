@@ -37,6 +37,20 @@ function makeIncludedFile(id: string, preview = `https://cdn.example.com/${id}-p
   }
 }
 
+function makePlaceholderIncludedFile(id: string) {
+  return {
+    type: 'file--file',
+    id,
+    attributes: {
+      uri: { url: '/sites/default/files/images/bricks/coming-soon-gray.jpg' },
+      image_style_uri: {
+        brick_preview: 'https://babsondev.prod.acquia-sites.com/sites/default/files/styles/brick_preview/public/images/bricks/coming-soon-gray.jpg',
+        brick_large: 'https://babsondev.prod.acquia-sites.com/sites/default/files/styles/brick_large/public/images/bricks/coming-soon-gray.jpg',
+      },
+    },
+  }
+}
+
 function makeFileItem(id: string, preview = `https://cdn.example.com/${id}-preview.jpg`, full = `https://cdn.example.com/${id}-full.jpg`): FileApiItem {
   return {
     id,
@@ -230,6 +244,29 @@ describe('TheBricks', () => {
 
     expect(vm.bricks[0].brickImagePreviewUrl).toBe('https://cdn.example.com/img-1-preview.jpg')
     expect(vm.bricks[0].brickImageFullUrl).toBe('https://cdn.example.com/img-1-full.jpg')
+  })
+
+  it('marks Drupal default placeholder images as coming-soon bricks', async () => {
+    mockedAxios.get.mockResolvedValue(
+      mockApiResponse(
+        [
+          makeBrick('1', 'Alpha', 'loc-1', 'img-1'),
+        ],
+        1,
+        [makePlaceholderIncludedFile('img-1')]
+      )
+    )
+
+    const wrapper = mountTheBricks()
+    await flushPromises()
+
+    const vm = wrapper.vm as InstanceType<typeof TheBricks> & {
+      bricks: Array<{ isPlaceholderImage?: boolean; brickImagePreviewUrl?: string; brickImageFullUrl?: string }>
+    }
+
+    expect(vm.bricks[0].isPlaceholderImage).toBe(true)
+    expect(vm.bricks[0].brickImagePreviewUrl).toBeUndefined()
+    expect(vm.bricks[0].brickImageFullUrl).toBeUndefined()
   })
 
   it('enriches existing bricks when locations arrive after the initial fetch', async () => {

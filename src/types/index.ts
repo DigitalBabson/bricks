@@ -11,6 +11,7 @@ export interface Brick {
   inscription: string
   brickImage: string
   brickParkLocation: string
+  isPlaceholderImage?: boolean
   brickImagePreviewUrl?: string
   brickImageFullUrl?: string
   parkLocationName?: string
@@ -88,7 +89,7 @@ export interface ParkLocationsApiResponse {
     id: string
     attributes: {
       uri?: { value?: string; url?: string }
-      image_style_uri?: { full_img?: string }
+      image_style_uri?: ImageStyleUri
       [key: string]: unknown
     }
     relationships?: {

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
+import { flushPromises, mount, type DOMWrapper, type VueWrapper } from '@vue/test-utils'
 import axios from 'axios'
 import BrickCard from '../BrickCard.vue'
 import UiModal from '../UiModal.vue'
@@ -39,115 +39,123 @@ function mockParkLocationResponse() {
   } as never
 }
 
+function mountBrickCard(brick: Brick) {
+  return mount(BrickCard, {
+    props: {
+      brick,
+    },
+    global: {
+      provide: {
+        [defaultEnvKey as symbol]: 'https://example.com',
+        [defaultUrlKey as symbol]: 'https://example.com/api/',
+      },
+      components: {
+        UiModal,
+      },
+      stubs: {
+        teleport: true,
+      },
+    },
+  })
+}
+
+function getLocationButton(wrapper: VueWrapper): DOMWrapper<Element> {
+  const button = wrapper.findAll('button').find((item) => item.text() === 'View location details')
+
+  if (!button) {
+    throw new Error('View location details button not found')
+  }
+
+  return button
+}
+
+function getBrickCardVm(wrapper: VueWrapper) {
+  return wrapper.vm as unknown as {
+    showImg: boolean
+    showMap: boolean
+    parkLocation: string
+    parkLocationImgURL: string
+    thumbnailUrl: string
+    brickImgUrl: string
+    hasMissingImage: boolean
+  }
+}
+
 describe('BrickCard', () => {
-  let wrapper: VueWrapper
-  const mockBrick: Brick = {
+  const comingSoonBrick: Brick = {
     id: '123',
     inscription: 'John Doe 1985',
     brickImage: 'default',
     brickParkLocation: 'park-1',
   }
 
+  const hydratedBrick: Brick = {
+    id: '456',
+    inscription: 'Jane Doe 1992',
+    brickImage: 'img-1',
+    brickParkLocation: 'park-2',
+    brickImagePreviewUrl: 'https://example.com/preview.jpg',
+    brickImageFullUrl: 'https://example.com/full.jpg',
+    parkLocationName: 'Zone 2',
+    parkLocationImgURL: 'https://example.com/map-zone-2.jpg',
+  }
+
+  const missingImageBrick: Brick = {
+    id: '789',
+    inscription: 'MICHAEL JAMES PACE CLASS OF 2015',
+    brickImage: 'img-missing',
+    brickParkLocation: 'park-3',
+  }
+
+  const drupalPlaceholderBrick: Brick = {
+    id: '790',
+    inscription: 'MICHAEL JAMES PACE CLASS OF 2015',
+    brickImage: '1b458e85-7575-4e00-9658-eacdb769ddaf',
+    brickParkLocation: 'park-3',
+    isPlaceholderImage: true,
+    brickImagePreviewUrl: 'https://babsondev.prod.acquia-sites.com/sites/default/files/styles/brick_preview/public/images/bricks/coming-soon-gray.jpg',
+    brickImageFullUrl: 'https://babsondev.prod.acquia-sites.com/sites/default/files/styles/brick_large/public/images/bricks/coming-soon-gray.jpg',
+  }
+
   beforeEach(() => {
     vi.clearAllMocks()
     mockedAxios.get.mockResolvedValue(mockParkLocationResponse())
-
-    wrapper = mount(BrickCard, {
-      props: {
-        brick: mockBrick
-      },
-      global: {
-        provide: {
-          [defaultEnvKey as symbol]: 'https://example.com',
-          [defaultUrlKey as symbol]: 'https://example.com/api/'
-        },
-        components: {
-          UiModal
-        },
-        stubs: {
-          teleport: true
-        }
-      }
-    })
   })
 
-  describe('Component Rendering', () => {
-    it('renders brick card article', () => {
-      expect(wrapper.find('article').exists()).toBe(true)
+  describe('coming soon bricks', () => {
+    let wrapper: VueWrapper
+
+    beforeEach(async () => {
+      wrapper = mountBrickCard(comingSoonBrick)
+      await wrapper.vm.$nextTick()
     })
 
-    it('renders "View location details" button', () => {
-      const button = wrapper.find('button')
-      expect(button.exists()).toBe(true)
-      expect(button.text()).toBe('View location details')
-    })
-  })
+    it('renders the card as a non-interactive container around real controls', () => {
+      const article = wrapper.find('article')
 
-  describe('Image Modal', () => {
-    it('opens image modal via method', async () => {
-      const vm = wrapper.vm as any
-      expect(vm.showImg).toBe(false)
-
-      vm.openImg()
-      await vm.$nextTick()
-
-      expect(vm.showImg).toBe(true)
+      expect(article.exists()).toBe(true)
+      expect(article.attributes('tabindex')).toBeUndefined()
+      expect(article.attributes('role')).toBeUndefined()
+      expect(article.attributes('aria-label')).toBeUndefined()
     })
 
-    it('closes image modal via method', async () => {
-      const vm = wrapper.vm as any
-      vm.showImg = true
-      await vm.$nextTick()
-
-      vm.closeImg()
-
-      expect(vm.showImg).toBe(false)
-    })
-  })
-
-  describe('Map Modal', () => {
-    it('opens map modal when button is clicked', async () => {
-      const vm = wrapper.vm as any
-      expect(vm.showMap).toBe(false)
-
-      await wrapper.find('button').trigger('click')
-
-      expect(vm.showMap).toBe(true)
+    it('renders the coming-soon overlay and disables the enlarge affordance', () => {
+      expect(wrapper.text()).toContain('John Doe 1985')
+      expect(wrapper.text()).toContain('Image Coming Soon')
+      expect(wrapper.find('button[aria-label="Enlarge brick image"]').exists()).toBe(false)
     })
 
-    it('closes map modal via method', async () => {
-      const vm = wrapper.vm as any
-      vm.showMap = true
-      await vm.$nextTick()
+    it('does not open the image modal when the placeholder image is clicked', async () => {
+      await wrapper.find('img').trigger('click')
 
-      vm.closeMap()
-
-      expect(vm.showMap).toBe(false)
-    })
-  })
-
-  describe('Props', () => {
-    it('accepts brick prop', () => {
-      expect((wrapper as any).props('brick')).toEqual(mockBrick)
-    })
-  })
-
-  describe('Component State', () => {
-    it('initializes with modals closed', () => {
-      const vm = wrapper.vm as any
-      expect(vm.showMap).toBe(false)
-      expect(vm.showImg).toBe(false)
+      expect(getBrickCardVm(wrapper).showImg).toBe(false)
     })
 
-    it('initializes with loading state', () => {
-      const vm = wrapper.vm as any
-      expect(vm.isImgLoading).toBeDefined()
-    })
-
-    it('loads the park location map only when the modal is opened', async () => {
-      await wrapper.find('button').trigger('click')
+    it('opens the map modal from the location button', async () => {
+      await getLocationButton(wrapper).trigger('click')
       await flushPromises()
 
+      expect(getBrickCardVm(wrapper).showMap).toBe(true)
       expect(mockedAxios.get).toHaveBeenCalledWith(
         'https://example.com/api/parkLocations/park-1' +
         '?include=field_brick_zone_image,field_brick_zone_image.field_media_image' +
@@ -155,50 +163,100 @@ describe('BrickCard', () => {
         '&fields[media--image]=field_media_image' +
         '&fields[file--file]=uri,url,image_style_uri'
       )
-      expect((wrapper.vm as any).parkLocation).toBe('Zone 1')
-      expect((wrapper.vm as any).parkLocationImgURL).toBe('https://example.com/map-large.jpg')
+      expect(getBrickCardVm(wrapper).parkLocation).toBe('Zone 1')
+      expect(getBrickCardVm(wrapper).parkLocationImgURL).toBe('https://example.com/map-large.jpg')
     })
 
-    it('uses hydrated image and location data without extra requests', async () => {
-      const styledBrick: Brick = {
-        ...mockBrick,
-        brickImage: 'img-1',
-        brickImagePreviewUrl: 'https://example.com/preview.jpg',
-        brickImageFullUrl: 'https://example.com/full.jpg',
-        parkLocationName: 'Zone 1',
-        parkLocationImgURL: 'https://example.com/map-large.jpg',
-      }
+    it('keeps the location button keyboard reachable', async () => {
+      const button = getLocationButton(wrapper)
 
-      vi.clearAllMocks()
-      mockedAxios.get.mockResolvedValue(mockParkLocationResponse())
+      expect(button.exists()).toBe(true)
+      expect(button.text()).toBe('View location details')
+      expect(button.attributes('tabindex')).toBeUndefined()
 
-      wrapper = mount(BrickCard, {
-        props: {
-          brick: styledBrick,
-        },
-        global: {
-          provide: {
-            [defaultEnvKey as symbol]: 'https://example.com',
-            [defaultUrlKey as symbol]: 'https://example.com/jsonapi/',
-          },
-          components: {
-            UiModal,
-          },
-          stubs: {
-            teleport: true,
-          },
-        },
-      })
+      await button.trigger('click')
 
+      expect(getBrickCardVm(wrapper).showMap).toBe(true)
+    })
+  })
+
+  describe('hydrated bricks with real images', () => {
+    let wrapper: VueWrapper
+
+    beforeEach(async () => {
+      wrapper = mountBrickCard(hydratedBrick)
       await wrapper.vm.$nextTick()
-      await wrapper.find('button').trigger('click')
+    })
+
+    it('shows the hover affordances and reuses hydrated data without extra requests', async () => {
+      expect(mockedAxios.get).not.toHaveBeenCalled()
+      expect(wrapper.find('button[aria-label="Enlarge brick image"]').exists()).toBe(true)
+      expect(wrapper.html()).toContain('tw-bg-white/40')
+      expect(getBrickCardVm(wrapper).thumbnailUrl).toBe('https://example.com/preview.jpg')
+      expect(getBrickCardVm(wrapper).brickImgUrl).toBe('https://example.com/full.jpg')
+      expect(getBrickCardVm(wrapper).parkLocation).toBe('Zone 2')
+      expect(getBrickCardVm(wrapper).parkLocationImgURL).toBe('https://example.com/map-zone-2.jpg')
+
+      await getLocationButton(wrapper).trigger('click')
       await flushPromises()
 
       expect(mockedAxios.get).not.toHaveBeenCalled()
-      expect((wrapper.vm as any).thumbnailUrl).toBe('https://example.com/preview.jpg')
-      expect((wrapper.vm as any).brickImgUrl).toBe('https://example.com/full.jpg')
-      expect((wrapper.vm as any).parkLocation).toBe('Zone 1')
-      expect((wrapper.vm as any).parkLocationImgURL).toBe('https://example.com/map-large.jpg')
+    })
+
+    it('opens the image modal when the image is clicked', async () => {
+      await wrapper.find('img').trigger('click')
+
+      expect(getBrickCardVm(wrapper).showImg).toBe(true)
+    })
+
+    it('opens the image modal when the enlarge button is clicked', async () => {
+      await wrapper.get('button[aria-label="Enlarge brick image"]').trigger('click')
+
+      expect(getBrickCardVm(wrapper).showImg).toBe(true)
+      expect(getBrickCardVm(wrapper).showMap).toBe(false)
+    })
+
+    it('opens the map modal from the location button without fetching again', async () => {
+      await getLocationButton(wrapper).trigger('click')
+      await flushPromises()
+
+      expect(getBrickCardVm(wrapper).showMap).toBe(true)
+      expect(mockedAxios.get).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('bricks with unresolved image assets', () => {
+    it('shows the coming-soon overlay and disables enlarge when image hydration fails', async () => {
+      mockedAxios.get.mockRejectedValueOnce(new Error('missing image'))
+
+      const wrapper = mountBrickCard(missingImageBrick)
+      await flushPromises()
+
+      expect(getBrickCardVm(wrapper).hasMissingImage).toBe(true)
+      expect(wrapper.text()).toContain('MICHAEL JAMES PACE CLASS OF 2015')
+      expect(wrapper.text()).toContain('Image Coming Soon')
+      expect(wrapper.html()).toContain('tw-bg-white/70')
+      expect(wrapper.find('button[aria-label="Enlarge brick image"]').exists()).toBe(false)
+
+      await wrapper.find('img').trigger('click')
+
+      expect(getBrickCardVm(wrapper).showImg).toBe(false)
+    })
+  })
+
+  describe('bricks using Drupal default placeholder images', () => {
+    it('treats the Drupal default image as coming soon even when style URLs exist', async () => {
+      const wrapper = mountBrickCard(drupalPlaceholderBrick)
+      await flushPromises()
+
+      expect(wrapper.text()).toContain('MICHAEL JAMES PACE CLASS OF 2015')
+      expect(wrapper.text()).toContain('Image Coming Soon')
+      expect(wrapper.find('button[aria-label="Enlarge brick image"]').exists()).toBe(false)
+      expect(mockedAxios.get).not.toHaveBeenCalled()
+
+      await wrapper.find('img').trigger('click')
+
+      expect(getBrickCardVm(wrapper).showImg).toBe(false)
     })
   })
 })

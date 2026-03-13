@@ -28,8 +28,8 @@ const locationsResponse = {
     included: [
       { type: 'media--image', id: 'media-1', attributes: {}, relationships: { field_media_image: { data: { type: 'file--file', id: 'file-1' } } } },
       { type: 'media--image', id: 'media-2', attributes: {}, relationships: { field_media_image: { data: { type: 'file--file', id: 'file-2' } } } },
-      { type: 'file--file', id: 'file-1', attributes: { uri: { url: '/sites/default/files/map1.png' } } },
-      { type: 'file--file', id: 'file-2', attributes: { uri: { url: '/sites/default/files/map2.png' } } },
+      { type: 'file--file', id: 'file-1', attributes: { uri: { url: '/sites/default/files/map1.png' }, image_style_uri: { brick_large: 'https://example.com/styles/map1-large.png' } } },
+      { type: 'file--file', id: 'file-2', attributes: { uri: { url: '/sites/default/files/map2.png' }, image_style_uri: { brick_large: 'https://example.com/styles/map2-large.png' } } },
     ],
   },
 }
@@ -68,14 +68,14 @@ describe('App', () => {
       '?include=field_brick_zone_image,field_brick_zone_image.field_media_image' +
       '&fields[parkLocation]=name,field_brick_zone_image' +
       '&fields[media--image]=field_media_image' +
-      '&fields[file--file]=uri,url' +
+      '&fields[file--file]=uri,url,image_style_uri' +
       '&sort=name'
     )
 
     const vm = wrapper.vm as unknown as { locations: Array<{ id: string; name: string; mapImageUrl: string }> }
     expect(vm.locations).toEqual([
-      { id: 'loc-1', name: 'Class Walk of 2019', mapImageUrl: 'https://example.com/sites/default/files/map1.png' },
-      { id: 'loc-2', name: 'Rodger Babson Statue', mapImageUrl: 'https://example.com/sites/default/files/map2.png' },
+      { id: 'loc-1', name: 'Class Walk of 2019', mapImageUrl: 'https://example.com/styles/map1-large.png' },
+      { id: 'loc-2', name: 'Rodger Babson Statue', mapImageUrl: 'https://example.com/styles/map2-large.png' },
     ])
   })
 

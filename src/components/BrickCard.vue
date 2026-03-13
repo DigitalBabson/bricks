@@ -1,5 +1,10 @@
 <template>
-  <article class="brick-card tw-shadow-brickCard tw-text-center">
+  <article
+    class="
+      brick-card tw-group tw-cursor-default tw-shadow-brickCard tw-text-center
+      focus-within:tw-ring-2 focus-within:tw-ring-brickSummerNight
+    "
+  >
     <div class="brick-card__media">
       <div
         v-if="showPlaceholder"
@@ -11,18 +16,72 @@
       <img
         v-else
         class="
-          tw-cursor-pointer
-          hover:tw-opacity-50
           tw-transition-opacity tw-duration-200 tw-ease-in-out
           brick-card__image
         "
+        :class="showComingSoonOverlay ? '' : 'tw-cursor-pointer'"
         :src="thumbnailUrl"
         :alt="brick?.inscription || 'Brick image'"
         loading="lazy"
         @load="onImgLoad"
         @error="onImgError"
-        @click="openImg"
+        @click="handleImageClick"
       />
+
+      <div
+        v-if="showComingSoonOverlay"
+        class="
+          tw-absolute tw-inset-x-4 tw-inset-y-10 tw-flex tw-items-center tw-justify-center
+        "
+      >
+        <div
+          class="
+            tw-flex tw-w-full tw-flex-col tw-items-center tw-justify-center
+            tw-bg-white/70 tw-px-5 tw-py-4 tw-text-center
+            tw-shadow-[0_0_24px_rgba(255,255,255,0.35)]
+          "
+        >
+          <p
+            class="
+              tw-font-oswald tw-uppercase tw-text-[16px] tw-text-black tw-leading-tight
+            "
+          >
+            {{ brick.inscription }}
+          </p>
+          <div class="tw-my-3 tw-h-px tw-w-full tw-bg-brickBabsonGrey/35"></div>
+          <p class="tw-font-oswald tw-text-[16px] tw-text-black">
+            Image Coming Soon
+          </p>
+        </div>
+      </div>
+
+      <div
+        v-else
+        class="
+          tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-white/40 tw-opacity-0
+          tw-transition-opacity tw-duration-200
+          group-hover:tw-opacity-100 group-focus-within:tw-opacity-100
+        "
+      ></div>
+
+      <button
+        v-if="!showComingSoonOverlay"
+        class="
+          tw-absolute tw-right-0 tw-top-0 tw-z-10 tw-bg-white tw-px-6 tw-py-4
+          tw-font-oswald tw-text-base tw-uppercase tw-text-black tw-opacity-0
+          tw-transition-opacity tw-duration-200
+          group-hover:tw-opacity-100 group-focus-within:tw-opacity-100
+          hover:tw-bg-black hover:tw-text-white
+          focus:tw-bg-black focus:tw-text-white
+          focus:tw-opacity-100 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white
+        "
+        aria-label="Enlarge brick image"
+        @click.stop="openImg"
+        @keydown.enter.stop.prevent="openImg"
+        @keydown.space.stop.prevent="openImg"
+      >
+        Enlarge Brick
+      </button>
     </div>
     <teleport to="body">
       <transition name="fade">
@@ -33,13 +92,13 @@
     </teleport>
     <button
       class="
-        tw-w-full tw-py-4 tw-text-brickCourtyardGreen tw-font-oswald tw-uppercase
+        tw-w-full tw-cursor-pointer tw-py-4 tw-text-brickCourtyardGreen tw-font-oswald tw-uppercase
         hover:tw-bg-brickMediumGreen hover:tw-text-white
         focus:tw-outline-none
         active:tw-outline-none
         tw-transition-background tw-duration-200 tw-ease-in-out
       "
-      @click="openMap"
+      @click.stop="openMap"
     >
       View location details
     </button>
@@ -106,6 +165,7 @@ export default defineComponent({
       parkLocationImgURL: "",
       parkLocation: "",
       isImgLoading: true,
+      hasMissingImage: false,
       defaultImgPath: import.meta.env.DEV_PLACEHOLDER_IMAGE
         || '/sites/default/files/2026-03/coming-soon-gray.jpg',
     };
@@ -118,6 +178,15 @@ export default defineComponent({
     UiModal,
   },
   computed: {
+    isComingSoon(): boolean {
+      return !this.brick.brickImage || this.brick.brickImage === "default";
+    },
+    hasConfiguredMissingImage(): boolean {
+      return this.isComingSoon || !!this.brick.isPlaceholderImage;
+    },
+    showComingSoonOverlay(): boolean {
+      return this.hasConfiguredMissingImage || this.hasMissingImage;
+    },
     showPlaceholder() {
       // Show placeholder only while loading before any image is ready
       return this.isImgLoading && !this.brickImgUrl;
@@ -137,6 +206,61 @@ export default defineComponent({
     },
   },
   methods: {
+    getPlaceholderImageUuid(): string {
+      return import.meta.env.DEV_PLACEHOLDER_IMAGE_UUID ?? '';
+    },
+    normalizeDrupalAssetPath(value?: string): string {
+      if (!value) {
+        return '';
+      }
+
+      const withoutQuery = value.split('?')[0];
+      if (withoutQuery.startsWith('public://')) {
+        return `/sites/default/files/${withoutQuery.slice('public://'.length)}`;
+      }
+
+      try {
+        return new URL(withoutQuery).pathname;
+      } catch {
+        return withoutQuery;
+      }
+    },
+    getPlaceholderImagePath(): string {
+      return this.normalizeDrupalAssetPath(this.defaultImgPath);
+    },
+    isDefaultDrupalImage(
+      fileId?: string,
+      file?: { attributes?: { uri?: { value?: string; url?: string } } }
+    ): boolean {
+      const placeholderUuid = this.getPlaceholderImageUuid();
+      if (placeholderUuid && fileId === placeholderUuid) {
+        return true;
+      }
+
+      if (!file?.attributes) {
+        return false;
+      }
+
+      const placeholderPath = this.getPlaceholderImagePath();
+      if (!placeholderPath) {
+        return false;
+      }
+
+      const candidates = [
+        this.normalizeDrupalAssetPath(file.attributes.uri?.value),
+        this.normalizeDrupalAssetPath(file.attributes.uri?.url),
+      ];
+
+      return candidates.some((value) => value === placeholderPath);
+    },
+    handleImageClick(event: MouseEvent) {
+      if (this.showComingSoonOverlay) {
+        event.preventDefault();
+        return;
+      }
+
+      this.openImg();
+    },
     openMap() {
       if (!this.parkLocation && this.brick.parkLocationName) {
         this.parkLocation = this.brick.parkLocationName;
@@ -155,6 +279,10 @@ export default defineComponent({
       this.showMap = false;
     },
     openImg() {
+      if (this.showComingSoonOverlay) {
+        return;
+      }
+
       this.showImg = true;
     },
     closeImg() {
@@ -165,6 +293,7 @@ export default defineComponent({
     },
     onImgError() {
       this.isImgLoading = false;
+      this.hasMissingImage = true;
       const fallback = this.fallbackImgUrl;
       this.thumbnailUrl = fallback;
       this.brickImgUrl = fallback;
@@ -182,6 +311,16 @@ export default defineComponent({
     },
     async getBrickImgURL() {
       this.isImgLoading = true;
+      this.hasMissingImage = false;
+
+      if (this.hasConfiguredMissingImage) {
+        this.hasMissingImage = true;
+        const fallback = this.fallbackImgUrl;
+        this.thumbnailUrl = fallback;
+        this.brickImgUrl = fallback;
+        this.isImgLoading = false;
+        return;
+      }
 
       if (this.brick.brickImagePreviewUrl && this.brick.brickImageFullUrl) {
         this.thumbnailUrl = this.brick.brickImagePreviewUrl;
@@ -190,18 +329,19 @@ export default defineComponent({
         return;
       }
 
-      // If brick image is explicitly default/missing, use default and stop
-      if (!this.brick.brickImage || this.brick.brickImage === "default") {
-        const fallback = this.fallbackImgUrl;
-        this.thumbnailUrl = fallback;
-        this.brickImgUrl = fallback;
-        this.isImgLoading = false;
-        return;
-      }
-
       try {
         const url = this.apiUrl + `file/file/` + this.brick.brickImage + `?fields[file--file]=uri,url,image_style_uri`;
         const response = await axios.get<MediaImageApiResponse>(url);
+        const file = response?.data?.data;
+        if (this.isDefaultDrupalImage(this.brick.brickImage, file)) {
+          this.hasMissingImage = true;
+          const fallback = this.fallbackImgUrl;
+          this.thumbnailUrl = fallback;
+          this.brickImgUrl = fallback;
+          this.isImgLoading = false;
+          return;
+        }
+
         const imageData = response?.data?.data?.attributes?.image_style_uri;
         const previewUrl = this.resolveAssetUrl(
           imageData?.brick_preview ?? imageData?.brick ?? response?.data?.data?.attributes?.uri?.url
@@ -213,14 +353,17 @@ export default defineComponent({
         if (previewUrl && fullUrl) {
           this.thumbnailUrl = previewUrl;
           this.brickImgUrl = fullUrl;
+          this.hasMissingImage = false;
           this.isImgLoading = false;
         } else {
+          this.hasMissingImage = true;
           const fallback = this.fallbackImgUrl;
           this.thumbnailUrl = fallback;
           this.brickImgUrl = fallback;
           this.isImgLoading = false;
         }
       } catch {
+        this.hasMissingImage = true;
         const fallback = this.fallbackImgUrl;
         this.thumbnailUrl = fallback;
         this.brickImgUrl = fallback;

@@ -24,6 +24,19 @@
 import { defineComponent } from 'vue'
 export default defineComponent({
   emits: ["close"],
+  methods: {
+    handleDocumentKeydown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        this.$emit('close')
+      }
+    },
+  },
+  mounted() {
+    document.addEventListener('keydown', this.handleDocumentKeydown)
+  },
+  beforeUnmount() {
+    document.removeEventListener('keydown', this.handleDocumentKeydown)
+  },
 })
 </script>
 
