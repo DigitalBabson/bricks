@@ -8,15 +8,19 @@ test.describe('Brick Search Functionality', () => {
 
   async function waitForKeywordRequest(page: Page) {
     await page.waitForResponse((response) =>
-      response.url().includes('filter[brickInscription][operator]=CONTAINS') && response.ok(),
+      (
+        response.url().includes('/emselect?') ||
+        response.url().includes('filter[field_brick_inscription][operator]=CONTAINS')
+      ) &&
+      response.ok(),
     )
   }
 
   async function waitForBrowseRequest(page: Page) {
     await page.waitForResponse((response) =>
       response.url().includes('/jsonapi/bricks?page[limit]=20') &&
-      !response.url().includes('filter[brickInscription][operator]=CONTAINS') &&
-      !response.url().includes('filter[brickParkLocation.id]=') &&
+      !response.url().includes('filter[field_brick_inscription][operator]=CONTAINS') &&
+      !response.url().includes('filter[field_brick_zone.id]=') &&
       response.ok(),
     )
   }

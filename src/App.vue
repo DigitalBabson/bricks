@@ -14,6 +14,7 @@
       <the-bricks
         :inscription="inscription"
         :locationIds="locationIds"
+        :locations="locations"
       />
     </div>
   </main>

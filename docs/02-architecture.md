@@ -8,7 +8,7 @@
 
 | System | Stores | Provides to Vue App |
 |---|---|---|
-| **Searchstax** | Fast search index | Matching brick IDs, zone counts |
+| **Searchstax** | Fast search index (`ss_uuid`, `ss_zone_uuid`, `ss_file_img_uuid`, `tcngramm_X3b_en_description`) | Complete `Brick` objects + `numFound` — zero-hydration (keyword-only and combined keyword + location) |
 | **Drupal** | Brick content, images, park locations | Image files, image styles, location data, full location list |
 | **Vue App** | Nothing (pure frontend) | Search UI, photo overlays, responsive grid |
 | **Acquia CDN** | Cached assets from Drupal | Fast global image delivery |
@@ -33,32 +33,51 @@ App.vue                          → page layout, provides config, manages overl
 
 ## 2.3 New Data-Flow Sequence
 
-**Keyword search flow:**
+**Routing rule:** Any request with a keyword (≥3 chars) goes through SearchStax, whether or not a location filter is also active. All other requests go through Drupal JSON:API directly.
+
+**Keyword-only search flow (zero-hydration):**
 
 ```
-User types keyword
-  ──► Searchstax emselect  (fq=tcngramm_X3b_en_description:{keyword})
-  ──► returns ss_uuid[] + numFound
+User types keyword (≥3 chars, 500ms debounce)
+  ──► Searchstax emselect  (fq=tcngramm_X3b_en_description:{keyword}
+                             &fl=ss_uuid,ss_zone_uuid,ss_file_img_uuid,tcngramm_X3b_en_description)
+  ──► returns complete Brick[] + numFound (single network call, no Drupal hydration needed)
         │
         ▼
-  For each ss_uuid ──► Drupal /brick/{ss_uuid}
-  ──► returns full brick resource (inscription, image URLs, location)
-        │
-        ▼
-  BrickCard renders  ──► Acquia CDN serves images
+  BrickCard renders  ──► per-card fetches for image URLs + location data (unchanged)
+                     ──► Acquia CDN serves images
 ```
 
-**Default browse flow (no keyword):**
+**Combined keyword + location search flow (zero-hydration):**
+
+```
+User types keyword + selects location(s)
+  ──► Searchstax emselect  (fq=tcngramm_X3b_en_description:{keyword}
+                             &fq=ss_zone_uuid:({uuid1} OR {uuid2})
+                             &fl=ss_uuid,ss_zone_uuid,ss_file_img_uuid,tcngramm_X3b_en_description)
+  ──► returns complete Brick[] + numFound (single network call, no Drupal hydration needed)
+```
+
+**Keyword search fallback (SearchStax unavailable):**
+
+```
+  SearchStax fails (network error, timeout, 401, 500)
+  ──► console.warn logged
+  ──► Drupal CONTAINS fallback ──► /bricks?filter[brickInscription][operator]=CONTAINS&...
+  ──► returns filtered, paginated brick list (same as pre-Phase-3 behavior)
+```
+
+**Default browse flow (no keyword, no location):**
 
 ```
   ──► Drupal /bricks?sort=brickInscription&page[limit]=20&page[offset]=N
   ──► returns paginated brick list
 ```
 
-**Location filter flow (no keyword):**
+**Location-only filter flow (no keyword):**
 
 ```
-  ──► Drupal /bricks?filter[brickParkLocation.id]={locId}&sort=brickInscription&...
+  ──► Drupal /bricks?filter[brickParkLocation.id][operator]=IN&filter[brickParkLocation.id][value]={locIds}&sort=brickInscription&...
   ──► returns filtered, paginated brick list
 ```
 
@@ -76,32 +95,49 @@ User types keyword
 
 All URLs below use `DEV_DRUPAL_ENDPOINT` and `DEV_SEARCHSTAX_ENDPOINT` from `.env`.
 
-### Searchstax — Keyword Search
+### Searchstax — Keyword-Only Search (zero-hydration)
 
 ```
-GET {DEV_SEARCHSTAX_ENDPOINT}/emselect
+GET {DEV_SEARCHSTAX_ENDPOINT}
     ?q=*:*
     &fq=tcngramm_X3b_en_description:{keyword}
     &rows={pageSize}
     &start={offset}
-    &fl=*
+    &fl=ss_uuid,ss_zone_uuid,ss_file_img_uuid,tcngramm_X3b_en_description
     &wt=json
-    &indent=true
 Headers:
     Authorization: Token {DEV_SEARCHSTAX_TOKEN}
 ```
 
-**Key response fields:** `ss_uuid` (brick UUID used to hydrate from Drupal), plus `numFound` for total count.
+**Zero-hydration field mapping:** The SearchStax response contains all fields needed to construct `Brick` objects directly — no Drupal batch call is required.
+
+| `Brick` property | SearchStax field | Description |
+|---|---|---|
+| `id` | `ss_uuid` | Brick media entity UUID |
+| `inscription` | `tcngramm_X3b_en_description[0]` | First element of inscription array |
+| `brickImage` | `ss_file_img_uuid` | File entity UUID for image |
+| `brickParkLocation` | `ss_zone_uuid` | Park location UUID |
+
+`response.numFound` provides the total count for pagination.
+
+### Searchstax — Combined Keyword + Location Search (zero-hydration)
+
+```
+GET {DEV_SEARCHSTAX_ENDPOINT}
+    ?q=*:*
+    &fq=tcngramm_X3b_en_description:{keyword}
+    &fq=ss_zone_uuid:({uuid1} OR {uuid2} OR {uuid3})
+    &rows={pageSize}
+    &start={offset}
+    &fl=ss_uuid,ss_zone_uuid,ss_file_img_uuid,tcngramm_X3b_en_description
+    &wt=json
+Headers:
+    Authorization: Token {DEV_SEARCHSTAX_TOKEN}
+```
+
+The `ss_zone_uuid` field stores the Drupal park location UUID. Location filtering uses UUID matching (not `ss_body` location name) for exactness. Same zero-hydration field mapping as keyword-only search.
 
 > **Security note:** The Searchstax token is sent directly from the browser. It is a read-only token scoped to the search index, so the risk is low. Proxying through Drupal would add latency. If needed later, swapping `DEV_SEARCHSTAX_ENDPOINT` to a proxy URL requires no frontend changes.
-
-### Drupal — Single Brick by UUID (hydrate after Searchstax)
-
-```
-GET {DEV_DRUPAL_ENDPOINT}/brick/{ss_uuid}
-```
-
-Returns the full brick resource including image URLs. One call per brick, or batch if the API supports multi-ID filtering.
 
 ### Drupal — Default Paginated Listing (alphabetical browse)
 

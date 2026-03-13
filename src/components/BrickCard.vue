@@ -33,7 +33,7 @@
     </teleport>
     <button
       class="
-        tw-w-full tw-py-4 tw-text-brickSummerNight tw-font-oswald tw-uppercase
+        tw-w-full tw-py-4 tw-text-brickCourtyardGreen tw-font-oswald tw-uppercase
         hover:tw-bg-brickMediumGreen hover:tw-text-white
         focus:tw-outline-none
         active:tw-outline-none
@@ -41,7 +41,7 @@
       "
       @click="openMap"
     >
-      See location details
+      View location details
     </button>
   </article>
   <teleport to="body">
@@ -138,7 +138,18 @@ export default defineComponent({
   },
   methods: {
     openMap() {
+      if (!this.parkLocation && this.brick.parkLocationName) {
+        this.parkLocation = this.brick.parkLocationName;
+      }
+      if (!this.parkLocationImgURL && this.brick.parkLocationImgURL) {
+        this.parkLocationImgURL = this.brick.parkLocationImgURL;
+      }
+
       this.showMap = true;
+
+      if (!this.parkLocation || !this.parkLocationImgURL) {
+        this.getParkLocationImgURL();
+      }
     },
     closeMap() {
       this.showMap = false;
@@ -158,8 +169,26 @@ export default defineComponent({
       this.thumbnailUrl = fallback;
       this.brickImgUrl = fallback;
     },
+    resolveAssetUrl(url?: string) {
+      if (!url) {
+        return "";
+      }
+
+      if (url.startsWith('http')) {
+        return url;
+      }
+
+      return this.env + url;
+    },
     async getBrickImgURL() {
       this.isImgLoading = true;
+
+      if (this.brick.brickImagePreviewUrl && this.brick.brickImageFullUrl) {
+        this.thumbnailUrl = this.brick.brickImagePreviewUrl;
+        this.brickImgUrl = this.brick.brickImageFullUrl;
+        this.isImgLoading = false;
+        return;
+      }
 
       // If brick image is explicitly default/missing, use default and stop
       if (!this.brick.brickImage || this.brick.brickImage === "default") {
@@ -171,13 +200,19 @@ export default defineComponent({
       }
 
       try {
-        const url = this.apiUrl + `media/image/`;
-        const response = await axios.get<MediaImageApiResponse>(url + this.brick.brickImage);
+        const url = this.apiUrl + `file/file/` + this.brick.brickImage + `?fields[file--file]=uri,url,image_style_uri`;
+        const response = await axios.get<MediaImageApiResponse>(url);
+        const imageData = response?.data?.data?.attributes?.image_style_uri;
+        const previewUrl = this.resolveAssetUrl(
+          imageData?.brick_preview ?? imageData?.brick ?? response?.data?.data?.attributes?.uri?.url
+        );
+        const fullUrl = this.resolveAssetUrl(
+          imageData?.brick_large ?? imageData?.full_img ?? response?.data?.data?.attributes?.uri?.url
+        );
 
-        const imageData = response?.data?.included?.[0]?.attributes?.image_style_uri;
-        if (imageData?.brick && imageData?.full_img) {
-          this.thumbnailUrl = imageData.brick;
-          this.brickImgUrl = imageData.full_img;
+        if (previewUrl && fullUrl) {
+          this.thumbnailUrl = previewUrl;
+          this.brickImgUrl = fullUrl;
           this.isImgLoading = false;
         } else {
           const fallback = this.fallbackImgUrl;
@@ -193,12 +228,38 @@ export default defineComponent({
       }
     },
     async getParkLocationImgURL() {
+      if (this.brick.parkLocationName && this.brick.parkLocationImgURL) {
+        this.parkLocation = this.brick.parkLocationName;
+        this.parkLocationImgURL = this.brick.parkLocationImgURL;
+        return;
+      }
+
       try {
-        const url = this.apiUrl + `parkLocations/` + this.brick.brickParkLocation;
+        const url = this.apiUrl +
+          `parkLocations/` +
+          this.brick.brickParkLocation +
+          `?include=field_brick_zone_image,field_brick_zone_image.field_media_image` +
+          `&fields[parkLocation]=name,field_brick_zone_image` +
+          `&fields[media--image]=field_media_image` +
+          `&fields[file--file]=uri,url,image_style_uri`;
         const response = await axios.get<ParkLocationApiResponse>(url);
         this.parkLocation = response?.data?.data?.attributes?.name || "";
-        this.parkLocationImgURL =
-          response?.data?.included?.[1]?.attributes?.image_style_uri?.full_img || "";
+
+        const included = response?.data?.included ?? [];
+        const mediaId = response?.data?.data?.relationships?.field_brick_zone_image?.data?.id;
+        const media = mediaId
+          ? included.find((item) => item.type === 'media--image' && item.id === mediaId)
+          : undefined;
+        const fileId = media?.relationships?.field_media_image?.data?.id;
+        const file = fileId
+          ? included.find((item) => item.type === 'file--file' && item.id === fileId)
+          : undefined;
+
+        this.parkLocationImgURL = this.resolveAssetUrl(
+          file?.attributes?.image_style_uri?.brick_large ??
+          file?.attributes?.image_style_uri?.full_img ??
+          file?.attributes?.uri?.url
+        );
       } catch {
         this.parkLocation = "";
         this.parkLocationImgURL = "";
@@ -207,7 +268,12 @@ export default defineComponent({
   },
   mounted() {
     this.getBrickImgURL();
-    this.getParkLocationImgURL();
+    if (this.brick.parkLocationName) {
+      this.parkLocation = this.brick.parkLocationName;
+    }
+    if (this.brick.parkLocationImgURL) {
+      this.parkLocationImgURL = this.brick.parkLocationImgURL;
+    }
   },
 })
 </script>

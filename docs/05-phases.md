@@ -37,20 +37,37 @@
 
 **Goal:** Fast keyword search via Searchstax instead of Drupal's `CONTAINS` filter, including combined keyword + location filtering.
 
-**Implementation order note:** Searchstax is not required to complete Phase 2 pagination or Phase 4 location-only filtering. The recommended delivery order is Phase 2 → Phase 4 → Phase 5 → Phase 3 → Phase 6, with keyword search allowed to remain a placeholder until Searchstax is wired. However, **combined keyword + location search** depends on Phase 3 because it routes through Searchstax (see step 3b below). Until Phase 3 ships, the app continues to use the hardcoded intranet Drupal host from `src/main.ts`; the Drupal endpoint cutover to `.env` happens in Phase 3 together with Searchstax.
+**Implementation order note:** Searchstax is not required to complete Phase 2 pagination or Phase 4 location-only filtering. The recommended delivery order is Phase 2 → Phase 4 → Phase 5 → Phase 3 → Phase 6, with keyword search allowed to remain a placeholder until Searchstax is wired. **Combined keyword + location search** depends on Phase 3 because it routes through Searchstax (see step 3b below).
 
-1. ~~Create `.env` / `.env.example` with `DEV_SEARCHSTAX_ENDPOINT` and `DEV_SEARCHSTAX_TOKEN`.~~ **Done** — completed in Task 1.7. Both variables already exist in `.env` and `.env.example`.
-2. Update `src/main.ts` to read `import.meta.env.DEV_*` and provide via inject (replacing hardcoded `drupalEnv`). This is the required cutover from the current intranet Drupal host to the `.env` site, and it must ship together with Searchstax because Searchstax indexes that site.
-3. Create `src/services/searchstax.ts`:
-   a. **Keyword-only search:** Builds the emselect URL with `fq=tcngramm_X3b_en_description:{keyword}&rows={pageSize}&start={offset}&fl=*&wt=json`.
-   b. **Combined keyword + location search:** Appends a second `fq` parameter: `&fq=ss_body:{locationId}`. The `ss_body` field in the Searchstax index stores the park-location reference corresponding to the Drupal `brickParkLocation` relationship.
+**Prerequisites already completed:**
+- ~~Create `.env` / `.env.example` with `DEV_SEARCHSTAX_ENDPOINT` and `DEV_SEARCHSTAX_TOKEN`.~~ **Done** — completed in Task 1.7.
+- ~~Drupal endpoint cutover from hardcoded `intranet.babson.edu` to `.env`.~~ **Done** — `main.ts` already reads `DEV_DRUPAL_ENDPOINT` from `.env` (completed Phase 1). The hardcoded fallback is retained as a safety net but is not exercised.
+
+**Architecture decision (Option A):** Default browse and location-only filtering continue to use the Drupal JSON:API directly. SearchStax is used only when a keyword is present (≥3 chars), whether alone or combined with a location filter. This avoids extra network calls on the most common request path (initial page load with no search terms).
+
+**Zero-hydration:** The SearchStax index contains all four fields needed to construct `Brick` objects directly — no Drupal batch call is required after a SearchStax search. This reduces the keyword search path to a single network request.
+
+**SearchStax index fields used:**
+| Field | Content | Maps to `Brick` property |
+|---|---|---|
+| `ss_uuid` | Brick media entity UUID | `id` |
+| `ss_file_img_uuid` | File entity UUID for brick image | `brickImage` |
+| `ss_zone_uuid` | Park location UUID | `brickParkLocation` |
+| `tcngramm_X3b_en_description` | Inscription text (array) | `inscription` (first element) |
+| `ss_body` | Park location name | _(informational only, not used)_ |
+
+**Tasks:**
+
+1. **Task 3.1 — Types & injection keys:** Add `SearchstaxDoc`, `SearchstaxResponse` types and `searchstaxEndpointKey`, `searchstaxTokenKey` injection keys to `src/types/index.ts`. Update `main.ts` to provide SearchStax endpoint and token via inject.
+2. **Task 3.2 — SearchStax service:** Create `src/services/searchstax.ts`:
+   a. **Keyword-only search:** Builds the emselect URL with `fq=tcngramm_X3b_en_description:{keyword}&rows={pageSize}&start={offset}&fl=ss_uuid,ss_zone_uuid,ss_file_img_uuid,tcngramm_X3b_en_description&wt=json`.
+   b. **Combined keyword + location search:** Appends `&fq=ss_zone_uuid:({uuid1} OR {uuid2})`. Uses `ss_zone_uuid` (location UUID) for exact matching instead of `ss_body` (location name).
    c. Sends `Authorization: Token {DEV_SEARCHSTAX_TOKEN}` header.
-   d. Parses `response.numFound` (total) and `response.docs[].ss_uuid` (brick UUIDs).
-4. Create hydration logic: for each `ss_uuid`, call `GET /brick/{ss_uuid}` to get full brick data (use `Promise.all` for parallelism, consider batching or a queue if result sets are large).
-5. Update TheBricks fetch logic with the routing rule: **any request involving a keyword (≥ 3 chars) goes through Searchstax**, whether or not a location filter is also active. Location-only filtering (no keyword) stays on the Drupal JSON:API path. Apply a 3-character minimum and 500ms debounce to keyword-driven fetches.
-6. Use `numFound` for pagination `totalPages` calculation during any Searchstax-backed search (keyword-only or combined).
-7. Add unit tests for the Searchstax service (mock HTTP responses), covering keyword-only and combined keyword + location queries.
-8. Full E2E regression against dev environment, including combined filter scenarios.
+   d. Constructs `Brick[]` directly from response fields (zero-hydration). Returns `{ bricks, numFound }`.
+3. **Task 3.3 — Debounce:** Add 500ms debounce to the keyword `inscription` watcher in TheBricks. Clearing the input fires immediately (no debounce).
+4. **Task 3.4 — Wire into TheBricks:** Update `fetchBricks()` routing: keyword present → SearchStax (returns `Brick[]` directly, no Drupal call); no keyword → existing Drupal paths. Remove Drupal `CONTAINS` branch from `buildUrl()`.
+5. **Task 3.5 — Drupal CONTAINS fallback:** Wrap SearchStax path in try/catch; on failure, fall back to Drupal `CONTAINS` keyword search (including combined keyword + location). Log `console.warn` on fallback.
+6. **Task 3.6 — Unit tests:** Tests for SearchStax service (URL building, auth header, field mapping, error propagation) and TheBricks routing logic (all four search modes, debounce, fallback, pagination source).
 
 **Estimated effort:** 2–3 days
 
@@ -62,7 +79,7 @@
 
 **Depends on:** Phase 2 pagination/state work.
 
-**Scope:** This phase handles location-only filtering via the Drupal JSON:API. All keyword-related paths (keyword-only and combined keyword + location via Searchstax `ss_body`) are owned by Phase 3. Do not add temporary Searchstax stubs, fallback branches, or partial combined-filter behavior in Phase 4.
+**Scope:** This phase handles location-only filtering via the Drupal JSON:API. All keyword-related paths (keyword-only and combined keyword + location via Searchstax `ss_zone_uuid`) are owned by Phase 3. Do not add temporary Searchstax stubs, fallback branches, or partial combined-filter behavior in Phase 4.
 
 1. Create `fetchLocations()` in App.vue — calls `/parkLocations?fields[parkLocation]=name&include=brick_zone_image&sort=name`. Store as shared `locations: ParkLocation[]` state.
 2. Add scrollable location list to BrickFilter (populated from `locations` prop).
