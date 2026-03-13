@@ -37,10 +37,10 @@
 
 **Goal:** Fast keyword search via Searchstax instead of Drupal's `CONTAINS` filter, including combined keyword + location filtering.
 
-**Implementation order note:** Searchstax is not required to complete Phase 2 pagination or Phase 4 location-only filtering. The recommended delivery order is Phase 2 → Phase 4 → Phase 5 → Phase 3 → Phase 6, with keyword search allowed to remain a placeholder until Searchstax is wired. However, **combined keyword + location search** depends on Phase 3 because it routes through Searchstax (see step 3b below).
+**Implementation order note:** Searchstax is not required to complete Phase 2 pagination or Phase 4 location-only filtering. The recommended delivery order is Phase 2 → Phase 4 → Phase 5 → Phase 3 → Phase 6, with keyword search allowed to remain a placeholder until Searchstax is wired. However, **combined keyword + location search** depends on Phase 3 because it routes through Searchstax (see step 3b below). Until Phase 3 ships, the app continues to use the hardcoded intranet Drupal host from `src/main.ts`; the Drupal endpoint cutover to `.env` happens in Phase 3 together with Searchstax.
 
 1. ~~Create `.env` / `.env.example` with `DEV_SEARCHSTAX_ENDPOINT` and `DEV_SEARCHSTAX_TOKEN`.~~ **Done** — completed in Task 1.7. Both variables already exist in `.env` and `.env.example`.
-2. Update `src/main.ts` to read `import.meta.env.DEV_*` and provide via inject (replacing hardcoded `drupalEnv`).
+2. Update `src/main.ts` to read `import.meta.env.DEV_*` and provide via inject (replacing hardcoded `drupalEnv`). This is the required cutover from the current intranet Drupal host to the `.env` site, and it must ship together with Searchstax because Searchstax indexes that site.
 3. Create `src/services/searchstax.ts`:
    a. **Keyword-only search:** Builds the emselect URL with `fq=tcngramm_X3b_en_description:{keyword}&rows={pageSize}&start={offset}&fl=*&wt=json`.
    b. **Combined keyword + location search:** Appends a second `fq` parameter: `&fq=ss_body:{locationId}`. The `ss_body` field in the Searchstax index stores the park-location reference corresponding to the Drupal `brickParkLocation` relationship.
@@ -86,7 +86,7 @@
 3. Populate sidebar from the same `locations` data used for the filter list.
 4. Default selection: first location in the sorted list.
 5. Clicking a location highlights it in the sidebar and swaps the map image.
-6. Responsive behavior: map on top, scrollable centered list below on mobile (with chevron scroll indicators).
+6. Responsive behavior: map on top, scrollable centered list below on mobile (with up/down chevron controls that also scroll the list when tapped/clicked).
 7. Unit + E2E tests for the overlay (desktop and mobile).
 
 **Estimated effort:** 1–2 days

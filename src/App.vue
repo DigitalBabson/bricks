@@ -23,6 +23,11 @@
     @openLocations="showLocationExplorer = true"
   />
   <app-footer />
+  <location-explorer
+    v-if="showLocationExplorer"
+    :locations="locations"
+    @close="showLocationExplorer = false"
+  />
 </div>
 </template>
 
@@ -35,7 +40,8 @@ import AppHero from './components/AppHero.vue'
 import AppFooter from './components/AppFooter.vue'
 import BrickFilter from './components/BrickFilter.vue'
 import LocationExplorerTrigger from './components/LocationExplorerTrigger.vue'
-import { defaultUrlKey } from './types/index'
+import LocationExplorer from './components/LocationExplorer.vue'
+import { defaultEnvKey, defaultUrlKey } from './types/index'
 import type { ParkLocation, ParkLocationsApiResponse } from './types/index'
 
 export default defineComponent({
@@ -46,8 +52,10 @@ export default defineComponent({
     AppFooter,
     BrickFilter,
     LocationExplorerTrigger,
+    LocationExplorer,
   },
   inject: {
+    defaultEnv: { from: defaultEnvKey, default: '' },
     defaultUrl: { from: defaultUrlKey, default: '' },
   },
   data() {
@@ -62,6 +70,9 @@ export default defineComponent({
     apiUrl(): string {
       return this.defaultUrl as string
     },
+    apiBaseOrigin(): string {
+      return this.defaultEnv as string
+    },
   },
   methods: {
     clearAllFilters() {
@@ -70,20 +81,48 @@ export default defineComponent({
     },
     async fetchLocations() {
       try {
-        const url = `${this.apiUrl}parkLocations?fields[parkLocation]=name&include=brick_zone_image&sort=name`
+        const url =
+          `${this.apiUrl}parkLocations` +
+          `?include=field_brick_zone_image,field_brick_zone_image.field_media_image` +
+          `&fields[parkLocation]=name,field_brick_zone_image` +
+          `&fields[media--image]=field_media_image` +
+          `&fields[file--file]=uri,url` +
+          `&sort=name`
         const response = await axios.get<ParkLocationsApiResponse>(url)
         const included = response.data.included ?? []
 
-        this.locations = response.data.data.map((location) => {
-          const imageRelId = location.relationships.brick_zone_image?.data?.id
-          const imageEntity = included.find((item) => item.id === imageRelId)
+        const mapped = response.data.data.map((location) => {
+          // Traverse: location → media → file → uri.url
+          const mediaId = location.relationships.field_brick_zone_image?.data?.id
+          const media = mediaId
+            ? included.find((item) => item.id === mediaId && item.type === 'media--image')
+            : undefined
+          const fileId = media?.relationships?.field_media_image?.data?.id
+          const file = fileId
+            ? included.find((item) => item.id === fileId && item.type === 'file--file')
+            : undefined
+          const imagePath = file?.attributes?.uri?.url ?? ''
 
           return {
             id: location.id,
             name: location.attributes.name,
-            mapImageUrl: imageEntity?.attributes.image_style_uri?.full_img ?? '',
+            mapImageUrl: imagePath ? `${this.apiBaseOrigin}${imagePath}` : '',
           }
         })
+
+        // Natural sort: numbered names (e.g. "1-2-3") first, then alphabetical
+        const startsWithDigit = (s: string) => /^\d/.test(s)
+        mapped.sort((a, b) => {
+          const aNum = startsWithDigit(a.name)
+          const bNum = startsWithDigit(b.name)
+          // Numbered locations come first
+          if (aNum && !bNum) return -1
+          if (!aNum && bNum) return 1
+          // Within each group, use locale-aware numeric comparison
+          return a.name.localeCompare(b.name, undefined, { numeric: true })
+        })
+
+        this.locations = mapped
       } catch {
         this.locations = []
       }
@@ -96,6 +135,7 @@ export default defineComponent({
 </script>
 
 <style>
+// @todo: can we remove this?
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;

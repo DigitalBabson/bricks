@@ -38,12 +38,20 @@ export interface ParkLocationsApiResponse {
     id: string
     attributes: { name: string }
     relationships: {
-      brick_zone_image?: { data: { id: string } | null }
+      field_brick_zone_image?: { data: { type: string; id: string } | null }
     }
   }>
   included?: Array<{
+    type: string
     id: string
-    attributes: { image_style_uri?: { full_img?: string } }
+    attributes: {
+      uri?: { value?: string; url?: string }
+      image_style_uri?: { full_img?: string }
+      [key: string]: unknown
+    }
+    relationships?: {
+      field_media_image?: { data: { type: string; id: string } | null }
+    }
   }>
 }
 

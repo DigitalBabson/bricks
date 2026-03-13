@@ -13,7 +13,7 @@
 | `src/components/AppFooter.vue` | **Create** | Page footer — "BABSON COLLEGE" white text on green bar (mirrors header line 1) |
 | `src/components/LocationExplorer.vue` | **Create** | Full-screen overlay with sidebar location list + map image viewer |
 | `src/components/TheBricks.vue` | **Modify** | Add sorting param, new search/filter state, location fetch, Searchstax integration, page-based pagination logic. Move BrickFilter rendering to hero. |
-| `src/components/BrickFilter.vue` | **Rewrite** | Keyword input + location dropdown + active filters bar + Clear All |
+| `src/components/BrickFilter.vue` | **Rewrite** | Keyword input + scrollable location list + active filters bar + Clear All |
 | `src/components/Pagination.vue` | **Rewrite** | Clickable numbered pagination with arrows and ellipsis |
 | `src/components/BrickCard.vue` | **Modify** | Add inscription overlay for "Coming Soon" images; add "ENLARGE BRICK" hover overlay, card-level focus wrapper with keyboard handlers (tab stop 1 → location details, tab stop 2 → enlarge), rename button text to "VIEW LOCATION DETAILS", accessibility attributes |
 | `src/types/index.ts` | **Modify** | Add `ParkLocation`, `SearchstaxResponse`, `SearchstaxDoc` types; update `BrickApiResponse` for total count |

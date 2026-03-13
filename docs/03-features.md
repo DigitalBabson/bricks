@@ -156,6 +156,8 @@ const isLoading = ref(false)
 
 There are four filter combinations. The routing rule is: **any request involving a keyword goes through Searchstax** (even when a location filter is also active). Location-only and default browse stay on the Drupal JSON:API path.
 
+**Endpoint cutover note:** The current app still points at the hardcoded intranet Drupal host in `src/main.ts`. Phase 3 is also the coordinated cutover to `import.meta.env.DEV_DRUPAL_ENDPOINT`. That switch must ship at the same time as Searchstax because the Searchstax index and the Drupal hydration/listing endpoints need to point at the same site.
+
 ```
 watchEffect:
   if keyword.length >= 3 AND locationIds.length > 0:
@@ -198,9 +200,12 @@ watchEffect:
 **New method: `fetchLocations()`**
 
 - Called once on `onMounted`.
-- `GET /parkLocations?fields[parkLocation]=name&include=brick_zone_image&sort=name`
+- `GET {DEV_DRUPAL_ENDPOINT}/parkLocations?include=field_brick_zone_image,field_brick_zone_image.field_media_image&fields[parkLocation]=name,field_brick_zone_image&fields[media--image]=field_media_image&fields[file--file]=uri,url`
 - Transforms response to `ParkLocation[]` array (id, name, mapImageUrl).
 - Used by both the BrickFilter location list and the LocationExplorer overlay.
+- This fetch loads location names plus map image URLs/metadata only. It does not preload every map image asset into the browser.
+- The overlay should render the selected location's map image on demand; switching locations swaps the rendered `<img src>` rather than pre-rendering all images up front.
+- This is the only Phase 5 call that should use `DEV_DRUPAL_ENDPOINT`. Bricks remain on the current endpoint until the Phase 3 cutover.
 
 ### 3.3.3 New type definitions
 
@@ -210,7 +215,7 @@ Add to `src/types/index.ts`:
 interface ParkLocation {
   id: string
   name: string
-  mapImageUrl: string   // from included brick_zone_image → image_style_uri.full_img
+  mapImageUrl: string   // resolved from included field_brick_zone_image -> field_media_image -> file url
 }
 
 interface SearchstaxResponse {
@@ -426,10 +431,13 @@ screens: {
 └──────────────────────────────────────────────────┘
 ```
 
-- **Left sidebar:** scrollable **flat list** of all zones, sorted alphanumerically in ascending order (matching the API's `sort=name`). No hierarchy or grouping — zones are listed as they come from the API. The active/selected zone is visually highlighted (bold, underline, or background highlight).
-- **Right panel:** the map image for the currently selected zone. Uses `image_style_uri.full_img` from the included `brick_zone_image`.
+- **Backdrop / overlay:** full-screen overlay with a black backdrop at `0.87` opacity on both desktop and mobile.
+- **Left sidebar (desktop):** sits in the top-left corner, flush to the map panel. Uses a white background at `0.87` opacity. The list is scrollable and remains a **flat list** of all zones, sorted alphanumerically in ascending order (matching the API's `sort=name`). No hierarchy or grouping — zones are listed as they come from the API.
+- **Location option typography (desktop + mobile):** Oswald, black, `16px`, centered text, `0.08em` letter spacing, `24px` line height. Selected location uses Oswald Medium; unselected locations use Oswald Light. Add separators between options. Do not rely on weight alone; keep the selected state visually distinct with underline and/or equivalent highlight treatment.
+- **Right panel:** the map image for the currently selected zone. Uses the resolved file `url` from the included `field_brick_zone_image -> field_media_image -> file--file` chain. If `mapImageUrl` is empty, show a "No map available" message in the map panel.
 - **Close button (×):** top-right corner, closes the overlay.
 - The overlay uses `<teleport to="body">` with a dark semi-transparent backdrop, consistent with the existing `UiModal` pattern.
+- **Map loading strategy:** The full `parkLocations` collection is fetched once at app level with `field_brick_zone_image` included so the overlay has every zone name and map URL immediately. Do not mount/preload every map image in the overlay. Only the currently selected location's image should be rendered so the browser fetches that map on demand.
 
 **Props:**
 
@@ -446,24 +454,39 @@ screens: {
 **Responsive behavior (from XD mobile wireframe):**
 
 - **Desktop:** two-column layout (left sidebar list + right map image).
-- **Mobile:** single-column stacked layout — map image on top (full-width), location list below. The list is a vertically scrollable centered list with up/down chevron arrows (`^` / `v`) at the top and bottom to indicate scrollability. The selected location is **bold** with an underline. The `×` close button sits in the top-right corner above the map. The dark/black background fills the full viewport.
+- **Mobile:** single-column stacked layout — map image on top (full-width), location list below. The location list container itself is the primary scroll region. Use up/down chevron controls (`^` / `v`) above and below the list; tapping/clicking a chevron should scroll the list in that direction by a small step or by one item. The selected location is underlined and announced semantically. The `×` close button sits in the top-right corner above the map. The black `0.87` opacity overlay treatment remains in place on mobile.
+
+**Accessibility recommendations:**
+
+- Treat the overlay as a true modal dialog with `role="dialog"` and `aria-modal="true"`, plus an accessible name (`aria-label` or `aria-labelledby`).
+- Move focus into the dialog on open, keep focus trapped while it is open, and return focus to the triggering control on close.
+- Render location items as real interactive controls with touch targets of at least `44px` in height. If the implementation keeps the existing nav/list presentation, prefer a consistent pattern such as buttons with `aria-current="true"` on the selected item rather than mixed semantics.
+- If chevrons are clickable scroll aids, render them as real buttons with accessible names such as `aria-label="Scroll locations up"` / `aria-label="Scroll locations down"`, keyboard support, and disabled/hidden states at the list boundaries.
+- Do not rely on font weight alone for selection state; preserve the underline and/or equivalent visual cue.
 
 ### 3.6.2 Data source for zones
 
 The same `fetchLocations()` call used for the filter list (see 3.3.2) provides all the data needed:
 
 ```
-GET /parkLocations?fields[parkLocation]=name&include=brick_zone_image&sort=name
+GET {DEV_DRUPAL_ENDPOINT}/parkLocations?include=field_brick_zone_image,field_brick_zone_image.field_media_image&fields[parkLocation]=name,field_brick_zone_image&fields[media--image]=field_media_image&fields[file--file]=uri,url
 ```
 
 This returns location names and their included map images in a single call. The `ParkLocation[]` array is shared between the BrickFilter location list and the LocationExplorer overlay — fetched once at App-level on mount.
+
+Important implementation detail:
+
+- "Included map images" here means the API response includes the park location, related media image, and related file resources needed to resolve the final map image URL.
+- The frontend should not eagerly preload or render every map image file.
+- The overlay should render one `<img>` for the active location and let the browser load additional maps only when the user changes the selected zone.
+- Do not switch the global bricks endpoint as part of this phase; only the shared park-locations fetch uses the dev endpoint.
 
 ### 3.6.3 Wiring into App.vue
 
 - `App.vue` manages a `showLocationExplorer: boolean` state.
 - `LocationExplorerTrigger` emits `@openLocations` from either placement → App sets `showLocationExplorer = true`.
 - `LocationExplorer` emits `@close` → App sets `showLocationExplorer = false`.
-- The locations data can be lifted to App-level (fetched once, passed down to both TheBricks and LocationExplorer) or re-fetched.
+- The locations data should be lifted to App-level (fetched once, passed down to both TheBricks and LocationExplorer).
 
 **Files affected:** `src/components/LocationExplorer.vue` (new), `src/components/LocationExplorerTrigger.vue`, `src/App.vue`, `src/types/index.ts`
 

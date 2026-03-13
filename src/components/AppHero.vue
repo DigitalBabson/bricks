@@ -10,15 +10,16 @@
       <!-- Full-coverage semi-transparent overlay -->
       <div class="tw-absolute tw-inset-0 tw-bg-white/80"></div>
 
-      <div class="tw-relative tw-h-full tw-max-w-brickMWL tw-mx-auto md:tw-px-6 md:tw-py-10 lg:tw-h-full">
-        <location-explorer-trigger
-          class="
-            tw-hidden md:tw-block
-            tw-absolute tw-top-12 tw-right-6
-          "
-          @openLocations="$emit('openLocations')"
-        />
-      </div>
+      <!-- Desktop trigger: flush to viewport edge, anchored to content at 3xl -->
+      <location-explorer-trigger
+        class="
+          tw-hidden md:tw-block
+          tw-absolute tw-top-12 tw-z-10
+          tw-right-6
+          3xl:tw-right-[calc((100%-1170px)/2+24px)]
+        "
+        @openLocations="$emit('openLocations')"
+      />
     </section>
 
     <div class="tw-relative tw-mx-auto tw-max-w-brickMWL -tw-mt-[355px] md:-tw-mt-[355px] md:tw-px-6 lg:-tw-mt-[245px]">

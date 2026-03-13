@@ -65,7 +65,10 @@ User types keyword
 **Park locations data (fetched once on mount):**
 
 ```
-  ──► Drupal /parkLocations?fields[parkLocation]=name&include=field_brick_zone_image&sort=name
+  ──► Drupal /parkLocations?include=field_brick_zone_image,field_brick_zone_image.field_media_image
+      &fields[parkLocation]=name,field_brick_zone_image
+      &fields[media--image]=field_media_image
+      &fields[file--file]=uri,url
   ──► populates both the filter dropdown AND the Location Explorer sidebar/maps
 ```
 
@@ -137,12 +140,19 @@ Resource type: `parkLocation`.
 
 ```
 GET {DEV_DRUPAL_ENDPOINT}/parkLocations
-    ?fields[parkLocation]=name
-    &include=field_brick_zone_image
-    &sort=name
+    ?include=field_brick_zone_image,field_brick_zone_image.field_media_image
+    &fields[parkLocation]=name,field_brick_zone_image
+    &fields[media--image]=field_media_image
+    &fields[file--file]=uri,url
 ```
 
-Returns location names plus included image entities with `image_style_uri.full_img` for the map viewer. Resource type: `parkLocation`.
+Returns location names plus the related media/file entities needed to resolve the map image URL for the viewer. Resource type: `parkLocation`.
+
+Planning note:
+
+- Fetch this collection once at app startup and reuse it for both the filter UI and the Location Explorer.
+- This request gives the frontend the map image URLs, but it should not trigger eager downloading of every map bitmap.
+- The overlay should render only the currently selected location's `<img>` so the browser fetches map images on demand as the user browses locations.
 
 ---
 

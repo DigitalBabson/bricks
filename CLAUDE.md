@@ -54,7 +54,7 @@ Configured in `App.vue` provide block. Switch by changing `drupalEnv.prod` to `d
 
 ## Testing
 
-- **Unit tests**: `src/components/__tests__/*.spec.js` using Vitest + Vue Test Utils with jsdom
+- **Unit tests**: `src/components/__tests__/*.spec.ts` using Vitest + Vue Test Utils with jsdom
 - **E2E tests**: `tests/e2e/*.spec.ts` using Playwright (Chromium, Firefox, WebKit, mobile viewports)
 - BrickCard tests must provide injections: `global: { provide: { defaultEnv: '...', defaultUrl: '...' } }`
 

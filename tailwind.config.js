@@ -3,6 +3,9 @@ export default {
   prefix: "tw-",
   theme: {
     extend: {
+      screens: {
+        '3xl': '2048px',
+      },
       colors: {
         brickLightGreen: "#C7D28A",
         brickCourtyardGreen: "#587C32",

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import axios from 'axios'
 import App from '../../App.vue'
-import { defaultUrlKey } from '../../types/index'
+import { defaultEnvKey, defaultUrlKey } from '../../types/index'
 
 vi.mock('axios')
 const mockedAxios = vi.mocked(axios, true)
@@ -14,20 +14,22 @@ const locationsResponse = {
         id: 'loc-1',
         attributes: { name: 'Class Walk of 2019' },
         relationships: {
-          brick_zone_image: { data: { id: 'img-1' } },
+          field_brick_zone_image: { data: { type: 'media--image', id: 'media-1' } },
         },
       },
       {
         id: 'loc-2',
         attributes: { name: 'Rodger Babson Statue' },
         relationships: {
-          brick_zone_image: { data: { id: 'img-2' } },
+          field_brick_zone_image: { data: { type: 'media--image', id: 'media-2' } },
         },
       },
     ],
     included: [
-      { id: 'img-1', attributes: { image_style_uri: { full_img: 'https://example.com/map1.jpg' } } },
-      { id: 'img-2', attributes: { image_style_uri: { full_img: 'https://example.com/map2.jpg' } } },
+      { type: 'media--image', id: 'media-1', attributes: {}, relationships: { field_media_image: { data: { type: 'file--file', id: 'file-1' } } } },
+      { type: 'media--image', id: 'media-2', attributes: {}, relationships: { field_media_image: { data: { type: 'file--file', id: 'file-2' } } } },
+      { type: 'file--file', id: 'file-1', attributes: { uri: { url: '/sites/default/files/map1.png' } } },
+      { type: 'file--file', id: 'file-2', attributes: { uri: { url: '/sites/default/files/map2.png' } } },
     ],
   },
 }
@@ -36,6 +38,7 @@ function mountApp() {
   return mount(App, {
     global: {
       provide: {
+        [defaultEnvKey as symbol]: 'https://example.com',
         [defaultUrlKey as symbol]: 'https://example.com/jsonapi/',
       },
       stubs: {
@@ -61,13 +64,18 @@ describe('App', () => {
     await flushPromises()
 
     expect(mockedAxios.get).toHaveBeenCalledWith(
-      'https://example.com/jsonapi/parkLocations?fields[parkLocation]=name&include=brick_zone_image&sort=name'
+      'https://example.com/jsonapi/parkLocations' +
+      '?include=field_brick_zone_image,field_brick_zone_image.field_media_image' +
+      '&fields[parkLocation]=name,field_brick_zone_image' +
+      '&fields[media--image]=field_media_image' +
+      '&fields[file--file]=uri,url' +
+      '&sort=name'
     )
 
     const vm = wrapper.vm as unknown as { locations: Array<{ id: string; name: string; mapImageUrl: string }> }
     expect(vm.locations).toEqual([
-      { id: 'loc-1', name: 'Class Walk of 2019', mapImageUrl: 'https://example.com/map1.jpg' },
-      { id: 'loc-2', name: 'Rodger Babson Statue', mapImageUrl: 'https://example.com/map2.jpg' },
+      { id: 'loc-1', name: 'Class Walk of 2019', mapImageUrl: 'https://example.com/sites/default/files/map1.png' },
+      { id: 'loc-2', name: 'Rodger Babson Statue', mapImageUrl: 'https://example.com/sites/default/files/map2.png' },
     ])
   })
 
