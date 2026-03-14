@@ -12,7 +12,8 @@ describe('AppHeader', () => {
   it('displays "Babson College" in an h1', () => {
     const h1 = wrapper.find('h1')
     expect(h1.exists()).toBe(true)
-    expect(h1.text()).toBe('Babson College')
+    expect(h1.find('svg').exists()).toBe(true)
+    expect(h1.find('a').attributes('title')).toBe('Babson College')
   })
 
   it('displays the subtitle text', () => {
@@ -31,12 +32,9 @@ describe('AppHeader', () => {
     expect(inner.classes()).toContain('tw-mx-auto')
   })
 
-  it('uses Oswald font and white text on both lines', () => {
-    const h1 = wrapper.find('h1')
-    expect(h1.classes()).toContain('tw-font-oswald')
-    expect(h1.classes()).toContain('tw-text-white')
-    expect(h1.classes()).toContain('tw-uppercase')
-
+  it('uses the white logo and white subtitle text', () => {
+    const logoLink = wrapper.find('h1 a')
+    expect(logoLink.classes()).toContain('tw-text-white')
     const p = wrapper.find('p')
     expect(p.classes()).toContain('tw-font-oswald')
     expect(p.classes()).toContain('tw-text-white')

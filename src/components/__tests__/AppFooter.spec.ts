@@ -10,7 +10,8 @@ describe('AppFooter', () => {
   })
 
   it('displays "Babson College"', () => {
-    expect(wrapper.text()).toContain('Babson College')
+    expect(wrapper.find('svg').exists()).toBe(true)
+    expect(wrapper.find('a').attributes('title')).toBe('Babson College')
   })
 
   it('does not contain the subheader text', () => {
@@ -27,11 +28,9 @@ describe('AppFooter', () => {
     expect(inner.classes()).toContain('tw-mx-auto')
   })
 
-  it('uses Oswald font and white uppercase text', () => {
-    const p = wrapper.find('p')
-    expect(p.classes()).toContain('tw-font-oswald')
-    expect(p.classes()).toContain('tw-text-white')
-    expect(p.classes()).toContain('tw-uppercase')
+  it('uses the white logo mark', () => {
+    const logoLink = wrapper.find('a')
+    expect(logoLink.classes()).toContain('tw-text-white')
   })
 
   it('has no props and emits no events', () => {

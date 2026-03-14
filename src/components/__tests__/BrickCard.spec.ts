@@ -188,6 +188,18 @@ describe('BrickCard', () => {
       await wrapper.vm.$nextTick()
     })
 
+    it('keeps the loading placeholder visible until the hydrated image finishes loading', async () => {
+      expect(wrapper.find('.brick-card__placeholder').exists()).toBe(true)
+      expect(wrapper.find('img').exists()).toBe(true)
+      expect(wrapper.find('img').classes()).toContain('brick-card__image--loading')
+
+      await wrapper.find('img').trigger('load')
+      await wrapper.vm.$nextTick()
+
+      expect(wrapper.find('.brick-card__placeholder').exists()).toBe(false)
+      expect(wrapper.find('img').classes()).not.toContain('brick-card__image--loading')
+    })
+
     it('shows the hover affordances and reuses hydrated data without extra requests', async () => {
       expect(mockedAxios.get).not.toHaveBeenCalled()
       expect(wrapper.find('button[aria-label="Enlarge brick image"]').exists()).toBe(true)

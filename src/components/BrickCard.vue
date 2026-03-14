@@ -14,12 +14,15 @@
       ></div>
 
       <img
-        v-else
+        v-if="thumbnailUrl"
         class="
           tw-transition-opacity tw-duration-200 tw-ease-in-out
           brick-card__image
         "
-        :class="showComingSoonOverlay ? '' : 'tw-cursor-pointer'"
+        :class="[
+          showComingSoonOverlay ? '' : 'tw-cursor-pointer',
+          showPlaceholder ? 'brick-card__image--loading' : ''
+        ]"
         :src="thumbnailUrl"
         :alt="brick?.inscription || 'Brick image'"
         loading="lazy"
@@ -67,9 +70,10 @@
       <button
         v-if="!showComingSoonOverlay"
         class="
-          tw-absolute tw-right-0 tw-top-0 tw-z-10 tw-bg-white tw-px-6 tw-py-4
+          tw-absolute tw-right-0 tw-top-0 tw-z-10 tw-hidden tw-bg-white tw-px-6 tw-py-4
           tw-font-oswald tw-text-base tw-uppercase tw-text-black tw-opacity-0
           tw-transition-opacity tw-duration-200
+          md:tw-block
           group-hover:tw-opacity-100 group-focus-within:tw-opacity-100
           hover:tw-bg-black hover:tw-text-white
           focus:tw-bg-black focus:tw-text-white
@@ -188,8 +192,7 @@ export default defineComponent({
       return this.hasConfiguredMissingImage || this.hasMissingImage;
     },
     showPlaceholder() {
-      // Show placeholder only while loading before any image is ready
-      return this.isImgLoading && !this.brickImgUrl;
+      return this.isImgLoading;
     },
     env(): string {
       return this.defaultEnv as string;
@@ -325,7 +328,6 @@ export default defineComponent({
       if (this.brick.brickImagePreviewUrl && this.brick.brickImageFullUrl) {
         this.thumbnailUrl = this.brick.brickImagePreviewUrl;
         this.brickImgUrl = this.brick.brickImageFullUrl;
-        this.isImgLoading = false;
         return;
       }
 
@@ -354,7 +356,6 @@ export default defineComponent({
           this.thumbnailUrl = previewUrl;
           this.brickImgUrl = fullUrl;
           this.hasMissingImage = false;
-          this.isImgLoading = false;
         } else {
           this.hasMissingImage = true;
           const fallback = this.fallbackImgUrl;
@@ -458,6 +459,12 @@ h3 {
   width: 100%;
   height: auto;
   border-radius: 4px;
+}
+.brick-card__image--loading {
+  inset: 0;
+  height: 100%;
+  opacity: 0;
+  position: absolute;
 }
 
 </style>
