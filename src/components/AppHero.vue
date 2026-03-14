@@ -15,8 +15,7 @@
         class="
           tw-hidden md:tw-block
           tw-absolute tw-top-12 tw-z-10
-          tw-right-6
-          3xl:tw-right-[calc((100%-1170px)/2+24px)]
+          tw-right-0
         "
         @openLocations="$emit('openLocations')"
       />
