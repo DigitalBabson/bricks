@@ -3,98 +3,82 @@ import { mount } from '@vue/test-utils'
 import UiModal from '../UiModal.vue'
 
 describe('UiModal', () => {
-  it('renders modal with slot content', () => {
-    const wrapper = mount(UiModal, {
+  function mountModal(slotMarkup = '<div>Content</div>') {
+    return mount(UiModal, {
       slots: {
-        default: '<div class="test-content">Modal Content</div>'
+        default: slotMarkup
       },
       attachTo: document.body
     })
+  }
 
-    expect(wrapper.html()).toContain('Modal Content')
-    expect(wrapper.find('.test-content').exists()).toBe(true)
+  it('renders modal with slot content', () => {
+    const wrapper = mountModal('<div class="test-content">Modal Content</div>')
+
+    expect(document.body.innerHTML).toContain('Modal Content')
+    expect(document.body.querySelector('.test-content')).not.toBeNull()
+    wrapper.unmount()
   })
 
   it('emits close event when close button is clicked', async () => {
-    const wrapper = mount(UiModal, {
-      slots: {
-        default: '<div>Content</div>'
-      },
-      attachTo: document.body
-    })
+    const wrapper = mountModal()
 
-    const closeButton = wrapper.find('button')
-    await closeButton.trigger('click')
+    const closeButton = document.body.querySelector('button')
+    expect(closeButton).not.toBeNull()
+    ;(closeButton as HTMLButtonElement).click()
 
     expect(wrapper.emitted()).toHaveProperty('close')
     expect(wrapper.emitted('close')).toHaveLength(1)
+    wrapper.unmount()
   })
 
   it('emits close event when backdrop is clicked', async () => {
-    const wrapper = mount(UiModal, {
-      slots: {
-        default: '<div>Content</div>'
-      },
-      attachTo: document.body
-    })
+    const wrapper = mountModal()
 
-    // Backdrop is the div with tw-fixed tw-inset-0 tw-bg-gray-900
-    const backdrop = wrapper.find('.tw-bg-gray-900')
-    await backdrop.trigger('click')
+    const backdrop = document.body.querySelector('.tw-bg-black\\/\\[0\\.87\\]')
+    expect(backdrop).not.toBeNull()
+    ;(backdrop as HTMLElement).click()
 
     expect(wrapper.emitted()).toHaveProperty('close')
+    wrapper.unmount()
   })
 
   it('emits close event when Escape is pressed', () => {
-    const wrapper = mount(UiModal, {
-      slots: {
-        default: '<div>Content</div>'
-      },
-      attachTo: document.body
-    })
+    const wrapper = mountModal()
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
 
     expect(wrapper.emitted()).toHaveProperty('close')
     expect(wrapper.emitted('close')).toHaveLength(1)
+    wrapper.unmount()
   })
 
   it('does not emit close when modal content is clicked', async () => {
-    const wrapper = mount(UiModal, {
-      slots: {
-        default: '<div class="modal-body">Content</div>'
-      },
-      attachTo: document.body
-    })
+    const wrapper = mountModal('<div class="modal-body">Content</div>')
 
-    const modalContent = wrapper.find('.modal-body')
-    await modalContent.trigger('click')
+    const modalContent = document.body.querySelector('.modal-body')
+    expect(modalContent).not.toBeNull()
+    ;(modalContent as HTMLElement).click()
 
-    expect(wrapper.html()).toContain('Content')
+    expect(document.body.innerHTML).toContain('Content')
+    expect(wrapper.emitted('close')).toBeUndefined()
+    wrapper.unmount()
   })
 
-  it('renders close button with FontAwesome icon', () => {
-    const wrapper = mount(UiModal, {
-      slots: {
-        default: '<div>Content</div>'
-      },
-      attachTo: document.body
-    })
+  it('renders close button with a visible close glyph', () => {
+    const wrapper = mountModal()
 
-    const closeButton = wrapper.find('button')
-    expect(closeButton.exists()).toBe(true)
-    expect(closeButton.find('i.fas.fa-times').exists()).toBe(true)
+    const closeButton = document.body.querySelector('button')
+    expect(closeButton).not.toBeNull()
+    expect(closeButton?.textContent).toContain('×')
+    wrapper.unmount()
   })
 
   it('uses fixed positioning for modal overlay', () => {
-    const wrapper = mount(UiModal, {
-      slots: {
-        default: '<div>Content</div>'
-      },
-      attachTo: document.body
-    })
+    const wrapper = mountModal()
 
-    expect(wrapper.html()).toContain('tw-fixed')
-    expect(wrapper.html()).toContain('tw-inset-0')
+    expect(document.body.innerHTML).toContain('tw-fixed')
+    expect(document.body.innerHTML).toContain('tw-inset-0')
+    wrapper.unmount()
   })
 })

@@ -1,23 +1,41 @@
 <template>
-  <div>
-    <!--teleport to="body"-->
-
+  <teleport to="body">
     <div
-      class="tw-fixed tw-inset-0 tw-bg-gray-900 tw-opacity-80 tw-z-50"
-      @click="$emit('close')"></div>
-    <dialog
-      class="tw-fixed tw-top-1/2 tw-left-0 tw-right-0
-      tw-transform tw--translate-y-2/4
-      tw-md:h-5/6 tw-p-0 tw-z-50 tw-mx-auto"
-      open>
-      <slot />
-    </dialog>
-    <button class="tw-fixed tw-top-5 lg:tw-top-8 tw-right-5 lg:tw-right-8 tw-text-white tw-z-50 tw-text-5xl" @click="$emit('close')">
-      <i class="fas fa-times"></i>
-    </button>
-
-    <!--/teleport-->
-  </div>
+      class="
+        tw-fixed tw-inset-0 tw-z-50
+        tw-flex tw-items-center tw-justify-center
+        tw-bg-black/[0.87]
+      "
+      @click.self="$emit('close')"
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        class="
+          tw-relative tw-flex tw-w-[90vw] tw-max-h-[90vh] tw-flex-col
+          tw-items-center tw-justify-center tw-shadow-xl
+          md:tw-h-[80vh] md:tw-max-w-[1100px]
+        "
+      >
+        <button
+          class="
+            tw-absolute tw-right-0 tw-top-[-60px] tw-z-30
+            tw-flex tw-h-[56px] tw-w-[56px] tw-items-center tw-justify-center
+            tw-rounded tw-text-white
+            md:tw-right-[-66px] md:tw-top-[-66px]
+            hover:tw-opacity-70 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white
+          "
+          aria-label="Close modal"
+          @click="$emit('close')"
+        >
+          <span class="tw-text-5xl tw-font-light tw-leading-none">&times;</span>
+        </button>
+        <div class="tw-flex tw-max-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-hidden">
+          <slot />
+        </div>
+      </div>
+    </div>
+  </teleport>
 </template>
 
 <script lang="ts">
@@ -33,15 +51,11 @@ export default defineComponent({
   },
   mounted() {
     document.addEventListener('keydown', this.handleDocumentKeydown)
+    document.body.style.overflow = 'hidden'
   },
   beforeUnmount() {
     document.removeEventListener('keydown', this.handleDocumentKeydown)
+    document.body.style.overflow = ''
   },
 })
 </script>
-
-<style scoped>
-dialog {
-  max-width: 90%;
-}
-</style>

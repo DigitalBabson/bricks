@@ -29,7 +29,7 @@
               tw-absolute tw-z-30
               tw-w-[56px] tw-h-[56px]
               tw-flex tw-items-center tw-justify-center
-              tw-text-white tw-text-5xl tw-font-bold tw-leading-none
+              tw-text-white tw-leading-none
               hover:tw-opacity-70 focus:tw-outline-none
               focus:tw-ring-2 focus:tw-ring-white tw-rounded
             "
@@ -37,7 +37,7 @@
             aria-label="Close location explorer"
             @click="$emit('close')"
           >
-            &times;
+            <span class="tw-text-5xl tw-font-light tw-leading-none">&times;</span>
           </button>
 
           <!-- Content: mobile stacked + centered, desktop image-fill with list overlaid -->
