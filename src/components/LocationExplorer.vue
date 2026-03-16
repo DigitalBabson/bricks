@@ -87,7 +87,6 @@
 
               <!-- Up chevron -->
               <div
-                v-if="showUpChevron"
                 class="
                   tw-sticky tw-top-0 tw-z-10
                   tw-flex tw-justify-center tw-py-1
@@ -96,11 +95,13 @@
               >
                 <button
                   type="button"
-                  class="tw-text-black tw-text-lg"
+                  class="tw-text-black tw-text-lg tw-transition-opacity"
+                  :class="showUpChevron ? '' : 'tw-opacity-20 tw-cursor-default'"
+                  :disabled="!showUpChevron"
                   aria-label="Scroll locations up"
                   @click="scrollLocations('up')"
                 >
-                  &#8963;
+                  <i class="fa-regular fa-angle-up"></i>
                 </button>
               </div>
 
@@ -132,7 +133,6 @@
 
               <!-- Down chevron -->
               <div
-                v-if="showDownChevron"
                 class="
                   tw-sticky tw-bottom-0 tw-z-10
                   tw-flex tw-justify-center tw-py-1
@@ -141,11 +141,13 @@
               >
                 <button
                   type="button"
-                  class="tw-text-black tw-text-lg"
+                  class="tw-text-black tw-text-lg tw-transition-opacity"
+                  :class="showDownChevron ? '' : 'tw-opacity-20 tw-cursor-default'"
+                  :disabled="!showDownChevron"
                   aria-label="Scroll locations down"
                   @click="scrollLocations('down')"
                 >
-                  &#8964;
+                  <i class="fa-regular fa-angle-down"></i>
                 </button>
               </div>
             </nav>
@@ -173,7 +175,7 @@ export default defineComponent({
     return {
       selectedZoneId: '',
       showUpChevron: false,
-      showDownChevron: false,
+      showDownChevron: true,
       imageRenderedTop: 0,
       imageRenderedHeight: 0,
       imageRenderedLeft: 0,
@@ -309,6 +311,7 @@ export default defineComponent({
       this.imageRenderedHeight = renderedH
       this.imageRenderedLeft = offsetRight
       this.imageRenderedWidth = renderedW
+      this.$nextTick(() => this.updateChevrons())
     },
     updateChevrons() {
       const list = this.$refs.locationList as HTMLElement | undefined
