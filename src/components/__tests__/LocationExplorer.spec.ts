@@ -82,7 +82,7 @@ describe('LocationExplorer', () => {
       wrapper = mountExplorer()
       const items = wrapper.findAll('nav li')
       expect(items[0].classes()).toContain('tw-font-medium')
-      expect(items[0].classes()).toContain('tw-underline')
+      expect(items[0].classes()).not.toContain('tw-underline')
     })
 
     it('uses the first location map image as src', () => {
@@ -102,7 +102,7 @@ describe('LocationExplorer', () => {
       await items[1].trigger('click')
 
       expect(items[1].classes()).toContain('tw-font-medium')
-      expect(items[1].classes()).toContain('tw-underline')
+      expect(items[1].classes()).not.toContain('tw-underline')
     })
 
     it('swaps the map image to the clicked location', async () => {

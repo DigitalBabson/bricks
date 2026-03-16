@@ -1,10 +1,16 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import UiModal from '../UiModal.vue'
 
+// Reset the body scroll lock counter between tests by resetting the module
+beforeEach(() => {
+  document.body.style.overflow = ''
+})
+
 describe('UiModal', () => {
-  function mountModal(slotMarkup = '<div>Content</div>') {
+  function mountModal(slotMarkup = '<div>Content</div>', label = 'Test dialog') {
     return mount(UiModal, {
+      props: { label },
       slots: {
         default: slotMarkup
       },
@@ -80,5 +86,34 @@ describe('UiModal', () => {
     expect(document.body.innerHTML).toContain('tw-fixed')
     expect(document.body.innerHTML).toContain('tw-inset-0')
     wrapper.unmount()
+  })
+
+  it('sets aria-label on the dialog element', () => {
+    const wrapper = mountModal('<div>Content</div>', 'Brick image: Test Inscription')
+
+    const dialog = document.body.querySelector('[role="dialog"]')
+    expect(dialog?.getAttribute('aria-label')).toBe('Brick image: Test Inscription')
+    wrapper.unmount()
+  })
+
+  it('sets body overflow hidden on mount and restores on unmount', () => {
+    const wrapper = mountModal()
+    expect(document.body.style.overflow).toBe('hidden')
+
+    wrapper.unmount()
+    expect(document.body.style.overflow).toBe('')
+  })
+
+  it('does not restore body overflow when a second modal is still open', () => {
+    const w1 = mountModal()
+    const w2 = mountModal()
+
+    expect(document.body.style.overflow).toBe('hidden')
+
+    w1.unmount()
+    expect(document.body.style.overflow).toBe('hidden') // still locked
+
+    w2.unmount()
+    expect(document.body.style.overflow).toBe('') // now released
   })
 })

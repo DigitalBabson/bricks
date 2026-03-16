@@ -162,6 +162,7 @@
 import { defineComponent } from 'vue'
 import type { PropType } from 'vue'
 import type { ParkLocation } from '../types/index'
+import { lockBodyScroll, unlockBodyScroll } from '../composables/useBodyScrollLock'
 
 export default defineComponent({
   props: {
@@ -236,7 +237,7 @@ export default defineComponent({
   },
   mounted() {
     document.addEventListener('keydown', this.onKeydown)
-    document.body.style.overflow = 'hidden'
+    lockBodyScroll()
     this.$nextTick(() => {
       this.updateChevrons()
       ;(this.$refs.closeButton as HTMLElement)?.focus()
@@ -246,7 +247,7 @@ export default defineComponent({
   },
   beforeUnmount() {
     document.removeEventListener('keydown', this.onKeydown)
-    document.body.style.overflow = ''
+    unlockBodyScroll()
     window.removeEventListener('resize', this.updateChevrons)
     window.removeEventListener('resize', this.updateNavHeight)
   },

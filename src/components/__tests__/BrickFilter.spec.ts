@@ -61,7 +61,7 @@ describe('BrickFilter', () => {
     expect(listbox.attributes('tabindex')).toBe('0')
     expect(listbox.attributes('aria-labelledby')).toBe('locations-label')
     expect(listbox.attributes('aria-multiselectable')).toBe('true')
-    expect(listbox.classes()).toContain('tw-max-h-[108px]')
+    expect(listbox.classes()).toContain('tw-max-h-[84px]')
     expect(listbox.classes()).not.toContain('tw-rounded')
     expect(listbox.classes()).toContain('tw-bg-white')
     expect(listbox.classes()).not.toContain('tw-border')

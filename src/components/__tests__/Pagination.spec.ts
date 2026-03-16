@@ -27,19 +27,19 @@ describe('Pagination', () => {
       expect(wrapper.find('nav').exists()).toBe(false)
     })
 
-    it('highlights active page with aria-current and underline', () => {
+    it('highlights active page with aria-current and page-active class', () => {
       const wrapper = mountPagination({ currentPage: 2, totalPages: 5 })
       const activeButton = wrapper.find('[aria-current="page"]')
       expect(activeButton.exists()).toBe(true)
       expect(activeButton.text()).toBe('2')
-      expect(activeButton.classes()).toContain('tw-underline')
+      expect(activeButton.classes()).toContain('page-active')
     })
 
     it('inactive pages have correct base color class', () => {
       const wrapper = mountPagination({ currentPage: 1, totalPages: 5 })
-      // Page 2 should be inactive — no underline
+      // Page 2 should be inactive — no page-active class
       const pageButtons = wrapper.findAll('button').filter(b => b.text() === '2')
-      expect(pageButtons[0].classes()).not.toContain('tw-underline')
+      expect(pageButtons[0].classes()).not.toContain('page-active')
     })
 
     it('disables previous arrow on page 1', () => {

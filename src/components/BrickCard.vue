@@ -88,7 +88,7 @@
       </button>
     </div>
     <transition name="fade">
-      <ui-modal v-if="showImg" @close="closeImg">
+      <ui-modal v-if="showImg" :label="`Brick image: ${brick.inscription}`" @close="closeImg">
         <img class="tw-object-contain tw-max-h-90vh" :src="brickImgUrl" />
       </ui-modal>
     </transition>
@@ -106,7 +106,7 @@
     </button>
   </article>
   <transition name="fade">
-    <ui-modal v-if="showMap" @close="closeMap">
+    <ui-modal v-if="showMap" :label="`Location map: ${brick.inscription}`" @close="closeMap">
       <div class="brick__map-wrapper tw-mx-auto tw-table">
         <img
           class="tw-object-contain tw-max-w-full tw-max-h-[calc(90vh_-_160px)] md:tw-max-h-[calc(80vh_-_160px)]"
