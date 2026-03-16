@@ -235,6 +235,32 @@ describe('BrickCard', () => {
       expect(getBrickCardVm(wrapper).showMap).toBe(true)
       expect(mockedAxios.get).not.toHaveBeenCalled()
     })
+
+    it('renders the map caption with visible location and inscription details', async () => {
+      await getLocationButton(wrapper).trigger('click')
+      await flushPromises()
+
+      const caption = wrapper.get('.brick__map-caption')
+      const captionRows = caption.findAll('div')
+      const labels = caption.findAll('.tw-font-oswald')
+      const values = caption.findAll('.tw-font-zilla')
+      const mapImage = wrapper.get('.brick__map-wrapper img')
+
+      expect(getBrickCardVm(wrapper).showMap).toBe(true)
+      expect(mapImage.attributes('src')).toBe('https://example.com/map-zone-2.jpg')
+      expect(caption.isVisible()).toBe(true)
+      expect(captionRows).toHaveLength(2)
+      expect(captionRows[0]?.isVisible()).toBe(true)
+      expect(captionRows[1]?.isVisible()).toBe(true)
+      expect(labels.map((label) => label.text())).toEqual([
+        'Brick Location:',
+        'Brick Inscription:',
+      ])
+      expect(values.map((value) => value.text())).toEqual([
+        'Zone 2',
+        'Jane Doe 1992',
+      ])
+    })
   })
 
   describe('bricks with unresolved image assets', () => {
