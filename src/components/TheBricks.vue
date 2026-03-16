@@ -57,7 +57,7 @@ export default defineComponent({
       default: () => [],
     },
   },
-  emits: ['update:totalCount'],
+  emits: [],
   data() {
     return {
       bricks: [] as Brick[],
@@ -100,6 +100,10 @@ export default defineComponent({
     locationIds: {
       handler() {
         this.currentPage = 1;
+        if (this.searchTimeout) {
+          clearTimeout(this.searchTimeout);
+          this.searchTimeout = null;
+        }
         this.fetchBricks();
       },
       deep: true,
@@ -329,7 +333,6 @@ export default defineComponent({
       this.bricks = hydratedBricks;
       this.showMessage = hydratedBricks.length === 0;
       this.totalPages = Math.ceil(result.numFound / this.pageSize) || 1;
-      this.$emit('update:totalCount', result.numFound);
     },
     async fetchViaDrupalKeyword() {
       const offset = (this.currentPage - 1) * this.pageSize;
@@ -366,7 +369,6 @@ export default defineComponent({
 
       const totalCount = responseData.meta?.count ?? 0;
       this.totalPages = Math.ceil(totalCount / this.pageSize) || 1;
-      this.$emit('update:totalCount', totalCount);
     },
     async fetchBricks() {
       try {
@@ -401,7 +403,6 @@ export default defineComponent({
         this.bricks = [];
         this.totalPages = 1;
         this.showMessage = this.locationIds.length > 0 || this.inscription.length >= 3;
-        this.$emit('update:totalCount', 0);
       }
     },
   },

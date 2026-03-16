@@ -184,13 +184,12 @@ describe('TheBricks', () => {
     expect(vm.totalPages).toBe(1)
   })
 
-  it('calculates totalPages from meta.count and emits totalCount', async () => {
+  it('calculates totalPages from meta.count', async () => {
     const wrapper = mountTheBricks({ locationIds: ['loc-1'] })
     await flushPromises()
 
     const vm = wrapper.vm as InstanceType<typeof TheBricks> & { totalPages: number }
     expect(vm.totalPages).toBe(5)
-    expect(wrapper.emitted('update:totalCount')).toEqual([[100]])
   })
 
   it('goToPage sets currentPage and fetches with the correct offset', async () => {

@@ -10,7 +10,7 @@
         @clearAll="clearAllFilters"
       />
     </app-hero>
-    <div class="tw-pt-8 md:tw-pt-0 tw-pb-brick40 md:tw-pb-brick60 lg:tw-pb-brick80">
+    <div class="tw-pt-8 md:tw-pt-0 tw-pb-[5rem]">
       <the-bricks
         :inscription="inscription"
         :locationIds="locationIds"

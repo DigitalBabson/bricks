@@ -5,7 +5,7 @@
     class="
       bricks__pagination
       tw-container tw-mx-auto
-      tw-mt-brick9 md:tw-mt-brick35 lg:tw-mt-brick50
+      tw-mt-[5rem]
       tw-flex tw-justify-center tw-items-center tw-gap-2
       tw-font-oswald tw-text-[20px]
     "

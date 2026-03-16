@@ -109,6 +109,7 @@
     <ui-modal v-if="showMap" :label="`Location map: ${brick.inscription}`" @close="closeMap">
       <div class="brick__map-wrapper tw-mx-auto tw-table">
         <img
+          v-if="parkLocationImgURL"
           class="tw-object-contain tw-max-w-full tw-max-h-[calc(90vh_-_160px)] md:tw-max-h-[calc(80vh_-_160px)]"
           :src="parkLocationImgURL"
         />
@@ -150,6 +151,7 @@ export default defineComponent({
       parkLocation: "",
       isImgLoading: true,
       hasMissingImage: false,
+      isFetchingLocation: false,
       defaultImgPath: import.meta.env.DEV_PLACEHOLDER_IMAGE
         || '/sites/default/files/2026-03/coming-soon-gray.jpg',
     };
@@ -254,7 +256,7 @@ export default defineComponent({
 
       this.showMap = true;
 
-      if (!this.parkLocation || !this.parkLocationImgURL) {
+      if ((!this.parkLocation || !this.parkLocationImgURL) && !this.isFetchingLocation) {
         this.getParkLocationImgURL();
       }
     },
@@ -308,6 +310,13 @@ export default defineComponent({
       if (this.brick.brickImagePreviewUrl && this.brick.brickImageFullUrl) {
         this.thumbnailUrl = this.brick.brickImagePreviewUrl;
         this.brickImgUrl = this.brick.brickImageFullUrl;
+        // For cached images the browser may not fire @load — clear loading state if already complete
+        this.$nextTick(() => {
+          const imgEl = this.$el?.querySelector?.('img.brick-card__image') as HTMLImageElement | undefined;
+          if (imgEl?.complete) {
+            this.isImgLoading = false;
+          }
+        });
         return;
       }
 
@@ -358,6 +367,7 @@ export default defineComponent({
         return;
       }
 
+      this.isFetchingLocation = true;
       try {
         const url = this.apiUrl +
           `parkLocations/` +
@@ -387,6 +397,8 @@ export default defineComponent({
       } catch {
         this.parkLocation = "";
         this.parkLocationImgURL = "";
+      } finally {
+        this.isFetchingLocation = false;
       }
     },
   },
