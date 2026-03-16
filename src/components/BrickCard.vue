@@ -87,13 +87,11 @@
         Enlarge Brick
       </button>
     </div>
-    <teleport to="body">
-      <transition name="fade">
-        <ui-modal v-if="showImg" @close="closeImg">
-          <img class="tw-object-contain tw-max-h-90vh" :src="brickImgUrl" />
-        </ui-modal>
-      </transition>
-    </teleport>
+    <transition name="fade">
+      <ui-modal v-if="showImg" @close="closeImg">
+        <img class="tw-object-contain tw-max-h-90vh" :src="brickImgUrl" />
+      </ui-modal>
+    </transition>
     <button
       class="
         tw-w-full tw-cursor-pointer tw-py-4 tw-text-brickCourtyardGreen tw-font-oswald tw-uppercase
@@ -107,43 +105,28 @@
       View location details
     </button>
   </article>
-  <teleport to="body">
-    <transition name="fade">
-      <ui-modal v-if="showMap" @close="closeMap">
-        <div class="brick__map-wrapper tw-mx-auto tw-table">
-          <img
-            class="
-              tw-object-contain tw-max-w-full tw-max-h-80vh
-              lg:tw-max-h-70vh
-            "
-            :src="parkLocationImgURL"
-          />
-          <div
-            class="
-              brick__map-caption
-              tw-table-caption
-              tw-bg-white tw-px-6 tw-py-4 tw-text-left
-            "
-          >
-            <div class="tw-mb-2">
-              <span class="tw-font-oswald tw-text-[18px] tw-text-black tw-mr-1">Brick Location:</span>
-              <span
-                class="tw-font-zilla tw-text-[19px] tw-text-black"
-                >{{ parkLocation }}</span
-              >
-            </div>
-            <div>
-              <span class="tw-font-oswald tw-text-[18px] tw-text-black tw-mr-1">Brick Inscription:</span>
-              <span
-                class="tw-font-zilla tw-text-[19px] tw-text-black"
-                >{{ brick.inscription }}</span
-              >
-            </div>
+  <transition name="fade">
+    <ui-modal v-if="showMap" @close="closeMap">
+      <div class="brick__map-wrapper tw-mx-auto tw-table">
+        <img
+          class="tw-object-contain tw-max-w-full tw-max-h-[calc(90vh_-_160px)] md:tw-max-h-[calc(80vh_-_160px)]"
+          :src="parkLocationImgURL"
+        />
+        <div
+          class="brick__map-caption tw-table-caption tw-bg-white tw-px-6 tw-py-4 tw-text-left"
+        >
+          <div class="tw-mb-2">
+            <span class="tw-font-oswald tw-text-[18px] tw-text-black tw-mr-1">Brick Location:</span>
+            <span class="tw-font-zilla tw-text-[19px] tw-text-black">{{ parkLocation }}</span>
+          </div>
+          <div>
+            <span class="tw-font-oswald tw-text-[18px] tw-text-black tw-mr-1">Brick Inscription:</span>
+            <span class="tw-font-zilla tw-text-[19px] tw-text-black">{{ brick.inscription }}</span>
           </div>
         </div>
-      </ui-modal>
-    </transition>
-  </teleport>
+      </div>
+    </ui-modal>
+  </transition>
 </template>
 
 <script lang="ts">
