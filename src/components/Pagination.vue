@@ -27,7 +27,7 @@
         class="tw-px-3 tw-py-2 tw-min-w-[2.5rem] tw-text-[#464646] hover:tw-text-brickBabsonGreen"
         :class="
           page === currentPage
-            ? 'tw-underline tw-underline-offset-4 tw-decoration-2'
+            ? 'page-active'
             : ''
         "
         :aria-current="page === currentPage ? 'page' : undefined"
@@ -91,3 +91,19 @@ export default defineComponent({
   },
 })
 </script>
+
+<style scoped>
+.page-active {
+  position: relative;
+}
+.page-active::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 4px;
+  background-color: #587C32;
+}
+</style>
