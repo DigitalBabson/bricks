@@ -80,11 +80,15 @@
               :style="navOverlayStyle"
               aria-label="Park locations"
             >
-              <!-- Up chevron (mobile only) -->
+              <!-- Heading -->
+              <div class="tw-px-4 tw-py-3 tw-text-center tw-font-oswald tw-text-[16px] tw-font-normal tw-uppercase tw-tracking-widest tw-text-black" style="background-color: #EEF1DC;">
+                Brick Location
+              </div>
+
+              <!-- Up chevron -->
               <div
                 v-if="showUpChevron"
                 class="
-                  md:tw-hidden
                   tw-sticky tw-top-0 tw-z-10
                   tw-flex tw-justify-center tw-py-1
                   tw-bg-gradient-to-b tw-from-white/85 tw-to-transparent
@@ -102,7 +106,7 @@
 
               <ul
                 ref="locationList"
-                class="tw-flex-1 tw-overflow-y-auto tw-text-center"
+                class="tw-flex-1 tw-overflow-y-auto tw-text-center location-list"
                 @scroll="updateChevrons"
               >
                 <li
@@ -117,7 +121,7 @@
                   "
                   :class="[
                     loc.id === selectedZoneId
-                      ? 'tw-font-medium tw-underline'
+                      ? 'tw-font-medium'
                       : 'hover:tw-bg-black/5',
                   ]"
                   @click="selectedZoneId = loc.id"
@@ -126,11 +130,10 @@
                 </li>
               </ul>
 
-              <!-- Down chevron (mobile only) -->
+              <!-- Down chevron -->
               <div
                 v-if="showDownChevron"
                 class="
-                  md:tw-hidden
                   tw-sticky tw-bottom-0 tw-z-10
                   tw-flex tw-justify-center tw-py-1
                   tw-bg-gradient-to-t tw-from-white/85 tw-to-transparent
@@ -351,5 +354,11 @@ export default defineComponent({
   width: 70px;
   height: 1px;
   background: rgba(0, 0, 0, 0.15);
+}
+.location-list {
+  scrollbar-width: none;
+}
+.location-list::-webkit-scrollbar {
+  display: none;
 }
 </style>
