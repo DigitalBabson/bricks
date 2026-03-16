@@ -17,7 +17,7 @@
       :class="currentPage === 1 ? 'tw-opacity-30 tw-cursor-not-allowed' : 'hover:tw-text-brickBabsonGreen'"
       @click="currentPage > 1 && $emit('update:page', currentPage - 1)"
     >
-      &lt;
+      <i class="fa-regular fa-angle-left"></i>
     </button>
 
     <template v-for="(page, index) in visiblePages" :key="`${page}-${index}`">
@@ -44,7 +44,7 @@
       :class="currentPage === totalPages ? 'tw-opacity-30 tw-cursor-not-allowed' : 'hover:tw-text-brickBabsonGreen'"
       @click="currentPage < totalPages && $emit('update:page', currentPage + 1)"
     >
-      &gt;
+      <i class="fa-regular fa-angle-right"></i>
     </button>
   </nav>
 </template>

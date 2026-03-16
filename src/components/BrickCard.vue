@@ -70,7 +70,7 @@
       <button
         v-if="!showComingSoonOverlay"
         class="
-          tw-absolute tw-right-0 tw-top-0 tw-z-10 tw-hidden tw-bg-white tw-px-6 tw-py-4
+          tw-absolute tw-right-0 tw-top-0 tw-z-10 tw-hidden tw-bg-white/70 tw-px-3 tw-py-3
           tw-font-oswald tw-text-base tw-uppercase tw-text-black tw-opacity-0
           tw-transition-opacity tw-duration-200
           md:tw-block
@@ -84,7 +84,7 @@
         @keydown.enter.stop.prevent="openImg"
         @keydown.space.stop.prevent="openImg"
       >
-        Enlarge Brick
+        Enlarge Brick <i class="fa-solid fa-up-right-and-down-left-from-center tw-ml-2"></i>
       </button>
     </div>
     <transition name="fade">

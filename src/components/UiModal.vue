@@ -28,7 +28,7 @@
           aria-label="Close modal"
           @click="$emit('close')"
         >
-          <span class="tw-text-5xl tw-font-light tw-leading-none">&times;</span>
+          <i class="fa-solid fa-xmark tw-text-4xl"></i>
         </button>
         <div class="tw-flex tw-max-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-hidden">
           <slot />

@@ -37,7 +37,7 @@
             aria-label="Close location explorer"
             @click="$emit('close')"
           >
-            <span class="tw-text-5xl tw-font-light tw-leading-none">&times;</span>
+            <i class="fa-solid fa-xmark tw-text-4xl"></i>
           </button>
 
           <!-- Content: mobile stacked + centered, desktop image-fill with list overlaid -->

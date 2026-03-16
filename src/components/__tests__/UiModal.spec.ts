@@ -70,7 +70,7 @@ describe('UiModal', () => {
 
     const closeButton = document.body.querySelector('button')
     expect(closeButton).not.toBeNull()
-    expect(closeButton?.textContent).toContain('×')
+    expect(closeButton?.querySelector('i.fa-solid.fa-xmark')).not.toBeNull()
     wrapper.unmount()
   })
 
