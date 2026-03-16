@@ -11,7 +11,7 @@
     <div class="tw-mb-4 tw-form-control tw-text-m">
       <label
         for="search-brick"
-        class="tw-mb-2 tw-block tw-font-zilla tw-text-[18px] tw-font-semibold tw-leading-tight tw-text-white"
+        class="tw-mb-2 tw-block tw-font-zilla tw-text-[18px] tw-font-normal tw-leading-tight tw-text-white"
       >
         Search by Brick Inscription
       </label>
@@ -27,7 +27,7 @@
     <div>
       <label
         id="locations-label"
-        class="tw-mb-2 tw-block tw-font-zilla tw-text-[18px] tw-font-semibold tw-leading-tight tw-text-white"
+        class="tw-mb-2 tw-block tw-font-zilla tw-text-[18px] tw-font-normal tw-leading-tight tw-text-white"
       >
         Brick Locations
       </label>
@@ -39,7 +39,7 @@
         :aria-activedescendant="activeDescendantId"
         tabindex="0"
         class="
-          tw-max-h-[108px] tw-overflow-y-auto tw-bg-white
+          tw-max-h-[84px] tw-overflow-y-auto tw-bg-white
           focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-brickSummerNight
         "
         @keydown.arrow-down.prevent="moveActive(1)"
@@ -57,7 +57,7 @@
           :key="location.id"
           role="option"
           :aria-selected="locationIds.includes(location.id)"
-          class="tw-cursor-pointer tw-px-3 tw-py-2 tw-font-oswald tw-text-[16px] tw-leading-tight"
+          class="tw-cursor-pointer tw-px-3 tw-py-[4px] tw-font-oswald tw-text-[16px] tw-leading-tight"
           :class="optionClasses(location.id, index)"
           @click="selectLocation(location.id)"
         >
@@ -94,7 +94,7 @@
             :aria-label="`Remove ${filter.label}: ${filter.value}`"
             @click="removeFilter(filter.type, filter.locationId)"
           >
-            ×
+            <i class="fa-solid fa-xmark tw-text-[10px]"></i>
           </button>
         </span>
 
