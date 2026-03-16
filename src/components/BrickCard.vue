@@ -431,14 +431,12 @@ h3 {
     rgba(0,0,0,0.10) 12px,
     rgba(0,0,0,0.10) 24px
   );
-  border-radius: 4px;
   animation: brick-card-pulse 1.2s ease-in-out infinite;
 }
 .brick-card__image {
   display: block;
   width: 100%;
   height: auto;
-  border-radius: 4px;
 }
 .brick-card__image--loading {
   inset: 0;
