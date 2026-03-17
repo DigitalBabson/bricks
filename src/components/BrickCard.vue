@@ -415,9 +415,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-h3 {
-  font-size: 2rem;
-}
 .brick__map-caption {
   caption-side: bottom;
 }

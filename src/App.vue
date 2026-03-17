@@ -149,12 +149,3 @@ export default defineComponent({
   },
 })
 </script>
-
-<style>
-// @todo: can we remove this?
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-</style>
