@@ -6,6 +6,11 @@ dist-ssr
 .env
 .env.*
 !.env.example
+!.env.dev
+!.env.localdev
+!.env.stage
+!.env.stage2
+!.env.production
 
 # Testing
 coverage

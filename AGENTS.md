@@ -44,7 +44,19 @@ App.vue                    → provides defaultEnv/defaultUrl via provide/inject
 
 ### API environments
 
-Configured in `App.vue` provide block. Switch by changing `drupalEnv.prod` to `drupalEnv.local|dev|stage`.
+Configured via Vite's mode system — `.env.[mode]` files are loaded at build time.
+
+| Command | Mode / env file | Drupal endpoint |
+|---------|-----------------|-----------------|
+| `npm run dev` | `.env.dev` | `babsondev.prod.acquia-sites.com` |
+| `npm run dev:stage` | `.env.stage` | `test-www.babson.edu` |
+| `npm run dev:stage2` | `.env.stage2` | `stage2.babson.edu` |
+| `npm run dev:prod` | `.env.production` | `intranet.babson.edu` |
+| `npm run build:stage` | `.env.stage` | `test-www.babson.edu` |
+| `npm run build:stage2` | `.env.stage2` | `stage2.babson.edu` |
+| `npm run build:production` | `.env.production` | `intranet.babson.edu` |
+
+To use real secrets locally, create `.env.[mode].local` (gitignored) with your actual `DEV_SEARCHSTAX_TOKEN`.
 
 ## Key conventions
 
