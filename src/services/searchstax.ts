@@ -37,7 +37,7 @@ export async function searchBricks(params: SearchstaxParams): Promise<Searchstax
   url.searchParams.set('wt', 'json')
 
   if (locationIds && locationIds.length > 0) {
-    const zoneFilter = locationIds.join(' OR ')
+    const zoneFilter = locationIds.map(escapeSolrTerm).join(' OR ')
     url.searchParams.append('fq', `ss_zone_uuid:(${zoneFilter})`)
   }
 

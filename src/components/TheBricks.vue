@@ -304,7 +304,7 @@ export default defineComponent({
         const encodedIds = this.locationIds.map((locationId) => encodeURIComponent(locationId)).join(',')
         return this.apiUrl +
           `bricks?page[limit]=${this.pageSize}` +
-          `&sort=field_brick_inscription` +
+          `&sort=field_sort_alpha` +
           `&filter[field_brick_zone.id][operator]=IN` +
           `&filter[field_brick_zone.id][value]=${encodedIds}` +
           this.buildDrupalImageQuery() +
@@ -315,7 +315,7 @@ export default defineComponent({
         `bricks?page[limit]=${this.pageSize}` +
         `&page[offset]=${offset}` +
         this.buildDrupalImageQuery() +
-        `&sort=field_brick_inscription`;
+        `&sort=field_sort_alpha`;
     },
     async fetchViaSearchstax() {
       const offset = (this.currentPage - 1) * this.pageSize;
@@ -343,7 +343,7 @@ export default defineComponent({
         `&filter[field_brick_inscription][value]=${encodeURIComponent(this.inscription)}` +
         this.buildDrupalImageQuery() +
         `&page[offset]=${offset}` +
-        `&sort=field_brick_inscription`;
+        `&sort=field_sort_alpha`;
 
       if (this.locationIds.length > 0) {
         const encodedIds = this.locationIds.map((id) => encodeURIComponent(id)).join(',');

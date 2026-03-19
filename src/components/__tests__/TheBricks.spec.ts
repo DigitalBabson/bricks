@@ -146,14 +146,14 @@ describe('TheBricks', () => {
 
   // --- Existing tests (updated for new behavior) ---
 
-  it('includes sort=field_brick_inscription in browse requests', async () => {
+  it('includes sort=field_sort_alpha in browse requests', async () => {
     mountTheBricks()
     await flushPromises()
 
     const url = mockedAxios.get.mock.calls[0][0] as string
-    expect(url).toContain('&sort=field_brick_inscription')
+    expect(url).toContain('&sort=field_sort_alpha')
     expect(url).toContain('&include=field_brick_image')
-    expect(url).toContain('&fields[brick]=field_brick_inscription,field_brick_image,field_brick_zone')
+    expect(url).toContain('&fields[brick]=field_brick_inscription,field_sort_alpha,field_brick_image,field_brick_zone')
     expect(url).toContain('&fields[file--file]=uri,url,image_style_uri')
   })
 
