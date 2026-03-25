@@ -1,14 +1,16 @@
 <template>
   <article
     class="
-      brick-card tw-group tw-cursor-default tw-shadow-brickCard tw-text-center
-      focus-within:tw-ring-2 focus-within:tw-ring-brickSummerNight
+      brick-card tw-cursor-default tw-shadow-brickCard tw-text-center
     "
-    tabindex="0"
-    @keydown.enter.self.prevent="openMap"
-    @keydown.space.self.prevent="openMap"
   >
-    <div class="brick-card__media tw-cursor-pointer" @click="openMap">
+    <div
+      class="brick-card__media tw-group tw-cursor-pointer focus-visible:tw-ring-2 focus-visible:tw-ring-brickSummerNight"
+      tabindex="0"
+      @click="handleImageClick"
+      @keydown.enter.prevent="handleImageClick"
+      @keydown.space.prevent="handleImageClick"
+    >
       <div
         v-if="showPlaceholder"
         class="brick-card__placeholder"
@@ -73,15 +75,14 @@
           tw-font-oswald tw-text-base tw-uppercase tw-text-black tw-opacity-0
           tw-transition-all tw-duration-200
           md:tw-block
-          group-hover:tw-opacity-100
+          group-hover:tw-opacity-100 group-focus-within:tw-opacity-100
           hover:tw-bg-black hover:tw-text-white
           focus-visible:tw-bg-black focus-visible:tw-text-white
           focus-visible:tw-opacity-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white
         "
+        tabindex="-1"
         aria-label="Enlarge brick image"
         @click.stop="openImg"
-        @keydown.enter.stop.prevent="openImg"
-        @keydown.space.stop.prevent="openImg"
       >
         Enlarge Brick <i class="fa-solid fa-up-right-and-down-left-from-center tw-ml-2"></i>
       </button>
@@ -94,7 +95,8 @@
     <button
       class="
         tw-w-full tw-cursor-pointer tw-py-4 tw-text-brickCourtyardGreen tw-font-oswald tw-uppercase
-        group-hover:tw-bg-brickMediumGreen group-hover:tw-text-white
+        hover:tw-bg-brickMediumGreen hover:tw-text-white
+        focus-visible:tw-bg-brickMediumGreen focus-visible:tw-text-white
         tw-transition-colors tw-duration-200 tw-ease-in-out
       "
       @click.stop="openMap"
@@ -235,9 +237,8 @@ export default defineComponent({
 
       return candidates.some((value) => value === placeholderPath);
     },
-    handleImageClick(event: MouseEvent) {
+    handleImageClick() {
       if (this.showComingSoonOverlay) {
-        event.preventDefault();
         return;
       }
 
