@@ -2,8 +2,8 @@
   <div class="tw-w-full min-[700px]:tw-mb-[60px]">
     <section
       class="
-        tw-relative tw-w-full tw-h-[355px] tw-bg-cover tw-bg-center
-        min-[700px]:tw-h-[276px]
+        tw-hidden min-[700px]:tw-block
+        tw-relative tw-w-full tw-h-[276px] tw-bg-cover tw-bg-center
       "
       :style="{ backgroundImage: `url(${heroImage})` }"
     >
@@ -21,7 +21,7 @@
       />
     </section>
 
-    <div class="tw-relative tw-mx-auto tw-max-w-brickMWL -tw-mt-[355px] min-[700px]:-tw-mt-[245px] min-[700px]:tw-px-6">
+    <div class="tw-relative tw-mx-auto tw-max-w-brickMWL min-[700px]:-tw-mt-[245px] min-[700px]:tw-px-6">
       <div class="tw-mx-auto tw-w-full tw-max-w-[700px]">
         <slot />
       </div>

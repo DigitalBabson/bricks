@@ -25,7 +25,7 @@
             tw-absolute tw-right-0 tw-top-[-60px] tw-z-30
             tw-flex tw-h-[56px] tw-w-[56px] tw-items-center tw-justify-center
             tw-rounded tw-text-white
-            md:tw-right-[-66px] md:tw-top-[-66px]
+            min-[1250px]:tw-right-[-66px] min-[1250px]:tw-top-[-66px]
             hover:tw-opacity-70 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white
           "
           aria-label="Close modal"

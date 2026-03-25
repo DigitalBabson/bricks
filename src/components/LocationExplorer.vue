@@ -26,14 +26,14 @@
           <button
             ref="closeButton"
             class="
-              tw-absolute tw-z-30
+              tw-absolute tw-z-30 tw-right-0 tw-top-[-60px]
               tw-w-[56px] tw-h-[56px]
               tw-flex tw-items-center tw-justify-center
-              tw-text-white tw-leading-none
+              tw-rounded tw-text-white tw-leading-none
+              min-[1250px]:tw-right-[-66px] min-[1250px]:tw-top-[-66px]
               hover:tw-opacity-70 focus-visible:tw-outline-none
-              focus-visible:tw-ring-2 focus-visible:tw-ring-white tw-rounded
+              focus-visible:tw-ring-2 focus-visible:tw-ring-white
             "
-            :style="closeButtonStyle"
             aria-label="Close location explorer"
             @click="$emit('close')"
           >
@@ -182,7 +182,6 @@ export default defineComponent({
       imageRenderedLeft: 0,
       imageRenderedWidth: 0,
       isMobile: false,
-      isNarrowDesktop: false,
     }
   },
   computed: {
@@ -205,29 +204,6 @@ export default defineComponent({
         left: `${this.imageRenderedLeft + 10}px`,
         width: '180px',
         maxHeight: `${this.imageRenderedHeight - 20}px`,
-      }
-    },
-    closeButtonStyle(): Record<string, string> {
-      if (this.isMobile) {
-        // Mobile: top-right of the overlay container
-        return { top: '-60px', right: '0px' }
-      }
-      if (!this.imageRenderedHeight) {
-        return { top: '12px', right: '12px' }
-      }
-      const imageRightEdge = this.imageRenderedLeft + this.imageRenderedWidth
-      const safeTop = Math.max(0, this.imageRenderedTop - 56 - 10)
-      if (this.isNarrowDesktop) {
-        // ≤1250px: above the image, right-aligned to the image edge
-        return {
-          top: `${safeTop}px`,
-          left: `${imageRightEdge - 56}px`,
-        }
-      }
-      // Wide desktop: outside the image, to the right
-      return {
-        top: `${safeTop}px`,
-        left: `${imageRightEdge + 10}px`,
       }
     },
   },
@@ -286,7 +262,6 @@ export default defineComponent({
     },
     checkMobile() {
       this.isMobile = window.innerWidth < 768
-      this.isNarrowDesktop = window.innerWidth <= 1250
     },
     updateNavHeight() {
       this.checkMobile()
