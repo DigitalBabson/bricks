@@ -4,8 +4,11 @@
       brick-card tw-group tw-cursor-default tw-shadow-brickCard tw-text-center
       focus-within:tw-ring-2 focus-within:tw-ring-brickSummerNight
     "
+    tabindex="0"
+    @keydown.enter.self.prevent="openMap"
+    @keydown.space.self.prevent="openMap"
   >
-    <div class="brick-card__media">
+    <div class="brick-card__media tw-cursor-pointer" @click="openMap">
       <div
         v-if="showPlaceholder"
         class="brick-card__placeholder"
@@ -19,16 +22,12 @@
           tw-transition-opacity tw-duration-200 tw-ease-in-out
           brick-card__image
         "
-        :class="[
-          showComingSoonOverlay ? '' : 'tw-cursor-pointer',
-          showPlaceholder ? 'brick-card__image--loading' : ''
-        ]"
+        :class="showPlaceholder ? 'brick-card__image--loading' : ''"
         :src="thumbnailUrl"
         :alt="brick?.inscription || 'Brick image'"
         loading="lazy"
         @load="onImgLoad"
         @error="onImgError"
-        @click="handleImageClick"
       />
 
       <div
@@ -72,12 +71,12 @@
         class="
           tw-absolute tw-right-0 tw-top-0 tw-z-10 tw-hidden tw-bg-white/70 tw-px-3 tw-py-3
           tw-font-oswald tw-text-base tw-uppercase tw-text-black tw-opacity-0
-          tw-transition-opacity tw-duration-200
+          tw-transition-all tw-duration-200
           md:tw-block
-          group-hover:tw-opacity-100 group-focus-within:tw-opacity-100
+          group-hover:tw-opacity-100
           hover:tw-bg-black hover:tw-text-white
-          focus:tw-bg-black focus:tw-text-white
-          focus:tw-opacity-100 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white
+          focus-visible:tw-bg-black focus-visible:tw-text-white
+          focus-visible:tw-opacity-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white
         "
         aria-label="Enlarge brick image"
         @click.stop="openImg"
@@ -95,10 +94,8 @@
     <button
       class="
         tw-w-full tw-cursor-pointer tw-py-4 tw-text-brickCourtyardGreen tw-font-oswald tw-uppercase
-        hover:tw-bg-brickMediumGreen hover:tw-text-white
-        focus:tw-outline-none
-        active:tw-outline-none
-        tw-transition-background tw-duration-200 tw-ease-in-out
+        group-hover:tw-bg-brickMediumGreen group-hover:tw-text-white
+        tw-transition-colors tw-duration-200 tw-ease-in-out
       "
       @click.stop="openMap"
     >

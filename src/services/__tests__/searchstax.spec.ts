@@ -81,10 +81,10 @@ describe('searchBricks', () => {
 
     await searchBricks({ ...baseParams, locationIds: ['zone-1'] })
 
-    const url = mockedAxios.get.mock.calls[0][0] as string
-    // URL-encoded version of fq=ss_zone_uuid:(zone-1)
+    const url = decodeURIComponent(mockedAxios.get.mock.calls[0][0] as string)
+    // escapeSolrTerm escapes hyphens: zone-1 → zone\-1
     expect(url).toContain('ss_zone_uuid')
-    expect(url).toContain('zone-1')
+    expect(url).toContain('zone\\-1')
   })
 
   it('adds OR-joined zone UUID filter for multiple locations', async () => {
@@ -92,10 +92,10 @@ describe('searchBricks', () => {
 
     await searchBricks({ ...baseParams, locationIds: ['zone-1', 'zone-2'] })
 
-    const url = mockedAxios.get.mock.calls[0][0] as string
+    const url = decodeURIComponent(mockedAxios.get.mock.calls[0][0] as string)
     expect(url).toContain('ss_zone_uuid')
-    expect(url).toContain('zone-1')
-    expect(url).toContain('zone-2')
+    expect(url).toContain('zone\\-1')
+    expect(url).toContain('zone\\-2')
   })
 
   it('maps SearchStax fields to Brick objects correctly', async () => {

@@ -153,7 +153,7 @@ describe('TheBricks', () => {
     const url = mockedAxios.get.mock.calls[0][0] as string
     expect(url).toContain('&sort=field_sort_alpha')
     expect(url).toContain('&include=field_brick_image')
-    expect(url).toContain('&fields[brick]=field_brick_inscription,field_sort_alpha,field_brick_image,field_brick_zone')
+    expect(url).toContain('&fields[brick]=field_brick_inscription,field_brick_image,field_brick_zone')
     expect(url).toContain('&fields[file--file]=uri,url,image_style_uri')
   })
 
@@ -163,7 +163,8 @@ describe('TheBricks', () => {
 
     const url = mockedAxios.get.mock.calls[0][0] as string
     expect(url).toContain('filter[field_brick_zone.id][operator]=IN')
-    expect(url).toContain('filter[field_brick_zone.id][value]=loc-2,loc-3')
+    expect(url).toContain('filter[field_brick_zone.id][value][0]=loc-2')
+    expect(url).toContain('filter[field_brick_zone.id][value][1]=loc-3')
     expect(url).not.toContain('filter[field_brick_inscription][operator]=CONTAINS')
   })
 
@@ -298,7 +299,8 @@ describe('TheBricks', () => {
 
     expect(vm.currentPage).toBe(1)
     const url = mockedAxios.get.mock.calls[0][0] as string
-    expect(url).toContain('filter[field_brick_zone.id][value]=loc-1,loc-2')
+    expect(url).toContain('filter[field_brick_zone.id][value][0]=loc-1')
+    expect(url).toContain('filter[field_brick_zone.id][value][1]=loc-2')
   })
 
   it('shows the no-results message when a location filter returns zero results', async () => {
@@ -474,7 +476,7 @@ describe('TheBricks', () => {
     const url = mockedAxios.get.mock.calls[0][0] as string
     expect(url).toContain('filter[field_brick_inscription][operator]=CONTAINS')
     expect(url).toContain('filter[field_brick_zone.id][operator]=IN')
-    expect(url).toContain('filter[field_brick_zone.id][value]=zone-1')
+    expect(url).toContain('filter[field_brick_zone.id][value][0]=zone-1')
 
     vi.mocked(console.warn).mockRestore()
   })

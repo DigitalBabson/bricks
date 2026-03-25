@@ -6,7 +6,7 @@ describe('LocationExplorerTrigger', () => {
   it('renders the CTA copy', () => {
     const wrapper = mount(LocationExplorerTrigger)
 
-    expect(wrapper.text()).toBe('View Map of Brick Locations')
+    expect(wrapper.text()).toBe('View Brick Locations')
   })
 
   it('emits openLocations on click', async () => {

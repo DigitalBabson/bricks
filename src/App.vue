@@ -10,7 +10,7 @@
         @clearAll="clearAllFilters"
       />
     </app-hero>
-    <div class="tw-pt-8 md:tw-pt-0 tw-pb-[5rem]">
+    <div class="tw-pt-8 min-[700px]:tw-pt-0 tw-pb-[5rem]">
       <the-bricks
         :inscription="inscription"
         :locationIds="locationIds"
@@ -19,7 +19,7 @@
     </div>
   </main>
   <location-explorer-trigger
-    class="md:tw-hidden"
+    class="lg:tw-hidden"
     :floating="true"
     @openLocations="showLocationExplorer = true"
   />

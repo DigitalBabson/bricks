@@ -299,14 +299,18 @@ export default defineComponent({
       this.currentPage = page;
       this.fetchBricks();
     },
+    buildLocationFilter(): string {
+      return this.locationIds
+        .map((id, i) => `&filter[field_brick_zone.id][value][${i}]=${encodeURIComponent(id)}`)
+        .join('');
+    },
     buildUrl(offset: number): string {
       if (this.locationIds.length > 0) {
-        const encodedIds = this.locationIds.map((locationId) => encodeURIComponent(locationId)).join(',')
         return this.apiUrl +
           `bricks?page[limit]=${this.pageSize}` +
           `&sort=field_sort_alpha` +
           `&filter[field_brick_zone.id][operator]=IN` +
-          `&filter[field_brick_zone.id][value]=${encodedIds}` +
+          this.buildLocationFilter() +
           this.buildDrupalImageQuery() +
           `&page[offset]=${offset}`;
       }
@@ -346,9 +350,8 @@ export default defineComponent({
         `&sort=field_sort_alpha`;
 
       if (this.locationIds.length > 0) {
-        const encodedIds = this.locationIds.map((id) => encodeURIComponent(id)).join(',');
         url += `&filter[field_brick_zone.id][operator]=IN` +
-               `&filter[field_brick_zone.id][value]=${encodedIds}`;
+               this.buildLocationFilter();
       }
 
       const response = await axios.get<BrickApiResponse>(url);

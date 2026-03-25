@@ -30,8 +30,8 @@
               tw-w-[56px] tw-h-[56px]
               tw-flex tw-items-center tw-justify-center
               tw-text-white tw-leading-none
-              hover:tw-opacity-70 focus:tw-outline-none
-              focus:tw-ring-2 focus:tw-ring-white tw-rounded
+              hover:tw-opacity-70 focus-visible:tw-outline-none
+              focus-visible:tw-ring-2 focus-visible:tw-ring-white tw-rounded
             "
             :style="closeButtonStyle"
             aria-label="Close location explorer"
@@ -81,7 +81,7 @@
               aria-label="Park locations"
             >
               <!-- Heading -->
-              <div class="tw-px-4 tw-py-3 tw-text-center tw-font-oswald tw-text-[16px] tw-font-normal tw-uppercase tw-tracking-widest tw-text-black" style="background-color: #EEF1DC;">
+              <div class="tw-px-4 tw-py-3 tw-text-center tw-font-oswald tw-text-[16px] tw-font-normal tw-uppercase tw-tracking-[0.5px] tw-text-black" style="background-color: #EEF1DC;">
                 Brick Location
               </div>
 
@@ -117,7 +117,7 @@
                     location-item
                     tw-px-2 tw-py-2 tw-cursor-pointer
                     tw-font-oswald tw-font-light tw-text-[16px] tw-leading-6
-                    tw-tracking-[0.08em] tw-text-black tw-text-center
+                    tw-tracking-[0.5px] tw-text-black tw-text-center
                     tw-transition-colors tw-duration-150
                   "
                   :class="[
@@ -182,6 +182,7 @@ export default defineComponent({
       imageRenderedLeft: 0,
       imageRenderedWidth: 0,
       isMobile: false,
+      isNarrowDesktop: false,
     }
   },
   computed: {
@@ -199,11 +200,10 @@ export default defineComponent({
       }
       // Desktop: overlaid on the image
       if (!this.imageRenderedHeight) return {}
-      const navWidth = this.imageRenderedWidth > 700 ? 220 : 160
       return {
         top: `${this.imageRenderedTop}px`,
         left: `${this.imageRenderedLeft + 10}px`,
-        maxWidth: `${navWidth}px`,
+        width: '180px',
         maxHeight: `${this.imageRenderedHeight - 20}px`,
       }
     },
@@ -215,11 +215,18 @@ export default defineComponent({
       if (!this.imageRenderedHeight) {
         return { top: '12px', right: '12px' }
       }
-      // Desktop: outside the image, diagonally from top-right corner
-      // Position using left: image right edge + 10px gap
       const imageRightEdge = this.imageRenderedLeft + this.imageRenderedWidth
+      const safeTop = Math.max(0, this.imageRenderedTop - 56 - 10)
+      if (this.isNarrowDesktop) {
+        // ≤1250px: above the image, right-aligned to the image edge
+        return {
+          top: `${safeTop}px`,
+          left: `${imageRightEdge - 56}px`,
+        }
+      }
+      // Wide desktop: outside the image, to the right
       return {
-        top: `${this.imageRenderedTop - 56 - 10}px`,
+        top: `${safeTop}px`,
         left: `${imageRightEdge + 10}px`,
       }
     },
@@ -238,6 +245,7 @@ export default defineComponent({
   mounted() {
     document.addEventListener('keydown', this.onKeydown)
     lockBodyScroll()
+    this.checkMobile()
     this.$nextTick(() => {
       this.updateChevrons()
       ;(this.$refs.closeButton as HTMLElement)?.focus()
@@ -278,6 +286,7 @@ export default defineComponent({
     },
     checkMobile() {
       this.isMobile = window.innerWidth < 768
+      this.isNarrowDesktop = window.innerWidth <= 1250
     },
     updateNavHeight() {
       this.checkMobile()

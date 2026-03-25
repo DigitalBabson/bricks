@@ -20,7 +20,7 @@ function escapeSolrTerm(value: string): string {
 }
 
 function buildKeywordFilter(keyword: string): string {
-  const normalized = keyword.trim().replace(/\s+/g, ' ')
+  const normalized = keyword.trim().replace(/\s+/g, ' ').replace(/"/g, '')
   const escaped = escapeSolrTerm(normalized)
   return `tcngramm_X3b_en_description:"${escaped}"`
 }

@@ -1,9 +1,9 @@
 <template>
-  <div class="tw-w-full lg:tw-mb-[60px]">
+  <div class="tw-w-full min-[700px]:tw-mb-[60px]">
     <section
       class="
-        tw-relative tw-w-full tw-h-[355px] tw-bg-cover tw-bg-center md:tw-h-[355px]
-        lg:tw-h-[276px]
+        tw-relative tw-w-full tw-h-[355px] tw-bg-cover tw-bg-center
+        min-[700px]:tw-h-[276px]
       "
       :style="{ backgroundImage: `url(${heroImage})` }"
     >
@@ -13,7 +13,7 @@
       <!-- Desktop trigger: flush to viewport edge, anchored to content at 3xl -->
       <location-explorer-trigger
         class="
-          tw-hidden md:tw-block
+          tw-hidden lg:tw-block
           tw-absolute tw-top-12 tw-z-10
           tw-right-0
         "
@@ -21,8 +21,8 @@
       />
     </section>
 
-    <div class="tw-relative tw-mx-auto tw-max-w-brickMWL -tw-mt-[355px] md:-tw-mt-[355px] md:tw-px-6 lg:-tw-mt-[245px]">
-      <div class="tw-mx-auto tw-h-[355px] tw-w-full tw-max-w-[700px] md:tw-min-h-[310px] lg:tw-h-auto">
+    <div class="tw-relative tw-mx-auto tw-max-w-brickMWL -tw-mt-[355px] min-[700px]:-tw-mt-[245px] min-[700px]:tw-px-6">
+      <div class="tw-mx-auto tw-w-full tw-max-w-[700px]">
         <slot />
       </div>
     </div>

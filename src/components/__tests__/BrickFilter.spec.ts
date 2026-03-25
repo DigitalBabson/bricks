@@ -66,7 +66,7 @@ describe('BrickFilter', () => {
     expect(listbox.classes()).toContain('tw-bg-white')
     expect(listbox.classes()).not.toContain('tw-border')
     expect(form.classes()).toContain('tw-max-w-[700px]')
-    expect(form.classes()).toContain('md:tw-min-h-[310px]')
+    expect(form.classes()).toContain('tw-gap-4')
 
     await listbox.trigger('focus')
     expect(listbox.attributes('aria-activedescendant')).toBe('location-option-loc-1')

@@ -1,14 +1,14 @@
 <template>
   <button
     class="
-      tw-bg-brickCourtyardGreen tw-text-white tw-font-oswald tw-text-[14px] tw-font-normal tw-uppercase
+      tw-bg-[#EEAF00] tw-text-[#1a1a1a] tw-font-oswald tw-text-[14px] tw-font-normal tw-uppercase
       hover:tw-opacity-95
       tw-transition-colors tw-duration-200
     "
     :class="buttonClasses"
     @click="$emit('openLocations')"
   >
-    View Map of Brick Locations
+    View Brick Locations
   </button>
 </template>
 

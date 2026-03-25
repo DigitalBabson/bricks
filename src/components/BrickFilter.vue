@@ -2,13 +2,13 @@
   <form
     class="
       bricks__search-form
-      tw-mx-auto tw-h-full tw-w-full tw-max-w-[700px] md:tw-h-auto md:tw-min-h-[310px]
+      tw-mx-auto tw-w-full tw-max-w-[700px]
       tw-bg-brickCourtyardGreen tw-px-12 tw-py-5
-      tw-flex tw-flex-col tw-justify-between
+      tw-flex tw-flex-col tw-gap-4
     "
     @submit.prevent
   >
-    <div class="tw-mb-4 tw-form-control tw-text-m">
+    <div class="tw-form-control tw-text-m">
       <label
         for="search-brick"
         class="tw-mb-2 tw-block tw-font-zilla tw-text-[18px] tw-font-normal tw-leading-tight tw-text-white"
@@ -17,7 +17,7 @@
       </label>
       <input
         id="search-brick"
-        class="tw-w-full tw-border tw-border-gray-300 tw-px-3 tw-py-1 tw-leading-8"
+        class="tw-w-full tw-border tw-border-gray-300 tw-px-3 tw-py-1 tw-leading-8 tw-font-oswald"
         :value="inscription"
         type="text"
         @input="$emit('update:inscription', ($event.target as HTMLInputElement).value)"
@@ -39,8 +39,8 @@
         :aria-activedescendant="activeDescendantId"
         tabindex="0"
         class="
-          tw-max-h-[84px] tw-overflow-y-auto tw-bg-white
-          focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-brickSummerNight
+          tw-max-h-[84px] tw-overflow-y-scroll tw-bg-white
+          focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-brickSummerNight
         "
         @keydown.arrow-down.prevent="moveActive(1)"
         @keydown.arrow-up.prevent="moveActive(-1)"
@@ -66,7 +66,7 @@
       </ul>
     </div>
 
-    <div class="tw-mt-4">
+    <div>
       <div
         class="
           bricks__filter-actions
@@ -89,7 +89,6 @@
             class="
               tw-inline-flex tw-h-[20px] tw-w-[20px] tw-items-center tw-justify-center
               tw-rounded-full tw-bg-black tw-text-[20px] tw-leading-none tw-text-white
-              focus:tw-outline-none
             "
             :aria-label="`Remove ${filter.label}: ${filter.value}`"
             @click="removeFilter(filter.type, filter.locationId)"
@@ -101,7 +100,7 @@
         <button
           class="
             tw-rounded-[23px] tw-px-3 tw-py-1
-            tw-font-oswald tw-text-sm tw-font-semibold
+            tw-font-oswald tw-text-sm tw-font-normal
             tw-transition-colors tw-duration-200
           "
           :class="activeFilters.length === 0
@@ -348,3 +347,17 @@ export default defineComponent({
   },
 })
 </script>
+
+<style scoped>
+[role="listbox"]::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 6px;
+}
+[role="listbox"]::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background-color: rgba(0, 0, 0, 0.3);
+}
+[role="listbox"]::-webkit-scrollbar-track {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+</style>

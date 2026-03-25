@@ -34,14 +34,14 @@ describe('AppHero', () => {
     expect(wrapper.find('.slot-content').exists()).toBe(true)
     expect(wrapper.text()).toContain('Search Form')
     expect(wrapper.find('.tw-max-w-\\[700px\\]').exists()).toBe(true)
-    expect(wrapper.find('.lg\\:-tw-mt-\\[245px\\]').exists()).toBe(true)
+    expect(wrapper.find('.min-\\[700px\\]\\:-tw-mt-\\[245px\\]').exists()).toBe(true)
   })
 
   it('renders LocationExplorerTrigger', () => {
     const wrapper = mount(AppHero)
     const trigger = wrapper.findComponent(LocationExplorerTrigger)
     expect(trigger.exists()).toBe(true)
-    expect(trigger.text()).toBe('View Map of Brick Locations')
+    expect(trigger.text()).toBe('View Brick Locations')
   })
 
   it('emits openLocations when trigger is clicked', async () => {
@@ -55,7 +55,7 @@ describe('AppHero', () => {
     const wrapper = mount(AppHero)
     const trigger = wrapper.findComponent(LocationExplorerTrigger)
     expect(trigger.classes()).toContain('tw-hidden')
-    expect(trigger.classes()).toContain('md:tw-block')
+    expect(trigger.classes()).toContain('lg:tw-block')
   })
 
   it('has semi-transparent backdrop for slot content', () => {
@@ -71,7 +71,7 @@ describe('AppHero', () => {
       slots: { default: '<div class="slot-content">Search Form</div>' }
     })
 
-    expect(wrapper.find('.lg\\:tw-mb-\\[60px\\]').exists()).toBe(true)
-    expect(wrapper.find('.lg\\:-tw-mt-\\[245px\\]').exists()).toBe(true)
+    expect(wrapper.find('.min-\\[700px\\]\\:tw-mb-\\[60px\\]').exists()).toBe(true)
+    expect(wrapper.find('.min-\\[700px\\]\\:-tw-mt-\\[245px\\]').exists()).toBe(true)
   })
 })

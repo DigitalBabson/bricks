@@ -72,7 +72,7 @@ describe('LocationExplorer', () => {
       expect(item.classes()).toContain('tw-font-oswald')
       expect(item.classes()).toContain('tw-text-[16px]')
       expect(item.classes()).toContain('tw-leading-6')
-      expect(item.classes()).toContain('tw-tracking-[0.08em]')
+      expect(item.classes()).toContain('tw-tracking-[0.5px]')
       expect(item.classes()).toContain('tw-text-center')
     })
   })

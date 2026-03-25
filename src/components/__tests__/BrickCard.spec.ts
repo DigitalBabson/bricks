@@ -134,7 +134,7 @@ describe('BrickCard', () => {
       const article = wrapper.find('article')
 
       expect(article.exists()).toBe(true)
-      expect(article.attributes('tabindex')).toBeUndefined()
+      expect(article.attributes('tabindex')).toBe('0')
       expect(article.attributes('role')).toBeUndefined()
       expect(article.attributes('aria-label')).toBeUndefined()
     })
@@ -215,10 +215,11 @@ describe('BrickCard', () => {
       expect(mockedAxios.get).not.toHaveBeenCalled()
     })
 
-    it('opens the image modal when the image is clicked', async () => {
+    it('opens the map modal when the image is clicked', async () => {
       await wrapper.find('img').trigger('click')
 
-      expect(getBrickCardVm(wrapper).showImg).toBe(true)
+      expect(getBrickCardVm(wrapper).showMap).toBe(true)
+      expect(getBrickCardVm(wrapper).showImg).toBe(false)
     })
 
     it('opens the image modal when the enlarge button is clicked', async () => {
