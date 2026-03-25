@@ -197,9 +197,8 @@ describe('BrickFilter', () => {
     expect(clearAllButton?.classes()).toContain('tw-rounded-[23px]')
     expect(wrapper.find('button[aria-label^="Remove"]').classes()).toContain('tw-bg-black')
     expect(wrapper.find('button[aria-label^="Remove"]').classes()).toContain('tw-text-white')
-    expect(wrapper.find('button[aria-label^="Remove"]').classes()).toContain('tw-h-[20px]')
-    expect(wrapper.find('button[aria-label^="Remove"]').classes()).toContain('tw-w-[20px]')
-    expect(wrapper.find('button[aria-label^="Remove"]').classes()).toContain('tw-text-[20px]')
+    expect(wrapper.find('button[aria-label^="Remove"]').classes()).toContain('tw-h-[15px]')
+    expect(wrapper.find('button[aria-label^="Remove"]').classes()).toContain('tw-w-[15px]')
   })
 
   it('removes only the targeted location pill, clears inscription, and disables clear all when inactive', async () => {

@@ -7,6 +7,8 @@
     <div
       class="brick-card__media tw-group tw-cursor-pointer focus-visible:tw-ring-2 focus-visible:tw-ring-brickSummerNight"
       tabindex="0"
+      role="button"
+      :aria-label="`Enlarge brick image: ${brick?.inscription || 'Brick'}`"
       @click="handleImageClick"
       @keydown.enter.prevent="handleImageClick"
       @keydown.space.prevent="handleImageClick"
@@ -71,10 +73,10 @@
       <button
         v-if="!showComingSoonOverlay"
         class="
-          tw-absolute tw-right-0 tw-top-0 tw-z-10 tw-hidden tw-bg-white/70 tw-px-3 tw-py-3
-          tw-font-oswald tw-text-base tw-uppercase tw-text-black tw-opacity-0
+          tw-absolute tw-right-0 tw-top-0 tw-z-10 tw-bg-white/70 tw-px-3 tw-py-3
+          tw-font-oswald tw-text-base tw-uppercase tw-text-black
           tw-transition-all tw-duration-200
-          md:tw-block
+          md:tw-opacity-0
           group-hover:tw-opacity-100 group-focus-within:tw-opacity-100
           hover:tw-bg-black hover:tw-text-white
           focus-visible:tw-bg-black focus-visible:tw-text-white
@@ -84,7 +86,7 @@
         aria-label="Enlarge brick image"
         @click.stop="openImg"
       >
-        Enlarge Brick <i class="fa-solid fa-up-right-and-down-left-from-center tw-ml-2"></i>
+        <span class="tw-hidden md:tw-inline">Enlarge Brick </span><i class="fa-solid fa-up-right-and-down-left-from-center md:tw-ml-2"></i>
       </button>
     </div>
     <transition name="fade">

@@ -39,7 +39,7 @@
         :aria-activedescendant="activeDescendantId"
         tabindex="0"
         class="
-          tw-max-h-[84px] tw-overflow-y-scroll tw-bg-white
+          tw-max-h-[84px] tw-overflow-y-auto tw-bg-white
           focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-brickSummerNight
         "
         @keydown.arrow-down.prevent="moveActive(1)"
@@ -78,7 +78,7 @@
           v-for="filter in activeFilters"
           :key="`${filter.type}-${filter.value}`"
           class="
-            tw-inline-flex tw-items-center tw-gap-2 tw-rounded-[23px]
+            tw-inline-flex tw-items-center tw-gap-3 tw-rounded-[23px]
             tw-bg-white tw-px-3 tw-py-1
             tw-font-oswald tw-text-sm tw-text-black
           "
@@ -87,13 +87,14 @@
           <button
             type="button"
             class="
-              tw-inline-flex tw-h-[20px] tw-w-[20px] tw-items-center tw-justify-center
-              tw-rounded-full tw-bg-black tw-text-[20px] tw-leading-none tw-text-white
+              tw-relative tw-inline-flex tw-h-[15px] tw-w-[15px] tw-items-center tw-justify-center
+              tw-rounded-full tw-bg-black tw-leading-none tw-text-white
+              before:tw-absolute before:tw-inset-[-6px] before:tw-content-['']
             "
             :aria-label="`Remove ${filter.label}: ${filter.value}`"
             @click="removeFilter(filter.type, filter.locationId)"
           >
-            <i class="fa-solid fa-xmark tw-text-[10px]"></i>
+            <i class="fa-solid fa-xmark tw-text-[9px]"></i>
           </button>
         </span>
 
@@ -347,17 +348,3 @@ export default defineComponent({
   },
 })
 </script>
-
-<style scoped>
-[role="listbox"]::-webkit-scrollbar {
-  -webkit-appearance: none;
-  width: 6px;
-}
-[role="listbox"]::-webkit-scrollbar-thumb {
-  border-radius: 3px;
-  background-color: rgba(0, 0, 0, 0.3);
-}
-[role="listbox"]::-webkit-scrollbar-track {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-</style>
