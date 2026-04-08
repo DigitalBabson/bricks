@@ -34,8 +34,8 @@ describe('LocationExplorerTrigger', () => {
   it('uses the desktop sizing by default', () => {
     const wrapper = mount(LocationExplorerTrigger)
 
-    expect(wrapper.classes()).toContain('tw-px-6')
-    expect(wrapper.classes()).toContain('tw-py-3')
+    expect(wrapper.classes()).toContain('tw-px-[15px]')
+    expect(wrapper.classes()).toContain('tw-py-[12px]')
     expect(wrapper.classes()).not.toContain('tw-fixed')
   })
 })

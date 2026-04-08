@@ -3,7 +3,7 @@
     class="
       bricks__search-form
       tw-mx-auto tw-w-full tw-max-w-[700px]
-      tw-bg-brickCourtyardGreen tw-px-12 tw-py-5
+      tw-bg-brickCourtyardGreen tw-px-8 sm:tw-px-12 tw-py-5
       tw-flex tw-flex-col tw-gap-4
     "
     @submit.prevent
@@ -39,7 +39,7 @@
         :aria-activedescendant="activeDescendantId"
         tabindex="0"
         class="
-          tw-max-h-[84px] tw-overflow-y-auto tw-bg-white
+          tw-max-h-[84px] tw-overflow-y-scroll tw-bg-white
           focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-brickSummerNight
         "
         @keydown.arrow-down.prevent="moveActive(1)"
@@ -71,7 +71,7 @@
         class="
           bricks__filter-actions
           tw-flex tw-min-h-[51px] tw-flex-wrap tw-items-center tw-gap-2
-          tw-bg-[rgba(255,255,255,0.53)] tw-px-2 tw-py-2
+          tw-bg-[rgba(255,255,255,0.53)] tw-px-[0.8rem] tw-py-2
         "
       >
         <span
