@@ -238,6 +238,62 @@ describe('LocationExplorer', () => {
     })
   })
 
+  describe('Keyboard navigation', () => {
+    beforeEach(() => {
+      wrapper = mountExplorer()
+    })
+
+    it('location list has role="listbox" and tabindex="0"', () => {
+      const ul = wrapper.find('ul')
+      expect(ul.attributes('role')).toBe('listbox')
+      expect(ul.attributes('tabindex')).toBe('0')
+    })
+
+    it('each location item has role="option" and aria-selected', () => {
+      const items = wrapper.findAll('nav li')
+      expect(items[0].attributes('role')).toBe('option')
+      expect(items[0].attributes('aria-selected')).toBe('true')
+      expect(items[1].attributes('aria-selected')).toBe('false')
+    })
+
+    it('arrow-down moves selection to next location', async () => {
+      const ul = wrapper.find('ul')
+      await ul.trigger('focus')
+      await ul.trigger('keydown', { key: 'ArrowDown' })
+
+      const img = wrapper.find('img')
+      expect(img.attributes('src')).toBe('https://example.com/map2.jpg')
+    })
+
+    it('arrow-up wraps to last location from first', async () => {
+      const ul = wrapper.find('ul')
+      await ul.trigger('focus')
+      await ul.trigger('keydown', { key: 'ArrowUp' })
+
+      const img = wrapper.find('img')
+      expect(img.attributes('src')).toBe('https://example.com/map3.jpg')
+    })
+
+    it('End key moves to last location', async () => {
+      const ul = wrapper.find('ul')
+      await ul.trigger('focus')
+      await ul.trigger('keydown', { key: 'End' })
+
+      const img = wrapper.find('img')
+      expect(img.attributes('src')).toBe('https://example.com/map3.jpg')
+    })
+
+    it('Home key moves to first location', async () => {
+      const ul = wrapper.find('ul')
+      await ul.trigger('focus')
+      await ul.trigger('keydown', { key: 'End' })
+      await ul.trigger('keydown', { key: 'Home' })
+
+      const img = wrapper.find('img')
+      expect(img.attributes('src')).toBe('https://example.com/map1.jpg')
+    })
+  })
+
   describe('Body scroll lock', () => {
     it('sets body overflow to hidden on mount', () => {
       wrapper = mountExplorer()
