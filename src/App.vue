@@ -138,13 +138,7 @@ export default defineComponent({
           return a.name.localeCompare(b.name, undefined, { numeric: true })
         })
 
-        // Deduplicate by name — keep only the first occurrence
-        const seenNames = new Set<string>()
-        this.locations = mapped.filter((loc) => {
-          if (seenNames.has(loc.name)) return false
-          seenNames.add(loc.name)
-          return true
-        })
+        this.locations = mapped
       } catch {
         this.locations = []
       }
