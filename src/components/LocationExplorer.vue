@@ -234,13 +234,11 @@ export default defineComponent({
       this.updateChevrons()
       ;(this.$refs.closeButton as HTMLElement)?.focus()
     })
-    window.addEventListener('resize', this.updateChevrons)
     window.addEventListener('resize', this.updateNavHeight)
   },
   beforeUnmount() {
     document.removeEventListener('keydown', this.onKeydown)
     unlockBodyScroll()
-    window.removeEventListener('resize', this.updateChevrons)
     window.removeEventListener('resize', this.updateNavHeight)
   },
   methods: {
@@ -277,9 +275,8 @@ export default defineComponent({
       this.focusActiveItem()
     },
     moveActiveToLast() {
-      if (!this.locations.length) return
       const last = this.locations.length - 1
-      if (this.activeIndex === last) return
+      if (last < 0 || this.activeIndex === last) return
       this.activeIndex = last
       this.selectedZoneId = this.locations[last].id
       this.focusActiveItem()
@@ -314,36 +311,32 @@ export default defineComponent({
     updateNavHeight() {
       this.checkMobile()
       const img = this.$refs.mapImage as HTMLImageElement | undefined
+
       if (!img) {
         this.imageRenderedTop = 0
         this.imageRenderedHeight = 0
         this.imageRenderedLeft = 0
         this.imageRenderedWidth = 0
-        return
-      }
-
-      if (this.isMobile) {
-        // Mobile: image is rendered inline, measure its actual size
+      } else if (this.isMobile) {
         this.imageRenderedWidth = img.clientWidth
-        return
+      } else {
+        // Desktop: object-contain centers the image — compute rendered dimensions
+        const container = img.parentElement
+        if (container) {
+          const containerRect = container.getBoundingClientRect()
+          const naturalW = img.naturalWidth || 1
+          const naturalH = img.naturalHeight || 1
+          const scale = Math.min(containerRect.width / naturalW, containerRect.height / naturalH)
+          const renderedW = naturalW * scale
+          const renderedH = naturalH * scale
+          // The image is centered by flexbox — compute offsets
+          this.imageRenderedTop = (containerRect.height - renderedH) / 2
+          this.imageRenderedLeft = (containerRect.width - renderedW) / 2
+          this.imageRenderedHeight = renderedH
+          this.imageRenderedWidth = renderedW
+        }
       }
 
-      // Desktop: object-contain centers the image — compute rendered dimensions
-      const container = img.parentElement
-      if (!container) return
-      const containerRect = container.getBoundingClientRect()
-      const naturalW = img.naturalWidth || 1
-      const naturalH = img.naturalHeight || 1
-      const scale = Math.min(containerRect.width / naturalW, containerRect.height / naturalH)
-      const renderedW = naturalW * scale
-      const renderedH = naturalH * scale
-      // The image is centered by flexbox — compute offsets
-      const offsetTop = (containerRect.height - renderedH) / 2
-      const offsetRight = (containerRect.width - renderedW) / 2
-      this.imageRenderedTop = offsetTop
-      this.imageRenderedHeight = renderedH
-      this.imageRenderedLeft = offsetRight
-      this.imageRenderedWidth = renderedW
       this.$nextTick(() => this.updateChevrons())
     },
     updateChevrons() {

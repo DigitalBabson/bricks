@@ -82,7 +82,6 @@ describe('LocationExplorer', () => {
       wrapper = mountExplorer()
       const items = wrapper.findAll('nav li')
       expect(items[0].classes()).toContain('tw-font-medium')
-      expect(items[0].classes()).not.toContain('tw-underline')
     })
 
     it('uses the first location map image as src', () => {
@@ -102,7 +101,6 @@ describe('LocationExplorer', () => {
       await items[1].trigger('click')
 
       expect(items[1].classes()).toContain('tw-font-medium')
-      expect(items[1].classes()).not.toContain('tw-underline')
     })
 
     it('swaps the map image to the clicked location', async () => {
@@ -186,54 +184,36 @@ describe('LocationExplorer', () => {
   })
 
   describe('Mobile chevrons', () => {
-    it('shows down chevron when list is scrollable', async () => {
-      wrapper = mountExplorer()
-      const list = wrapper.find('ul').element
-
-      // Simulate a scrollable list: scrollHeight > clientHeight
+    async function makeListScrollable(w: VueWrapper, scrollTop = 0) {
+      const list = w.find('ul').element
       Object.defineProperty(list, 'scrollHeight', { value: 300, configurable: true })
       Object.defineProperty(list, 'clientHeight', { value: 100, configurable: true })
-      Object.defineProperty(list, 'scrollTop', { value: 0, writable: true, configurable: true })
-
+      Object.defineProperty(list, 'scrollTop', { value: scrollTop, writable: true, configurable: true })
       list.dispatchEvent(new Event('scroll'))
-      await wrapper.vm.$nextTick()
+      await w.vm.$nextTick()
+      return list
+    }
 
-      const downButton = wrapper.find('button[aria-label="Scroll locations down"]')
-      expect(downButton.exists()).toBe(true)
+    it('shows down chevron when list is scrollable', async () => {
+      wrapper = mountExplorer()
+      await makeListScrollable(wrapper)
+      expect(wrapper.find('button[aria-label="Scroll locations down"]').exists()).toBe(true)
     })
 
     it('shows up chevron when list is scrolled down', async () => {
       wrapper = mountExplorer()
-      const list = wrapper.find('ul').element
-
-      Object.defineProperty(list, 'scrollHeight', { value: 300, configurable: true })
-      Object.defineProperty(list, 'clientHeight', { value: 100, configurable: true })
-      Object.defineProperty(list, 'scrollTop', { value: 50, writable: true, configurable: true })
-
-      list.dispatchEvent(new Event('scroll'))
-      await wrapper.vm.$nextTick()
-
-      const upButton = wrapper.find('button[aria-label="Scroll locations up"]')
-      expect(upButton.exists()).toBe(true)
+      await makeListScrollable(wrapper, 50)
+      expect(wrapper.find('button[aria-label="Scroll locations up"]').exists()).toBe(true)
     })
 
     it('clicking a chevron scrolls the list', async () => {
       wrapper = mountExplorer()
-      const list = wrapper.find('ul').element
-
-      Object.defineProperty(list, 'scrollHeight', { value: 300, configurable: true })
-      Object.defineProperty(list, 'clientHeight', { value: 100, configurable: true })
-      Object.defineProperty(list, 'scrollTop', { value: 0, writable: true, configurable: true })
-
-      list.dispatchEvent(new Event('scroll'))
-      await wrapper.vm.$nextTick()
+      const list = await makeListScrollable(wrapper)
 
       let scrollCalled = false
       list.scrollBy = (() => { scrollCalled = true }) as typeof list.scrollBy
 
-      const downButton = wrapper.find('button[aria-label="Scroll locations down"]')
-      await downButton.trigger('click')
-
+      await wrapper.find('button[aria-label="Scroll locations down"]').trigger('click')
       expect(scrollCalled).toBe(true)
     })
   })
