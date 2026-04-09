@@ -356,6 +356,10 @@ export default defineComponent({
 .location-item {
   position: relative;
 }
+.location-item:focus-visible {
+  outline-offset: -2px;
+  box-shadow: none;
+}
 .location-item:not(:last-child)::after {
   content: '';
   position: absolute;
