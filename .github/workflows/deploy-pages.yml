@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - develop
+      - claude/bricks-updates-april-O3Fls
 
 permissions:
   contents: read

@@ -19,7 +19,7 @@
     <brick-card v-for="brick in bricks" :key="brick.id" :brick="brick" />
   </div>
   <h3
-    class="tw-container tw-mx-auto tw-max-w-6xl msg_no_results tw-text-3xl"
+    class="tw-container tw-mx-auto tw-max-w-6xl msg_no_results tw-text-3xl tw-text-center tw-px-8"
     v-if="showMessage == true"
   >
     No bricks match your criteria

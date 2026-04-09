@@ -5,7 +5,7 @@
     "
   >
     <div
-      class="brick-card__media tw-group tw-cursor-pointer focus-visible:tw-ring-2 focus-visible:tw-ring-brickSummerNight"
+      class="brick-card__media tw-group tw-cursor-pointer"
       tabindex="0"
       role="button"
       :aria-label="`Enlarge brick image: ${brick?.inscription || 'Brick'}`"
@@ -73,13 +73,11 @@
       <button
         v-if="!showComingSoonOverlay"
         class="
-          tw-absolute tw-right-0 tw-top-0 tw-z-10 tw-bg-white/70 tw-px-3 tw-py-3
+          tw-absolute tw-right-0 tw-top-0 tw-z-10 tw-bg-[#ffffffe0] tw-px-3 tw-py-3
           tw-font-oswald tw-text-base tw-uppercase tw-text-black
           tw-transition-all tw-duration-200
           md:tw-opacity-0
           group-hover:tw-opacity-100 group-focus-within:tw-opacity-100
-          hover:tw-bg-black hover:tw-text-white
-          focus-visible:tw-bg-black focus-visible:tw-text-white
           focus-visible:tw-opacity-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white
         "
         tabindex="-1"

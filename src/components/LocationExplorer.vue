@@ -107,12 +107,18 @@
 
               <ul
                 ref="locationList"
+                role="listbox"
+                aria-label="Park locations"
                 class="tw-flex-1 tw-overflow-y-auto tw-text-center location-list"
                 @scroll="updateChevrons"
               >
                 <li
-                  v-for="loc in locations"
+                  v-for="(loc, index) in locations"
+                  :id="optionId(loc.id)"
                   :key="loc.id"
+                  role="option"
+                  :aria-selected="loc.id === selectedZoneId"
+                  :tabindex="index === activeIndex ? 0 : -1"
                   class="
                     location-item
                     tw-px-2 tw-py-2 tw-cursor-pointer
@@ -120,12 +126,12 @@
                     tw-tracking-[0.5px] tw-text-black tw-text-center
                     tw-transition-colors tw-duration-150
                   "
-                  :class="[
-                    loc.id === selectedZoneId
-                      ? 'tw-font-medium'
-                      : 'hover:tw-bg-black/5',
-                  ]"
-                  @click="selectedZoneId = loc.id"
+                  :class="loc.id === selectedZoneId ? 'tw-font-medium' : 'hover:tw-bg-black/5'"
+                  @click="selectLocation(loc.id, index)"
+                  @keydown.arrow-down.prevent="moveActive(1)"
+                  @keydown.arrow-up.prevent="moveActive(-1)"
+                  @keydown.home.prevent="moveActiveToFirst"
+                  @keydown.end.prevent="moveActiveToLast"
                 >
                   {{ loc.name }}
                 </li>
@@ -175,6 +181,7 @@ export default defineComponent({
   data() {
     return {
       selectedZoneId: '',
+      activeIndex: 0,
       showUpChevron: false,
       showDownChevron: true,
       imageRenderedTop: 0,
@@ -212,6 +219,7 @@ export default defineComponent({
       handler(newVal: ParkLocation[]) {
         if (newVal.length && !this.selectedZoneId) {
           this.selectedZoneId = newVal[0].id
+          this.activeIndex = 0
         }
         this.$nextTick(() => this.updateChevrons())
       },
@@ -226,16 +234,53 @@ export default defineComponent({
       this.updateChevrons()
       ;(this.$refs.closeButton as HTMLElement)?.focus()
     })
-    window.addEventListener('resize', this.updateChevrons)
     window.addEventListener('resize', this.updateNavHeight)
   },
   beforeUnmount() {
     document.removeEventListener('keydown', this.onKeydown)
     unlockBodyScroll()
-    window.removeEventListener('resize', this.updateChevrons)
     window.removeEventListener('resize', this.updateNavHeight)
   },
   methods: {
+    optionId(id: string): string {
+      return `location-explorer-option-${id}`
+    },
+    focusActiveItem() {
+      this.$nextTick(() => {
+        const list = this.$refs.locationList as HTMLElement | undefined
+        const loc = this.locations[this.activeIndex]
+        if (!loc) return
+        const el = list?.querySelector<HTMLElement>(`[id="${this.optionId(loc.id)}"]`)
+        el?.focus()
+        el?.scrollIntoView?.({ block: 'nearest' })
+      })
+    },
+    selectLocation(id: string, index: number) {
+      this.selectedZoneId = id
+      this.activeIndex = index
+      this.focusActiveItem()
+    },
+    moveActive(delta: number) {
+      if (!this.locations.length) return
+      const next = Math.max(0, Math.min(this.locations.length - 1, this.activeIndex + delta))
+      if (next === this.activeIndex) return
+      this.activeIndex = next
+      this.selectedZoneId = this.locations[next].id
+      this.focusActiveItem()
+    },
+    moveActiveToFirst() {
+      if (!this.locations.length || this.activeIndex === 0) return
+      this.activeIndex = 0
+      this.selectedZoneId = this.locations[0].id
+      this.focusActiveItem()
+    },
+    moveActiveToLast() {
+      const last = this.locations.length - 1
+      if (last < 0 || this.activeIndex === last) return
+      this.activeIndex = last
+      this.selectedZoneId = this.locations[last].id
+      this.focusActiveItem()
+    },
     onKeydown(e: KeyboardEvent) {
       if (e.key === 'Escape') {
         this.$emit('close')
@@ -266,36 +311,32 @@ export default defineComponent({
     updateNavHeight() {
       this.checkMobile()
       const img = this.$refs.mapImage as HTMLImageElement | undefined
+
       if (!img) {
         this.imageRenderedTop = 0
         this.imageRenderedHeight = 0
         this.imageRenderedLeft = 0
         this.imageRenderedWidth = 0
-        return
-      }
-
-      if (this.isMobile) {
-        // Mobile: image is rendered inline, measure its actual size
+      } else if (this.isMobile) {
         this.imageRenderedWidth = img.clientWidth
-        return
+      } else {
+        // Desktop: object-contain centers the image — compute rendered dimensions
+        const container = img.parentElement
+        if (container) {
+          const containerRect = container.getBoundingClientRect()
+          const naturalW = img.naturalWidth || 1
+          const naturalH = img.naturalHeight || 1
+          const scale = Math.min(containerRect.width / naturalW, containerRect.height / naturalH)
+          const renderedW = naturalW * scale
+          const renderedH = naturalH * scale
+          // The image is centered by flexbox — compute offsets
+          this.imageRenderedTop = (containerRect.height - renderedH) / 2
+          this.imageRenderedLeft = (containerRect.width - renderedW) / 2
+          this.imageRenderedHeight = renderedH
+          this.imageRenderedWidth = renderedW
+        }
       }
 
-      // Desktop: object-contain centers the image — compute rendered dimensions
-      const container = img.parentElement
-      if (!container) return
-      const containerRect = container.getBoundingClientRect()
-      const naturalW = img.naturalWidth || 1
-      const naturalH = img.naturalHeight || 1
-      const scale = Math.min(containerRect.width / naturalW, containerRect.height / naturalH)
-      const renderedW = naturalW * scale
-      const renderedH = naturalH * scale
-      // The image is centered by flexbox — compute offsets
-      const offsetTop = (containerRect.height - renderedH) / 2
-      const offsetRight = (containerRect.width - renderedW) / 2
-      this.imageRenderedTop = offsetTop
-      this.imageRenderedHeight = renderedH
-      this.imageRenderedLeft = offsetRight
-      this.imageRenderedWidth = renderedW
       this.$nextTick(() => this.updateChevrons())
     },
     updateChevrons() {
@@ -332,6 +373,10 @@ export default defineComponent({
 <style scoped>
 .location-item {
   position: relative;
+}
+.location-item:focus-visible {
+  outline-offset: -2px;
+  box-shadow: none;
 }
 .location-item:not(:last-child)::after {
   content: '';

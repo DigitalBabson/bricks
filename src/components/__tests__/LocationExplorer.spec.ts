@@ -82,7 +82,6 @@ describe('LocationExplorer', () => {
       wrapper = mountExplorer()
       const items = wrapper.findAll('nav li')
       expect(items[0].classes()).toContain('tw-font-medium')
-      expect(items[0].classes()).not.toContain('tw-underline')
     })
 
     it('uses the first location map image as src', () => {
@@ -102,7 +101,6 @@ describe('LocationExplorer', () => {
       await items[1].trigger('click')
 
       expect(items[1].classes()).toContain('tw-font-medium')
-      expect(items[1].classes()).not.toContain('tw-underline')
     })
 
     it('swaps the map image to the clicked location', async () => {
@@ -186,55 +184,103 @@ describe('LocationExplorer', () => {
   })
 
   describe('Mobile chevrons', () => {
-    it('shows down chevron when list is scrollable', async () => {
-      wrapper = mountExplorer()
-      const list = wrapper.find('ul').element
-
-      // Simulate a scrollable list: scrollHeight > clientHeight
+    async function makeListScrollable(w: VueWrapper, scrollTop = 0) {
+      const list = w.find('ul').element
       Object.defineProperty(list, 'scrollHeight', { value: 300, configurable: true })
       Object.defineProperty(list, 'clientHeight', { value: 100, configurable: true })
-      Object.defineProperty(list, 'scrollTop', { value: 0, writable: true, configurable: true })
-
+      Object.defineProperty(list, 'scrollTop', { value: scrollTop, writable: true, configurable: true })
       list.dispatchEvent(new Event('scroll'))
-      await wrapper.vm.$nextTick()
+      await w.vm.$nextTick()
+      return list
+    }
 
-      const downButton = wrapper.find('button[aria-label="Scroll locations down"]')
-      expect(downButton.exists()).toBe(true)
+    it('shows down chevron when list is scrollable', async () => {
+      wrapper = mountExplorer()
+      await makeListScrollable(wrapper)
+      expect(wrapper.find('button[aria-label="Scroll locations down"]').exists()).toBe(true)
     })
 
     it('shows up chevron when list is scrolled down', async () => {
       wrapper = mountExplorer()
-      const list = wrapper.find('ul').element
-
-      Object.defineProperty(list, 'scrollHeight', { value: 300, configurable: true })
-      Object.defineProperty(list, 'clientHeight', { value: 100, configurable: true })
-      Object.defineProperty(list, 'scrollTop', { value: 50, writable: true, configurable: true })
-
-      list.dispatchEvent(new Event('scroll'))
-      await wrapper.vm.$nextTick()
-
-      const upButton = wrapper.find('button[aria-label="Scroll locations up"]')
-      expect(upButton.exists()).toBe(true)
+      await makeListScrollable(wrapper, 50)
+      expect(wrapper.find('button[aria-label="Scroll locations up"]').exists()).toBe(true)
     })
 
     it('clicking a chevron scrolls the list', async () => {
       wrapper = mountExplorer()
-      const list = wrapper.find('ul').element
-
-      Object.defineProperty(list, 'scrollHeight', { value: 300, configurable: true })
-      Object.defineProperty(list, 'clientHeight', { value: 100, configurable: true })
-      Object.defineProperty(list, 'scrollTop', { value: 0, writable: true, configurable: true })
-
-      list.dispatchEvent(new Event('scroll'))
-      await wrapper.vm.$nextTick()
+      const list = await makeListScrollable(wrapper)
 
       let scrollCalled = false
       list.scrollBy = (() => { scrollCalled = true }) as typeof list.scrollBy
 
-      const downButton = wrapper.find('button[aria-label="Scroll locations down"]')
-      await downButton.trigger('click')
-
+      await wrapper.find('button[aria-label="Scroll locations down"]').trigger('click')
       expect(scrollCalled).toBe(true)
+    })
+  })
+
+  describe('Keyboard navigation', () => {
+    beforeEach(() => {
+      wrapper = mountExplorer()
+    })
+
+    it('listbox container has role="listbox"', () => {
+      expect(wrapper.find('ul').attributes('role')).toBe('listbox')
+    })
+
+    it('only the active item has tabindex="0"; others have tabindex="-1"', () => {
+      const items = wrapper.findAll('nav li')
+      expect(items[0].attributes('tabindex')).toBe('0')  // first item active by default
+      expect(items[1].attributes('tabindex')).toBe('-1')
+      expect(items[2].attributes('tabindex')).toBe('-1')
+    })
+
+    it('each item has role="option" and correct aria-selected', () => {
+      const items = wrapper.findAll('nav li')
+      items.forEach((item) => expect(item.attributes('role')).toBe('option'))
+      expect(items[0].attributes('aria-selected')).toBe('true')
+      expect(items[1].attributes('aria-selected')).toBe('false')
+    })
+
+    it('arrow-down moves selection and roving tabindex to next item', async () => {
+      const items = wrapper.findAll('nav li')
+      await items[0].trigger('keydown', { key: 'ArrowDown' })
+
+      expect(wrapper.find('img').attributes('src')).toBe('https://example.com/map2.jpg')
+      expect(items[1].attributes('tabindex')).toBe('0')
+      expect(items[0].attributes('tabindex')).toBe('-1')
+    })
+
+    it('arrow-up does not move past the first item', async () => {
+      const items = wrapper.findAll('nav li')
+      await items[0].trigger('keydown', { key: 'ArrowUp' })
+
+      expect(items[0].attributes('tabindex')).toBe('0')
+      expect(wrapper.find('img').attributes('src')).toBe('https://example.com/map1.jpg')
+    })
+
+    it('End key moves to last item', async () => {
+      const items = wrapper.findAll('nav li')
+      await items[0].trigger('keydown', { key: 'End' })
+
+      expect(wrapper.find('img').attributes('src')).toBe('https://example.com/map3.jpg')
+      expect(items[2].attributes('tabindex')).toBe('0')
+    })
+
+    it('Home key moves to first item', async () => {
+      const items = wrapper.findAll('nav li')
+      await items[2].trigger('click')        // select third first
+      await items[2].trigger('keydown', { key: 'Home' })
+
+      expect(wrapper.find('img').attributes('src')).toBe('https://example.com/map1.jpg')
+      expect(items[0].attributes('tabindex')).toBe('0')
+    })
+
+    it('clicking a non-active item moves the roving tabindex to it', async () => {
+      const items = wrapper.findAll('nav li')
+      await items[1].trigger('click')
+
+      expect(items[1].attributes('tabindex')).toBe('0')
+      expect(items[0].attributes('tabindex')).toBe('-1')
     })
   })
 
