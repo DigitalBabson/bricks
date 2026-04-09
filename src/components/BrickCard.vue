@@ -49,7 +49,7 @@
         >
           <p
             class="
-              tw-font-oswald tw-uppercase tw-text-[16px] tw-text-black tw-leading-tight
+              tw-font-oswald tw-uppercase tw-text-[16px] tw-text-black tw-leading-normal
             "
           >
             {{ brick.inscription }}
@@ -70,22 +70,20 @@
         "
       ></div>
 
-      <button
+      <span
         v-if="!showComingSoonOverlay"
+        aria-hidden="true"
         class="
           tw-absolute tw-right-0 tw-top-0 tw-z-10 tw-bg-[#ffffffe0] tw-px-3 tw-py-3
-          tw-font-oswald tw-text-base tw-uppercase tw-text-black
+          tw-cursor-pointer tw-font-oswald tw-text-base tw-uppercase tw-text-black
           tw-transition-all tw-duration-200
-          md:tw-opacity-0
+          lg:tw-opacity-0
           group-hover:tw-opacity-100 group-focus-within:tw-opacity-100
-          focus-visible:tw-opacity-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white
         "
-        tabindex="-1"
-        aria-label="Enlarge brick image"
         @click.stop="openImg"
       >
-        <span class="tw-hidden md:tw-inline">Enlarge Brick </span><i class="fa-solid fa-up-right-and-down-left-from-center md:tw-ml-2"></i>
-      </button>
+        <span class="tw-hidden lg:tw-inline">Enlarge Brick </span><i class="fa-solid fa-up-right-and-down-left-from-center lg:tw-ml-2"></i>
+      </span>
     </div>
     <transition name="fade">
       <ui-modal v-if="showImg" :label="`Brick image: ${brick.inscription}`" @close="closeImg">
@@ -94,11 +92,12 @@
     </transition>
     <button
       class="
-        tw-w-full tw-cursor-pointer tw-py-4 tw-text-brickCourtyardGreen tw-font-oswald tw-uppercase
+        tw-w-full tw-cursor-pointer tw-py-[.7rem] tw-text-brickCourtyardGreen tw-font-oswald tw-uppercase
         hover:tw-bg-brickMediumGreen hover:tw-text-white
         focus-visible:tw-bg-brickMediumGreen focus-visible:tw-text-white
         tw-transition-colors tw-duration-200 tw-ease-in-out
       "
+      :aria-label="'View location details for ' + brick.inscription"
       @click.stop="openMap"
     >
       View location details

@@ -11,7 +11,7 @@ describe('AppFooter', () => {
 
   it('displays "Babson College"', () => {
     expect(wrapper.find('svg').exists()).toBe(true)
-    expect(wrapper.find('a').attributes('title')).toBe('Babson College')
+    expect(wrapper.find('a').attributes('aria-label')).toBe('Babson College home')
   })
 
   it('does not contain the subheader text', () => {

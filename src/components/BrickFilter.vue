@@ -1,5 +1,6 @@
 <template>
   <form
+    role="search"
     class="
       bricks__search-form
       tw-mx-auto tw-w-full tw-max-w-[700px]
@@ -11,7 +12,7 @@
     <div class="tw-form-control tw-text-m">
       <label
         for="search-brick"
-        class="tw-mb-2 tw-block tw-font-zilla tw-text-[18px] tw-font-normal tw-leading-tight tw-text-white"
+        class="tw-mb-2 tw-block tw-font-zilla tw-text-[18px] tw-font-normal tw-leading-normal tw-text-white"
       >
         Search by Brick Inscription
       </label>
@@ -27,18 +28,23 @@
     <div>
       <label
         id="locations-label"
-        class="tw-mb-2 tw-block tw-font-zilla tw-text-[18px] tw-font-normal tw-leading-tight tw-text-white"
+        class="tw-mb-2 tw-block tw-font-zilla tw-text-[18px] tw-font-normal tw-leading-normal tw-text-white"
       >
         Brick Locations
       </label>
+      <span id="locations-instructions" class="tw-sr-only">
+        Use arrow keys to navigate options. Press Space to select or deselect.
+      </span>
       <ul
         ref="locationListbox"
         role="listbox"
         aria-labelledby="locations-label"
+        aria-describedby="locations-instructions"
         aria-multiselectable="true"
         :aria-activedescendant="activeDescendantId"
         tabindex="0"
         class="
+          bricks__location-listbox
           tw-max-h-[84px] tw-overflow-y-scroll tw-bg-white
           focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-brickSummerNight
         "
@@ -57,7 +63,7 @@
           :key="location.id"
           role="option"
           :aria-selected="locationIds.includes(location.id)"
-          class="tw-cursor-pointer tw-px-3 tw-py-[4px] tw-font-oswald tw-text-[16px] tw-leading-tight"
+          class="tw-cursor-pointer tw-px-3 tw-py-[4px] tw-font-oswald tw-text-[16px] tw-leading-normal"
           :class="optionClasses(location.id, index)"
           @click="selectLocation(location.id)"
         >
@@ -348,3 +354,21 @@ export default defineComponent({
   },
 })
 </script>
+
+<style scoped>
+@media (max-width: 1023px) {
+  .bricks__location-listbox::-webkit-scrollbar {
+    width: 8px;
+  }
+  .bricks__location-listbox::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  .bricks__location-listbox::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 4px;
+  }
+  .bricks__location-listbox {
+    scrollbar-width: thin;
+  }
+}
+</style>

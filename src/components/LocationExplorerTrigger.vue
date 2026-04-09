@@ -23,7 +23,7 @@ export default defineComponent({
   setup(props) {
     const buttonClasses = computed(() =>
       props.floating
-        ? 'tw-fixed tw-bottom-0 tw-right-0 tw-z-50 tw-rounded-none tw-shadow-brickCard tw-px-4 tw-py-3'
+        ? 'tw-fixed tw-bottom-0 tw-right-0 tw-z-50 tw-rounded-none tw-shadow-brickCard tw-px-4 tw-py-3 focus-visible:tw-shadow-[0_0_0_6px_#fff]'
         : 'tw-px-[15px] tw-py-[12px]',
     )
 

@@ -21,7 +21,10 @@
     </button>
 
     <template v-for="(page, index) in visiblePages" :key="`${page}-${index}`">
-      <span v-if="page === '...'" class="tw-px-2 tw-text-[#464646]">...</span>
+      <span v-if="page === '...'" class="tw-px-2 tw-text-[#464646]">
+        <span aria-hidden="true">...</span>
+        <span class="tw-sr-only">Pages {{ Number(visiblePages[index - 1]) + 1 }} through {{ Number(visiblePages[index + 1]) - 1 }} not shown</span>
+      </span>
       <button
         v-else
         class="tw-px-3 tw-py-2 tw-min-w-[2.5rem] tw-text-[#464646] hover:tw-text-brickBabsonGreen"
@@ -30,6 +33,7 @@
             ? 'page-active'
             : ''
         "
+        :aria-label="'Page ' + page"
         :aria-current="page === currentPage ? 'page' : undefined"
         @click="$emit('update:page', page)"
       >
