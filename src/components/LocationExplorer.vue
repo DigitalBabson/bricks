@@ -105,8 +105,14 @@
                 </button>
               </div>
 
+              <!-- role="listbox" gives screen readers the right widget semantics.
+                   Each option has tabindex="0" (non-standard roving tabindex)
+                   so Tab navigates through items individually per user requirement,
+                   while role="option" + aria-selected provide selection announcements. -->
               <ul
                 ref="locationList"
+                role="listbox"
+                aria-label="Park locations"
                 class="tw-flex-1 tw-overflow-y-auto tw-text-center location-list"
                 @scroll="updateChevrons"
               >
@@ -114,6 +120,8 @@
                   v-for="(loc, index) in locations"
                   :id="optionId(loc.id)"
                   :key="loc.id"
+                  role="option"
+                  :aria-selected="loc.id === selectedZoneId"
                   tabindex="0"
                   class="
                     location-item

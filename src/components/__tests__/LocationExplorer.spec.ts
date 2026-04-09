@@ -243,11 +243,18 @@ describe('LocationExplorer', () => {
       wrapper = mountExplorer()
     })
 
-    it('each location item has tabindex="0"', () => {
+    it('each location item has tabindex="0", role="option", and aria-selected', () => {
       const items = wrapper.findAll('nav li')
       items.forEach((item) => {
         expect(item.attributes('tabindex')).toBe('0')
+        expect(item.attributes('role')).toBe('option')
       })
+      expect(items[0].attributes('aria-selected')).toBe('true')
+      expect(items[1].attributes('aria-selected')).toBe('false')
+    })
+
+    it('listbox container has role="listbox"', () => {
+      expect(wrapper.find('ul').attributes('role')).toBe('listbox')
     })
 
     it('focusing an item updates the map', async () => {
