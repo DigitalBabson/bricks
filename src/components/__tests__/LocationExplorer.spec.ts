@@ -243,54 +243,45 @@ describe('LocationExplorer', () => {
       wrapper = mountExplorer()
     })
 
-    it('location list has role="listbox" and tabindex="0"', () => {
-      const ul = wrapper.find('ul')
-      expect(ul.attributes('role')).toBe('listbox')
-      expect(ul.attributes('tabindex')).toBe('0')
-    })
-
-    it('each location item has role="option" and aria-selected', () => {
+    it('each location item has tabindex="0"', () => {
       const items = wrapper.findAll('nav li')
-      expect(items[0].attributes('role')).toBe('option')
-      expect(items[0].attributes('aria-selected')).toBe('true')
-      expect(items[1].attributes('aria-selected')).toBe('false')
+      items.forEach((item) => {
+        expect(item.attributes('tabindex')).toBe('0')
+      })
     })
 
-    it('arrow-down moves selection to next location', async () => {
-      const ul = wrapper.find('ul')
-      await ul.trigger('focus')
-      await ul.trigger('keydown', { key: 'ArrowDown' })
+    it('focusing an item updates the map', async () => {
+      const items = wrapper.findAll('nav li')
+      await items[1].trigger('focus')
 
       const img = wrapper.find('img')
       expect(img.attributes('src')).toBe('https://example.com/map2.jpg')
     })
 
-    it('arrow-up wraps to last location from first', async () => {
-      const ul = wrapper.find('ul')
-      await ul.trigger('focus')
-      await ul.trigger('keydown', { key: 'ArrowUp' })
+    it('focusing third item updates the map to third location', async () => {
+      const items = wrapper.findAll('nav li')
+      await items[2].trigger('focus')
 
       const img = wrapper.find('img')
       expect(img.attributes('src')).toBe('https://example.com/map3.jpg')
     })
 
-    it('End key moves to last location', async () => {
-      const ul = wrapper.find('ul')
-      await ul.trigger('focus')
-      await ul.trigger('keydown', { key: 'End' })
+    it('arrow-down on an item focuses the next item', async () => {
+      const items = wrapper.findAll('nav li')
+      let focused = false
+      ;(items[1].element as HTMLElement).focus = () => { focused = true }
 
-      const img = wrapper.find('img')
-      expect(img.attributes('src')).toBe('https://example.com/map3.jpg')
+      await items[0].trigger('keydown', { key: 'ArrowDown' })
+      expect(focused).toBe(true)
     })
 
-    it('Home key moves to first location', async () => {
-      const ul = wrapper.find('ul')
-      await ul.trigger('focus')
-      await ul.trigger('keydown', { key: 'End' })
-      await ul.trigger('keydown', { key: 'Home' })
+    it('arrow-up on an item focuses the previous item', async () => {
+      const items = wrapper.findAll('nav li')
+      let focused = false
+      ;(items[0].element as HTMLElement).focus = () => { focused = true }
 
-      const img = wrapper.find('img')
-      expect(img.attributes('src')).toBe('https://example.com/map1.jpg')
+      await items[1].trigger('keydown', { key: 'ArrowUp' })
+      expect(focused).toBe(true)
     })
   })
 

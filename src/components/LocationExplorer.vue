@@ -107,25 +107,14 @@
 
               <ul
                 ref="locationList"
-                role="listbox"
-                aria-label="Park locations"
-                :aria-activedescendant="activeDescendantId"
-                tabindex="0"
-                class="tw-flex-1 tw-overflow-y-auto tw-text-center location-list focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-brickSummerNight"
+                class="tw-flex-1 tw-overflow-y-auto tw-text-center location-list"
                 @scroll="updateChevrons"
-                @focus="onListboxFocus"
-                @blur="onListboxBlur"
-                @keydown.arrow-down.prevent="moveActive(1)"
-                @keydown.arrow-up.prevent="moveActive(-1)"
-                @keydown.home.prevent="moveActiveToFirst"
-                @keydown.end.prevent="moveActiveToLast"
               >
                 <li
                   v-for="(loc, index) in locations"
                   :id="optionId(loc.id)"
                   :key="loc.id"
-                  role="option"
-                  :aria-selected="loc.id === selectedZoneId"
+                  tabindex="0"
                   class="
                     location-item
                     tw-px-2 tw-py-2 tw-cursor-pointer
@@ -133,8 +122,11 @@
                     tw-tracking-[0.5px] tw-text-black tw-text-center
                     tw-transition-colors tw-duration-150
                   "
-                  :class="optionClasses(loc.id, index)"
-                  @click="selectLocation(loc.id, index)"
+                  :class="loc.id === selectedZoneId ? 'tw-font-medium' : 'hover:tw-bg-black/5'"
+                  @click="selectLocation(loc.id)"
+                  @focus="onItemFocus(loc.id, index)"
+                  @keydown.arrow-down.prevent="focusAdjacentItem(index, 1)"
+                  @keydown.arrow-up.prevent="focusAdjacentItem(index, -1)"
                 >
                   {{ loc.name }}
                 </li>
@@ -184,8 +176,6 @@ export default defineComponent({
   data() {
     return {
       selectedZoneId: '',
-      activeIndex: -1,
-      isListboxFocused: false,
       showUpChevron: false,
       showDownChevron: true,
       imageRenderedTop: 0,
@@ -198,10 +188,6 @@ export default defineComponent({
   computed: {
     selectedLocation(): ParkLocation | undefined {
       return this.locations.find((loc) => loc.id === this.selectedZoneId)
-    },
-    activeDescendantId(): string | undefined {
-      if (this.activeIndex < 0 || this.activeIndex >= this.locations.length) return undefined
-      return this.optionId(this.locations[this.activeIndex].id)
     },
     navOverlayStyle(): Record<string, string> {
       if (this.isMobile) {
@@ -254,59 +240,24 @@ export default defineComponent({
     optionId(id: string): string {
       return `location-explorer-option-${id}`
     },
-    optionClasses(id: string, index: number): string[] {
-      const isSelected = id === this.selectedZoneId
-      const isActive = index === this.activeIndex && this.isListboxFocused
-      return [
-        isSelected ? 'tw-font-medium' : 'hover:tw-bg-black/5',
-        ...(isActive ? ['tw-ring-2', 'tw-ring-inset', 'tw-ring-brickSummerNight'] : []),
-      ]
-    },
-    selectLocation(id: string, index: number) {
+    selectLocation(id: string) {
       this.selectedZoneId = id
-      this.activeIndex = index
     },
-    onListboxFocus() {
-      this.isListboxFocused = true
-      if (this.activeIndex >= 0) return
-      const selectedIndex = this.locations.findIndex((loc) => loc.id === this.selectedZoneId)
-      this.activeIndex = selectedIndex >= 0 ? selectedIndex : 0
-    },
-    onListboxBlur() {
-      this.isListboxFocused = false
-    },
-    moveActive(delta: number) {
-      if (!this.locations.length) return
-      if (this.activeIndex < 0) {
-        this.activeIndex = delta > 0 ? 0 : this.locations.length - 1
-      } else {
-        let next = this.activeIndex + delta
-        if (next < 0) next = this.locations.length - 1
-        if (next >= this.locations.length) next = 0
-        this.activeIndex = next
-      }
-      this.selectedZoneId = this.locations[this.activeIndex].id
-      this.scrollActiveIntoView()
-    },
-    moveActiveToFirst() {
-      if (!this.locations.length) return
-      this.activeIndex = 0
-      this.selectedZoneId = this.locations[0].id
-      this.scrollActiveIntoView()
-    },
-    moveActiveToLast() {
-      if (!this.locations.length) return
-      this.activeIndex = this.locations.length - 1
-      this.selectedZoneId = this.locations[this.activeIndex].id
-      this.scrollActiveIntoView()
-    },
-    scrollActiveIntoView() {
+    onItemFocus(id: string, index: number) {
+      this.selectedZoneId = id
+      // Scroll item into view if it's being reached via Tab
       this.$nextTick(() => {
         const list = this.$refs.locationList as HTMLElement | undefined
-        if (!list || !this.activeDescendantId) return
-        const activeEl = list.querySelector<HTMLElement>(`[id="${this.activeDescendantId}"]`)
-        activeEl?.scrollIntoView?.({ block: 'nearest' })
+        const el = list?.querySelector<HTMLElement>(`[id="${this.optionId(id)}"]`)
+        el?.scrollIntoView?.({ block: 'nearest' })
       })
+    },
+    focusAdjacentItem(currentIndex: number, delta: number) {
+      const nextIndex = currentIndex + delta
+      if (nextIndex < 0 || nextIndex >= this.locations.length) return
+      const list = this.$refs.locationList as HTMLElement | undefined
+      const el = list?.querySelector<HTMLElement>(`[id="${this.optionId(this.locations[nextIndex].id)}"]`)
+      el?.focus()
     },
     onKeydown(e: KeyboardEvent) {
       if (e.key === 'Escape') {
