@@ -105,10 +105,6 @@
                 </button>
               </div>
 
-              <!-- role="listbox" gives screen readers the right widget semantics.
-                   Each option has tabindex="0" (non-standard roving tabindex)
-                   so Tab navigates through items individually per user requirement,
-                   while role="option" + aria-selected provide selection announcements. -->
               <ul
                 ref="locationList"
                 role="listbox"
@@ -122,7 +118,7 @@
                   :key="loc.id"
                   role="option"
                   :aria-selected="loc.id === selectedZoneId"
-                  tabindex="0"
+                  :tabindex="index === activeIndex ? 0 : -1"
                   class="
                     location-item
                     tw-px-2 tw-py-2 tw-cursor-pointer
@@ -131,10 +127,11 @@
                     tw-transition-colors tw-duration-150
                   "
                   :class="loc.id === selectedZoneId ? 'tw-font-medium' : 'hover:tw-bg-black/5'"
-                  @click="selectLocation(loc.id)"
-                  @focus="onItemFocus(loc.id, index)"
-                  @keydown.arrow-down.prevent="focusAdjacentItem(index, 1)"
-                  @keydown.arrow-up.prevent="focusAdjacentItem(index, -1)"
+                  @click="selectLocation(loc.id, index)"
+                  @keydown.arrow-down.prevent="moveActive(1)"
+                  @keydown.arrow-up.prevent="moveActive(-1)"
+                  @keydown.home.prevent="moveActiveToFirst"
+                  @keydown.end.prevent="moveActiveToLast"
                 >
                   {{ loc.name }}
                 </li>
@@ -184,6 +181,7 @@ export default defineComponent({
   data() {
     return {
       selectedZoneId: '',
+      activeIndex: 0,
       showUpChevron: false,
       showDownChevron: true,
       imageRenderedTop: 0,
@@ -221,6 +219,7 @@ export default defineComponent({
       handler(newVal: ParkLocation[]) {
         if (newVal.length && !this.selectedZoneId) {
           this.selectedZoneId = newVal[0].id
+          this.activeIndex = 0
         }
         this.$nextTick(() => this.updateChevrons())
       },
@@ -248,24 +247,42 @@ export default defineComponent({
     optionId(id: string): string {
       return `location-explorer-option-${id}`
     },
-    selectLocation(id: string) {
-      this.selectedZoneId = id
-    },
-    onItemFocus(id: string, index: number) {
-      this.selectedZoneId = id
-      // Scroll item into view if it's being reached via Tab
+    focusActiveItem() {
       this.$nextTick(() => {
         const list = this.$refs.locationList as HTMLElement | undefined
-        const el = list?.querySelector<HTMLElement>(`[id="${this.optionId(id)}"]`)
+        const loc = this.locations[this.activeIndex]
+        if (!loc) return
+        const el = list?.querySelector<HTMLElement>(`[id="${this.optionId(loc.id)}"]`)
+        el?.focus()
         el?.scrollIntoView?.({ block: 'nearest' })
       })
     },
-    focusAdjacentItem(currentIndex: number, delta: number) {
-      const nextIndex = currentIndex + delta
-      if (nextIndex < 0 || nextIndex >= this.locations.length) return
-      const list = this.$refs.locationList as HTMLElement | undefined
-      const el = list?.querySelector<HTMLElement>(`[id="${this.optionId(this.locations[nextIndex].id)}"]`)
-      el?.focus()
+    selectLocation(id: string, index: number) {
+      this.selectedZoneId = id
+      this.activeIndex = index
+      this.focusActiveItem()
+    },
+    moveActive(delta: number) {
+      if (!this.locations.length) return
+      const next = Math.max(0, Math.min(this.locations.length - 1, this.activeIndex + delta))
+      if (next === this.activeIndex) return
+      this.activeIndex = next
+      this.selectedZoneId = this.locations[next].id
+      this.focusActiveItem()
+    },
+    moveActiveToFirst() {
+      if (!this.locations.length || this.activeIndex === 0) return
+      this.activeIndex = 0
+      this.selectedZoneId = this.locations[0].id
+      this.focusActiveItem()
+    },
+    moveActiveToLast() {
+      if (!this.locations.length) return
+      const last = this.locations.length - 1
+      if (this.activeIndex === last) return
+      this.activeIndex = last
+      this.selectedZoneId = this.locations[last].id
+      this.focusActiveItem()
     },
     onKeydown(e: KeyboardEvent) {
       if (e.key === 'Escape') {
