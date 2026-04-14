@@ -366,16 +366,15 @@ export default defineComponent({
   background-color: #888;
   border-radius: 4px;
 }
-.bricks__location-listbox {
-  scrollbar-width: thin;
-  scrollbar-color: #888 #f1f1f1;
+@media (min-width: 1024px) {
+  .bricks__location-listbox {
+    scrollbar-width: thin;
+    scrollbar-color: #888 #f1f1f1;
+  }
 }
 @media (max-width: 1023px) {
   .bricks__location-listbox::-webkit-scrollbar {
-    width: 12px;
-  }
-  .bricks__location-listbox {
-    scrollbar-width: auto;
+    width: 24px;
   }
 }
 </style>
