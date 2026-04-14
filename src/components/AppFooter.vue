@@ -1,10 +1,11 @@
 <template>
   <footer class="tw-bg-brickBabsonGreen tw-w-full tw-text-white">
 
-    <!-- Logo + contact info -->
+    <!-- Upper: Logo + Address + Nav links -->
     <div class="tw-max-w-brickMWL tw-mx-auto tw-px-6 tw-py-10">
-      <div class="tw-flex tw-flex-col sm:tw-flex-row tw-items-start tw-gap-8">
+      <div class="tw-flex tw-flex-col lg:tw-flex-row tw-items-start tw-gap-8">
 
+        <!-- Logo -->
         <a href="https://www.babson.edu" aria-label="Babson College home" class="tw-shrink-0 tw-text-white">
           <svg
             viewBox="0 0 191 123"
@@ -17,42 +18,126 @@
           </svg>
         </a>
 
-        <address class="tw-not-italic tw-font-zilla tw-text-base tw-leading-normal">
-          <p class="tw-m-0">231 Forest Street</p>
-          <p class="tw-mt-0 tw-mb-4">Babson Park, MA 02457</p>
-          <p class="tw-m-0 tw-mb-3">
-            <a href="tel:781-235-1200" class="hover:tw-underline">781-235-1200</a>
-          </p>
-          <p class="tw-m-0">
-            <a href="https://www.babson.edu/contact-babson/" class="hover:tw-underline">Contact Us</a>
-          </p>
-        </address>
+        <!-- Address + Student Mailing Address -->
+        <div class="tw-shrink-0">
+          <address class="tw-not-italic tw-font-zilla tw-text-[16px] tw-leading-normal">
+            <p class="tw-m-0">231 Forest Street</p>
+            <p class="tw-mt-0 tw-mb-4">Babson Park, MA 02457</p>
+            <p class="tw-m-0 tw-mb-3">
+              <a href="tel:781-235-1200" class="hover:tw-underline">781-235-1200</a>
+            </p>
+            <p class="tw-m-0">
+              <a href="https://www.babson.edu/contact-babson/" class="hover:tw-underline">Contact Us</a>
+            </p>
+          </address>
+          <hr class="tw-border-white/30 tw-my-4" style="width: 50%;">
+          <div class="tw-font-zilla tw-text-[16px] tw-leading-normal">
+            <p class="tw-m-0 tw-mb-1"><strong>Student Mailing Address</strong></p>
+            <p class="tw-m-0">21 Babson College Drive</p>
+            <p class="tw-m-0">Wellesley Hills, MA 02481</p>
+          </div>
+        </div>
+
+        <!-- Nav links (3 columns) -->
+        <nav class="tw-flex-1" aria-label="Footer navigation">
+          <ul class="tw-columns-2 sm:tw-columns-3 tw-gap-x-6 tw-list-none tw-m-0 tw-p-0">
+            <li class="tw-break-inside-avoid tw-mb-2">
+              <a href="https://www.givecampus.com/campaigns/5869/donations/new" class="tw-font-oswald tw-text-[16px] tw-font-normal tw-leading-normal hover:tw-underline">Make a Gift</a>
+            </li>
+            <li class="tw-break-inside-avoid tw-mb-2">
+              <a href="https://www.babson.edu/registrar/academic-calendar/" class="tw-font-oswald tw-text-[16px] tw-font-normal tw-leading-normal hover:tw-underline">Academic Calendar</a>
+            </li>
+            <li class="tw-break-inside-avoid tw-mb-2">
+              <a href="https://www.babson.edu/emergency-preparedness/" class="tw-font-oswald tw-text-[16px] tw-font-normal tw-leading-normal hover:tw-underline">Emergency Info</a>
+            </li>
+            <li class="tw-break-inside-avoid tw-mb-2">
+              <a href="https://www.babson.edu/social-media/" class="tw-font-oswald tw-text-[16px] tw-font-normal tw-leading-normal hover:tw-underline">Social Media</a>
+            </li>
+            <li class="tw-break-inside-avoid tw-mb-2">
+              <a href="https://www.babson.edu/offices-and-services/" class="tw-font-oswald tw-text-[16px] tw-font-normal tw-leading-normal hover:tw-underline">Offices and Services</a>
+            </li>
+            <li class="tw-break-inside-avoid tw-mb-2">
+              <a href="https://www.babson.edu/careers-at-babson/" class="tw-font-oswald tw-text-[16px] tw-font-normal tw-leading-normal hover:tw-underline">Careers at Babson</a>
+            </li>
+            <li class="tw-break-inside-avoid tw-mb-2">
+              <a href="https://www.bkstr.com/babsonstore/home" class="tw-font-oswald tw-text-[16px] tw-font-normal tw-leading-normal hover:tw-underline">Campus Store</a>
+            </li>
+            <li class="tw-break-inside-avoid tw-mb-2">
+              <a href="https://www.babson.edu/about/babson-at-a-glance/college-rankings-and-accolades/" class="tw-font-oswald tw-text-[16px] tw-font-normal tw-leading-normal hover:tw-underline">Rankings</a>
+            </li>
+            <li class="tw-break-inside-avoid tw-mb-2">
+              <a href="https://www.babson.edu/blank-school-for-entrepreneurial-leadership/centers-and-institutes/" class="tw-font-oswald tw-text-[16px] tw-font-normal tw-leading-normal hover:tw-underline">Centers and Institutes</a>
+            </li>
+            <li class="tw-break-inside-avoid tw-mb-2">
+              <a href="https://www.babson.edu/about/inclusive-excellence/notice-of-non-discrimination/" class="tw-font-oswald tw-text-[16px] tw-font-normal tw-leading-normal hover:tw-underline">Non-Discrimination</a>
+            </li>
+            <li class="tw-break-inside-avoid tw-mb-2">
+              <a href="https://www.babson.edu/about/babson-at-a-glance/for-the-media/" class="tw-font-oswald tw-text-[16px] tw-font-normal tw-leading-normal hover:tw-underline">For the Media</a>
+            </li>
+          </ul>
+        </nav>
 
       </div>
     </div>
 
-    <!-- Campus location links -->
-    <div class="tw-border-t tw-border-white/20">
-      <div class="tw-max-w-brickMWL tw-mx-auto tw-px-6 tw-py-5 tw-flex tw-justify-center tw-items-center tw-gap-8">
+    <!-- Campus locations row -->
+    <div class="tw-border-t tw-border-b tw-border-white/20" style="background: rgba(0, 0, 0, 0.1);">
+      <div class="tw-max-w-brickMWL tw-mx-auto tw-px-6 tw-py-[1.875rem] tw-flex tw-flex-wrap tw-justify-center tw-items-center tw-gap-4 sm:tw-gap-8">
         <a
           href="https://www.babson.edu/visit-babson/wellesley-main-campus/"
-          class="tw-font-oswald tw-font-light tw-text-sm tw-tracking-[0.12em] tw-uppercase hover:tw-underline"
+          class="tw-font-oswald tw-text-[20px] tw-font-light tw-tracking-[0.12em] tw-uppercase hover:tw-underline"
         >Wellesley</a>
         <span aria-hidden="true">•</span>
         <a
           href="https://www.babson.edu/visit-babson/babson-boston/"
-          class="tw-font-oswald tw-font-light tw-text-sm tw-tracking-[0.12em] tw-uppercase hover:tw-underline"
+          class="tw-font-oswald tw-text-[20px] tw-font-light tw-tracking-[0.12em] tw-uppercase hover:tw-underline"
         >Boston</a>
         <span aria-hidden="true">•</span>
         <a
           href="https://www.babson.edu/visit-babson/babson-miami/"
-          class="tw-font-oswald tw-font-light tw-text-sm tw-tracking-[0.12em] tw-uppercase hover:tw-underline"
+          class="tw-font-oswald tw-text-[20px] tw-font-light tw-tracking-[0.12em] tw-uppercase hover:tw-underline"
         >Miami</a>
       </div>
     </div>
 
+    <!-- Legal + Social row -->
+    <div>
+      <div class="tw-max-w-brickMWL tw-mx-auto tw-px-6 tw-py-5 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-4">
+
+        <!-- Legal links -->
+        <div class="tw-flex tw-flex-wrap tw-items-center tw-gap-4">
+          <a href="https://www.babson.edu/terms-of-use/" class="tw-font-zilla tw-text-[16px] hover:tw-underline">Terms of Use</a>
+          <a href="https://www.babson.edu/privacy-policy/" class="tw-font-zilla tw-text-[16px] hover:tw-underline">Privacy Policy</a>
+          <a href="mailto:webmaster@babson.edu" class="tw-font-zilla tw-text-[16px] hover:tw-underline">Feedback</a>
+        </div>
+
+        <!-- Social icons -->
+        <div class="tw-flex tw-items-center tw-gap-4">
+          <a href="https://www.facebook.com/babsoncollege/" aria-label="Babson on Facebook" class="tw-text-[#C6D188] tw-text-[28px] hover:tw-opacity-80">
+            <i class="fa-brands fa-facebook-f" aria-hidden="true"></i>
+          </a>
+          <a href="https://www.instagram.com/babsoncollege/" aria-label="Babson on Instagram" class="tw-text-[#C6D188] tw-text-[28px] hover:tw-opacity-80">
+            <i class="fa-brands fa-instagram" aria-hidden="true"></i>
+          </a>
+          <a href="https://www.linkedin.com/school/babson-college/" aria-label="Babson on LinkedIn" class="tw-text-[#C6D188] tw-text-[28px] hover:tw-opacity-80">
+            <i class="fa-brands fa-linkedin-in" aria-hidden="true"></i>
+          </a>
+          <a href="https://www.tiktok.com/@babson_college" aria-label="Babson on TikTok" class="tw-text-[#C6D188] tw-text-[28px] hover:tw-opacity-80">
+            <i class="fa-brands fa-tiktok" aria-hidden="true"></i>
+          </a>
+          <a href="https://twitter.com/babson" aria-label="Babson on X (Twitter)" class="tw-text-[#C6D188] tw-text-[28px] hover:tw-opacity-80">
+            <i class="fa-brands fa-x-twitter" aria-hidden="true"></i>
+          </a>
+          <a href="https://www.youtube.com/user/BabsonMedia/" aria-label="Babson on YouTube" class="tw-text-[#C6D188] tw-text-[28px] hover:tw-opacity-80">
+            <i class="fa-brands fa-youtube" aria-hidden="true"></i>
+          </a>
+        </div>
+
+      </div>
+    </div>
+
     <!-- Copyright -->
-    <div class="tw-border-t tw-border-white/20">
+    <div>
       <p class="tw-max-w-brickMWL tw-mx-auto tw-px-6 tw-py-4 tw-text-center tw-font-zilla tw-text-[16px] tw-m-0">
         © {{ currentYear }} Babson College. All rights reserved.
       </p>
