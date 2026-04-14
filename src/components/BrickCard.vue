@@ -335,7 +335,7 @@ export default defineComponent({
           imageData?.brick_preview ?? imageData?.brick ?? response?.data?.data?.attributes?.uri?.url
         );
         const fullUrl = this.resolveAssetUrl(
-          imageData?.brick_large ?? imageData?.full_img ?? response?.data?.data?.attributes?.uri?.url
+          imageData?.brick_large ?? response?.data?.data?.attributes?.uri?.url
         );
 
         if (previewUrl && fullUrl) {
@@ -387,8 +387,8 @@ export default defineComponent({
           : undefined;
 
         this.parkLocationImgURL = this.resolveAssetUrl(
+          file?.attributes?.image_style_uri?.full_im ??
           file?.attributes?.image_style_uri?.brick_large ??
-          file?.attributes?.image_style_uri?.full_img ??
           file?.attributes?.uri?.url
         );
       } catch {

@@ -53,7 +53,7 @@
 
     <!-- Copyright -->
     <div class="tw-border-t tw-border-white/20">
-      <p class="tw-max-w-brickMWL tw-mx-auto tw-px-6 tw-py-4 tw-text-center tw-font-zilla tw-text-[1.6rem] tw-m-0">
+      <p class="tw-max-w-brickMWL tw-mx-auto tw-px-6 tw-py-4 tw-text-center tw-font-zilla tw-text-[16px] tw-m-0">
         © {{ currentYear }} Babson College. All rights reserved.
       </p>
     </div>

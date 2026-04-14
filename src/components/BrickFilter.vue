@@ -45,7 +45,7 @@
         tabindex="0"
         class="
           bricks__location-listbox
-          tw-max-h-[84px] tw-overflow-y-scroll tw-bg-white
+          tw-max-h-[96px] tw-overflow-y-scroll tw-bg-white
           focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-brickSummerNight
         "
         @keydown.arrow-down.prevent="moveActive(1)"
@@ -356,19 +356,26 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.bricks__location-listbox::-webkit-scrollbar {
+  width: 8px;
+}
+.bricks__location-listbox::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+.bricks__location-listbox::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 4px;
+}
+.bricks__location-listbox {
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f1f1f1;
+}
 @media (max-width: 1023px) {
   .bricks__location-listbox::-webkit-scrollbar {
-    width: 8px;
-  }
-  .bricks__location-listbox::-webkit-scrollbar-track {
-    background: #f1f1f1;
-  }
-  .bricks__location-listbox::-webkit-scrollbar-thumb {
-    background-color: #888;
-    border-radius: 4px;
+    width: 12px;
   }
   .bricks__location-listbox {
-    scrollbar-width: thin;
+    scrollbar-width: auto;
   }
 }
 </style>

@@ -1,6 +1,7 @@
 <template>
   <div
     ref="brickGrid"
+    tabindex="-1"
     class="
       bricks
       tw-container xl:tw-max-w-brickMWL
@@ -227,7 +228,6 @@ export default defineComponent({
       );
       const fullUrl = this.resolveAssetUrl(
         imageFile?.attributes?.image_style_uri?.brick_large ??
-        imageFile?.attributes?.image_style_uri?.full_img ??
         imageFile?.attributes?.uri?.url
       );
       const brickParkLocation = brickItem.relationships.field_brick_zone.data?.id ?? '';
@@ -278,7 +278,6 @@ export default defineComponent({
         );
         const fullUrl = this.resolveAssetUrl(
           imageFile?.attributes?.image_style_uri?.brick_large ??
-          imageFile?.attributes?.image_style_uri?.full_img ??
           imageFile?.attributes?.uri?.url
         );
         const location = this.getLocationDetails(brick.brickParkLocation);
@@ -295,9 +294,14 @@ export default defineComponent({
 
       return this.decorateBricksWithLocations(hydratedBricks);
     },
-    goToPage(page: number) {
+    async goToPage(page: number) {
       this.currentPage = page;
-      this.fetchBricks();
+      await this.fetchBricks();
+      this.$nextTick(() => {
+        const grid = this.$refs.brickGrid as HTMLElement | undefined;
+        grid?.focus();
+        grid?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+      });
     },
     buildLocationFilter(): string {
       return this.locationIds
@@ -394,14 +398,6 @@ export default defineComponent({
         const url = this.buildUrl(offset);
         const response = await axios.get<BrickApiResponse>(url);
         this.parseDrupalResponse(response.data);
-
-        // Scroll grid to top on page change
-        if (this.currentPage > 1) {
-          this.$nextTick(() => {
-            const grid = this.$refs.brickGrid as HTMLElement | undefined;
-            grid?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
-          });
-        }
       } catch {
         this.bricks = [];
         this.totalPages = 1;

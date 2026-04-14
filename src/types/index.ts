@@ -102,7 +102,7 @@ export interface ImageStyleUri {
   brick?: string
   brick_preview?: string
   brick_large?: string
-  full_img?: string
+  full_im?: string
   [key: string]: string | undefined
 }
 

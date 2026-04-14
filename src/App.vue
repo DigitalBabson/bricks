@@ -114,8 +114,8 @@ export default defineComponent({
             ? included.find((item) => item.id === fileId && item.type === 'file--file')
             : undefined
           const imagePath =
+            file?.attributes?.image_style_uri?.full_im ??
             file?.attributes?.image_style_uri?.brick_large ??
-            file?.attributes?.image_style_uri?.full_img ??
             file?.attributes?.uri?.url ??
             ''
 
