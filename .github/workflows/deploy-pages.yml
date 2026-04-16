@@ -1,0 +1,90 @@
+name: Deploy GitHub Pages
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - develop
+      - claude/bricks-updates-april-O3Fls
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+    env:
+      DEV_DRUPAL_ENDPOINT: ${{ secrets.DEV_DRUPAL_ENDPOINT }}
+      DEV_SEARCHSTAX_ENDPOINT: ${{ secrets.DEV_SEARCHSTAX_ENDPOINT }}
+      DEV_SEARCHSTAX_TOKEN: ${{ secrets.DEV_SEARCHSTAX_TOKEN }}
+      DEV_HERO_IMAGE: ${{ vars.DEV_HERO_IMAGE }}
+      DEV_PLACEHOLDER_IMAGE: ${{ vars.DEV_PLACEHOLDER_IMAGE }}
+      DEV_PLACEHOLDER_IMAGE_UUID: ${{ vars.DEV_PLACEHOLDER_IMAGE_UUID }}
+      PAGES_BASE_PATH: ${{ vars.PAGES_BASE_PATH }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create build env file
+        shell: bash
+        run: |
+          required_vars=(
+            DEV_DRUPAL_ENDPOINT
+            DEV_SEARCHSTAX_ENDPOINT
+            DEV_SEARCHSTAX_TOKEN
+          )
+
+          for name in "${required_vars[@]}"; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is not set"
+              exit 1
+            fi
+          done
+
+          cat > .env.production <<EOF
+          DEV_DRUPAL_ENDPOINT=${DEV_DRUPAL_ENDPOINT}
+          DEV_SEARCHSTAX_ENDPOINT=${DEV_SEARCHSTAX_ENDPOINT}
+          DEV_SEARCHSTAX_TOKEN=${DEV_SEARCHSTAX_TOKEN}
+          DEV_HERO_IMAGE=${DEV_HERO_IMAGE}
+          DEV_PLACEHOLDER_IMAGE=${DEV_PLACEHOLDER_IMAGE}
+          DEV_PLACEHOLDER_IMAGE_UUID=${DEV_PLACEHOLDER_IMAGE_UUID}
+          EOF
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

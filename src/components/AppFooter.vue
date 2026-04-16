@@ -1,0 +1,159 @@
+<template>
+  <footer class="tw-bg-brickBabsonGreen tw-w-full tw-text-white">
+
+    <!-- Upper: Logo + Address + Nav links -->
+    <div class="tw-max-w-brickMWL tw-mx-auto tw-px-6 tw-py-10">
+      <div class="tw-flex tw-flex-col lg:tw-flex-row tw-items-start tw-gap-8">
+
+        <!-- Logo -->
+        <a href="https://www.babson.edu" aria-label="Babson College home" class="tw-shrink-0 tw-text-white">
+          <svg
+            viewBox="0 0 191 123"
+            style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2; height:100px; width:auto;"
+            class="tw-block tw-fill-current"
+            aria-hidden="true"
+          >
+            <path id="babsonText" d="M24.6,93.3c-2.7,1.6 -6,1.7 -10.1,1.7c-0.5,0 -1.1,-0.1 -1.6,-0.1l-11.8,0l0,-0.8c5.2,-0.5 6.3,-1.7 6.3,-6.5l0,-18.1c0,-4.5 -0.5,-6 -5.5,-6.4l0,-0.9l10.2,0c9.6,0 14.4,2 14.4,7.5c0,4.1 -2.5,6.4 -8,7.7l0,0.3c6.8,1.6 10.1,4.4 10.1,8.9c0,2.7 -1.5,5.1 -4,6.7Zm-12.9,-30.2l0,14.5c6.8,-0.1 10.2,-2.5 10.2,-7.1c0.1,-4.4 -3.7,-7.3 -10.2,-7.4Zm1.6,15.4c-0.5,0 -1.1,0 -1.6,0.1l0,8.9c0,4.3 0.4,6.3 4.8,6.3c4.3,0 7.1,-2.7 7.1,-6.7c-0.1,-5 -3.9,-8.6 -10.3,-8.6Zm42.7,16.3c-2.3,0 -4.7,0.1 -6.9,0.1l0,-0.8c2.4,-0.1 3.7,-1.3 3.7,-2.7c0,-0.8 -0.3,-1.9 -0.7,-3.2l-2.5,-7.1l-11.1,0l-0.8,2.9c-1.2,3.5 -1.9,5.7 -1.9,7.2c0,2 1.7,2.8 5.3,2.9l0,0.8c-2.4,0 -4.7,-0.1 -6.9,-0.1c-2.1,0 -4.3,0.1 -6.3,0.1l0,-0.8c1.9,-0.3 3.2,-0.8 4.1,-1.9c1.2,-1.2 2.8,-6.1 5.9,-14.4l5.5,-14.1l-0.3,-0.9c1.3,-0.4 2.4,-1.3 3.3,-2.7l10.4,28.1c1.5,3.9 2.7,5.7 6.3,5.9l0,0.8c-2.4,0 -4.7,-0.1 -7.1,-0.1Zm-12.1,-28.5l-4.7,12.9l9.6,0l-4.9,-12.9Zm10.1,53.1c-1.3,0.5 -2.8,0.9 -4.3,0.9c-2,0 -3.9,-0.7 -5.3,-1.7c-1.7,-1.3 -2.5,-3.2 -2.5,-5.5c0,-2.3 0.9,-4.1 2.5,-5.5c1.5,-1.2 3.3,-1.9 5.6,-1.9c1.6,0 3.1,0.4 4.5,1.1l0,3.3l-0.4,0c-0.4,-2.5 -1.9,-3.9 -4.3,-3.9c-3.3,0 -5.7,2.7 -5.7,6.7c0,1.9 0.8,3.6 2,4.9c1.1,1.2 2.5,1.7 4.1,1.7c2.1,0 3.5,-1.2 4.7,-4l0.3,0.1c-0.2,1.5 -0.6,2.7 -1.2,3.8Zm11.7,0.8c-4.5,0 -7.5,-2.8 -7.5,-7.2c0,-4.3 2.9,-7.1 7.6,-7.1c4.4,0 7.3,2.8 7.3,7.2c0.1,4.3 -2.8,7.1 -7.4,7.1Zm17.7,-26.9c-2.7,1.6 -5.9,1.7 -10.1,1.7c-0.4,0 -1.1,-0.1 -1.6,-0.1c-6.3,0 -4,0 -5.5,0l0,-7.3l0,-18.1c0,-4.5 -0.5,-6 -5.6,-6.4l0,-0.9l10.2,0c9.7,0 14.5,2 14.5,7.5c0,4.1 -2.5,6.4 -8.1,7.7l0,0.3c6.9,1.6 10.2,4.4 10.2,8.9c0.2,2.7 -1.3,5.1 -4,6.7Zm-13.8,15.6c-1.1,-1.6 -2.3,-2.4 -4,-2.4c-2.9,0 -4.9,2.4 -4.9,6.3c0,4.1 2.3,6.9 5.2,6.9c2.9,0 5.1,-2.4 5.1,-6.3c-0.1,-1.7 -0.6,-3.5 -1.4,-4.5Zm1.1,-45.8l0,14.5c6.8,-0.1 10.1,-2.5 10.1,-7.1c0,-4.4 -3.6,-7.3 -10.1,-7.4Zm1.6,15.4c-0.5,0 -1.1,0 -1.6,0.1l0,8.9c0,4.3 0.4,6.3 4.8,6.3c4.3,0 7.1,-2.7 7.1,-6.7c-0.1,-5 -4,-8.6 -10.3,-8.6Zm14.5,41.4l-11.5,0l0,-0.3c2.4,-0.3 2.7,-1.1 2.7,-3.5l0,-6.7c0,-2.1 -0.3,-2.8 -2.7,-3.1l0,-0.4c1.2,0.1 2.3,0.1 3.5,0.1c1.2,0 2.3,0 3.5,-0.1l0,0.4c-2.1,0.1 -2.5,0.9 -2.5,3.1l0,6.7c0,1.3 0,2.3 0.3,2.8c0.3,0.4 0.9,0.4 2.4,0.4c1.2,0 2.3,0 3.1,-0.5c0.8,-0.5 1.5,-1.5 2.1,-2.8l0.3,0.1l-1.2,3.8Zm14.5,0l-11.4,0l0,-0.3c2.4,-0.3 2.5,-1.1 2.5,-3.5l0,-6.7c0,-2.1 -0.3,-2.8 -2.5,-3.1l0,-0.4c1.2,0.1 2.3,0.1 3.5,0.1c1.1,0 2.3,0 3.5,-0.1l0,0.4c-2.3,0.1 -2.5,0.9 -2.5,3.1l0,6.7c0,1.3 0,2.3 0.3,2.8c0.1,0.4 0.9,0.4 2.3,0.4c1.3,0 2.4,0 3.2,-0.5c0.8,-0.5 1.5,-1.5 2.1,-2.8l0.3,0.1l-1.3,3.8Zm-0.3,-24.1c-3.3,0 -6.5,-0.9 -9,-2.5c-0.5,-2.7 -0.4,-5.3 -0.7,-8.1l0.9,-0.1c1.6,6.1 4.7,9.2 9.3,9.2c3.7,0 6.3,-2.5 6.3,-5.7c0,-2.8 -1.7,-5.3 -5.1,-7.1l-3.9,-2.3c-4.1,-2.3 -6,-5.2 -6,-8.6c0,-5.1 4,-9 10.1,-9c2.8,0 6,0.8 8.4,2.1c-0.3,2.1 -0.1,4.5 -0.3,7.2l-0.8,0c-0.7,-5.3 -4.1,-8 -7.9,-8c-3.3,0 -5.5,2.3 -5.5,5.6c0,2.3 1.5,4.7 4.1,6.3l5.9,3.2c3.7,2.1 5.5,4.9 5.5,8.5c0.1,5.2 -4.8,9.3 -11.3,9.3Zm14.5,24.2c-1.9,-0.1 -4,-0.1 -6.7,-0.1l-4.7,0l0,-0.3c2.4,-0.4 2.7,-0.9 2.7,-2.8l0,-7.6c0,-2 -0.4,-2.7 -2.4,-2.8l0,-0.4c1.9,0.1 3.6,0.1 5.2,0.1c2,0 3.9,0 5.6,-0.1c-0.1,1.1 -0.3,2.1 -0.3,3.2l-0.2,0c-0.1,-2 -1.1,-2.7 -3.5,-2.7l-2.5,0l0,5.7l2,0c2,0 2.8,-0.3 3.1,-1.9l0.3,0l0,4.7l-0.4,0c-0.1,-1.5 -0.9,-1.9 -2.9,-1.9l-2,0l0,3.5c0,2.1 0.5,2.7 3.2,2.7c2.4,0 3.6,-1.1 4.1,-3.5l0.3,0c-0.1,1.6 -0.4,3 -0.9,4.2Zm18.2,-24.4c-10.5,0 -17.6,-6.8 -17.6,-17.2c0,-10.1 7.1,-16.8 17.8,-16.8c10.6,0 17.6,6.9 17.6,17.2c0.1,10 -7,16.8 -17.8,16.8Zm-1.8,20.4l0,2.4l0.9,0l0,0.3c-2.1,1.1 -4.1,1.5 -6,1.5c-4.8,0 -7.9,-2.8 -7.9,-6.9c0,-2.1 0.8,-4 2.4,-5.3c1.5,-1.3 3.5,-2.1 5.7,-2.1c1.6,0 3.3,0.4 4.9,0.9c-0.1,1.2 -0.1,2.3 -0.1,3.5l-0.3,0c-0.7,-2.5 -2.3,-3.9 -4.7,-3.9c-3.5,0 -5.7,2.5 -5.7,6.3c0,1.9 0.7,3.6 1.9,4.8c1.3,1.5 3.2,2.1 5.2,2.1c1.5,0 1.7,-0.3 1.7,-1.6l0,-2c0,-1.6 -0.8,-2.1 -2.7,-2.3l0,-0.4c1.1,0.1 2,0.1 3.1,0.1c0.9,0 2,0 2.9,-0.1l0,0.4c-1.2,0.2 -1.3,0.7 -1.3,2.3Zm11.1,-47.5c-2.5,-3.7 -5.5,-5.6 -9.6,-5.6c-6.8,0 -11.7,5.7 -11.7,14.8c0,9.8 5.3,16.4 12.4,16.4c7.1,0 11.8,-5.7 11.8,-14.9c0.1,-4 -1,-7.9 -2.9,-10.7Zm3.9,51.5c-1.9,-0.1 -4,-0.1 -6.7,-0.1l-4.7,0l0,-0.3c2.4,-0.4 2.7,-0.9 2.7,-2.8l0,-7.6c0,-2 -0.4,-2.7 -2.4,-2.8l0,-0.4c1.9,0.1 3.6,0.1 5.2,0.1c2,0 3.9,0 5.6,-0.1c-0.1,1.1 -0.3,2.1 -0.3,3.2l-0.3,0c-0.1,-2 -1.1,-2.7 -3.5,-2.7l-2.5,0l0,5.7l2,0c2,0 2.8,-0.3 3.1,-1.9l0.3,0l0,4.7l-0.4,0c-0.1,-1.5 -0.9,-1.9 -2.9,-1.9l-2,0l0,3.5c0,2.1 0.5,2.7 3.2,2.7c2.4,0 3.6,-1.1 4.1,-3.5l0.3,0c0,1.6 -0.3,3 -0.8,4.2Zm41.7,-56.9c-3.6,0 -4.5,3.6 -4.5,11.8l0,10c0,3.9 0.1,7.6 0.3,11.2l-0.3,0c-2.9,-3.2 -4.5,-5.1 -4.9,-5.6l-19.8,-21l0,9.3c0,6.5 0,10.8 1.2,12.6c0.8,1.3 2.7,2.1 5.6,2.7l0,0.8c-2.4,0 -4.9,-0.1 -7.3,-0.1c-2.4,0 -4.9,0.1 -7.3,0.1l0,-0.8c5.5,-0.3 6.3,-3.3 6.3,-11.4l0,-8.9l0,-3.2c0,-2.3 -0.1,-4 -1.9,-5.6c-1.2,-1.1 -2.9,-1.7 -4.9,-1.9l0,-0.9c1.5,0 2.9,0.1 4.3,0.1c1.4,0 2.7,-0.1 3.9,-0.1l23.6,25.1l0,-10.8c0,-5.9 -0.1,-9.6 -1.6,-11.4c-0.9,-1.2 -2.7,-1.9 -5.2,-2l0,-0.9c2.3,0.1 4.7,0.1 6.8,0.1c2.3,0 4.4,0 6.4,-0.1l0,0.9l-0.7,0Z" />
+            <path id="babsonGlobe" d="M95.1,51.8c-14.4,0 -26.1,-11.2 -26.1,-25c0,-13.8 11.7,-25.2 26.1,-25.2c14.2,0 25.9,11.3 25.9,25.2c0,13.9 -11.6,25 -25.9,25Zm6.8,-27.8c5.5,-1.7 9.7,-5.5 9.7,-10.2c0,-7.7 -10.1,-11.3 -16.6,-11.3c-6.5,0.1 -16.6,3.5 -16.6,11.2c0,0.7 0.1,1.3 0.3,2c2.4,-3.6 5.6,-6.4 9.2,-8c-0.1,0.1 -0.1,0.4 -0.1,0.5c-3.9,2 -6.7,5.2 -8.5,8.8c0.9,2.3 2.9,4.3 5.5,5.6c0.9,-4.1 2.7,-8.3 4.5,-11.3c0.1,0.1 0.1,0.1 0.3,0.3c-1.5,3.2 -2.8,7.5 -3.6,11.7c0.5,0.3 1.2,0.5 1.9,0.7c0.8,0.3 1.6,0.5 2.3,0.7l0,0.5c-1.5,-0.1 -2.9,-0.5 -4.3,-1.1c-0.4,1.9 -0.5,3.7 -0.7,5.5c0,1.9 0,3.9 0.1,5.7c0.5,0.3 1.1,0.4 1.5,0.5c1.1,0.3 2.3,0.5 3.3,0.7l0,0.7c-1.7,-0.3 -3.2,-0.5 -4.7,-0.9c0.3,4.3 1.1,8.5 2.3,11.7l-0.1,0c-1.6,-3.3 -2.9,-7.7 -3.5,-12c-1.1,-0.4 -2.3,-0.8 -3.3,-1.3c-1.9,-0.8 -3.5,-1.6 -4.8,-2.7c0.1,3.9 1.2,7.6 2.9,10.8l-0.4,-0.3c-2.4,-3.7 -3.9,-7.9 -4.1,-11.8c-1.3,-1.3 -2.4,-2.8 -3.2,-4.4l0,0.5c0,13.8 10.1,24.2 24.1,24.2c7.5,0 20,-4.8 20,-14c-0.2,-7.3 -7.7,-11.8 -13.4,-13Zm-25.5,-9.7c-0.1,-1.3 0.1,-2.4 0.5,-3.5c-0.9,1.2 -1.7,2.3 -2.7,3.9c-1.2,2 -2.1,4.5 -2.3,6.9c0,1.9 0.8,3.3 1.7,5.1c0.1,0.4 0.4,0.7 0.7,1.1c0.3,-3.5 1.3,-6.9 2.9,-10c-0.4,-1.2 -0.7,-2.2 -0.8,-3.5Zm3.4,6.3c-0.7,-0.5 -1.2,-1.2 -1.6,-1.7c-1.5,3.3 -2.3,6.9 -2.4,10.6c2.3,2.4 5.2,4.1 8,5.2c-0.3,-1.9 -0.4,-3.6 -0.3,-5.3c0,-1.9 0.4,-4 0.8,-6c-1.6,-0.6 -3.2,-1.6 -4.5,-2.8Zm15.2,2.4l0,-10.2c0.4,0 0.7,0 0.9,-0.1c0.4,-0.1 0.8,-0.3 1.2,-0.4c0,0 1.1,-0.5 0.9,-0.8c-0.1,-0.1 -0.9,0.1 -1.1,0.1c-0.8,0.3 -1.5,0.4 -2,0.4c-2,0 -6,-1.1 -6,-3.9c0,-3.5 4.5,-3.7 6,-3.7c5.2,0 9.7,4.1 9.7,9.3c0.1,5.6 -5.6,9.3 -9.6,9.3Zm0,25.8l0,-23.8c6.4,0.3 13,4.8 13,11.8c0,7.1 -6.6,11.5 -13,12Z" />
+          </svg>
+        </a>
+
+        <!-- Address + Student Mailing Address -->
+        <div class="tw-shrink-0">
+          <address class="tw-not-italic tw-font-zilla tw-text-[16px] tw-leading-normal">
+            <p class="tw-m-0">231 Forest Street</p>
+            <p class="tw-mt-0 tw-mb-4">Babson Park, MA 02457</p>
+            <p class="tw-m-0 tw-mb-3">
+              <a href="tel:781-235-1200" class="hover:tw-underline">781-235-1200</a>
+            </p>
+            <p class="tw-m-0">
+              <a href="https://www.babson.edu/contact-babson/" class="hover:tw-underline">Contact Us</a>
+            </p>
+          </address>
+          <hr class="tw-border-white/30 tw-my-4" style="width: 50%;">
+          <div class="tw-font-zilla tw-text-[16px] tw-leading-normal">
+            <p class="tw-m-0 tw-mb-1"><strong>Student Mailing Address</strong></p>
+            <p class="tw-m-0">21 Babson College Drive</p>
+            <p class="tw-m-0">Wellesley Hills, MA 02481</p>
+          </div>
+        </div>
+
+        <!-- Nav links (3 columns) -->
+        <nav class="tw-flex-1" aria-label="Footer navigation">
+          <ul class="tw-columns-2 sm:tw-columns-3 tw-gap-x-6 tw-list-none tw-m-0 tw-p-0">
+            <li class="tw-break-inside-avoid tw-mb-2">
+              <a href="https://www.givecampus.com/campaigns/5869/donations/new" class="tw-font-oswald tw-text-[16px] tw-font-normal tw-leading-normal hover:tw-underline">Make a Gift</a>
+            </li>
+            <li class="tw-break-inside-avoid tw-mb-2">
+              <a href="https://www.babson.edu/registrar/academic-calendar/" class="tw-font-oswald tw-text-[16px] tw-font-normal tw-leading-normal hover:tw-underline">Academic Calendar</a>
+            </li>
+            <li class="tw-break-inside-avoid tw-mb-2">
+              <a href="https://www.babson.edu/emergency-preparedness/" class="tw-font-oswald tw-text-[16px] tw-font-normal tw-leading-normal hover:tw-underline">Emergency Info</a>
+            </li>
+            <li class="tw-break-inside-avoid tw-mb-2">
+              <a href="https://www.babson.edu/social-media/" class="tw-font-oswald tw-text-[16px] tw-font-normal tw-leading-normal hover:tw-underline">Social Media</a>
+            </li>
+            <li class="tw-break-inside-avoid tw-mb-2">
+              <a href="https://www.babson.edu/offices-and-services/" class="tw-font-oswald tw-text-[16px] tw-font-normal tw-leading-normal hover:tw-underline">Offices and Services</a>
+            </li>
+            <li class="tw-break-inside-avoid tw-mb-2">
+              <a href="https://www.babson.edu/careers-at-babson/" class="tw-font-oswald tw-text-[16px] tw-font-normal tw-leading-normal hover:tw-underline">Careers at Babson</a>
+            </li>
+            <li class="tw-break-inside-avoid tw-mb-2">
+              <a href="https://www.bkstr.com/babsonstore/home" class="tw-font-oswald tw-text-[16px] tw-font-normal tw-leading-normal hover:tw-underline">Campus Store</a>
+            </li>
+            <li class="tw-break-inside-avoid tw-mb-2">
+              <a href="https://www.babson.edu/about/babson-at-a-glance/college-rankings-and-accolades/" class="tw-font-oswald tw-text-[16px] tw-font-normal tw-leading-normal hover:tw-underline">Rankings</a>
+            </li>
+            <li class="tw-break-inside-avoid tw-mb-2">
+              <a href="https://www.babson.edu/blank-school-for-entrepreneurial-leadership/centers-and-institutes/" class="tw-font-oswald tw-text-[16px] tw-font-normal tw-leading-normal hover:tw-underline">Centers and Institutes</a>
+            </li>
+            <li class="tw-break-inside-avoid tw-mb-2">
+              <a href="https://www.babson.edu/about/inclusive-excellence/notice-of-non-discrimination/" class="tw-font-oswald tw-text-[16px] tw-font-normal tw-leading-normal hover:tw-underline">Non-Discrimination</a>
+            </li>
+            <li class="tw-break-inside-avoid tw-mb-2">
+              <a href="https://www.babson.edu/about/babson-at-a-glance/for-the-media/" class="tw-font-oswald tw-text-[16px] tw-font-normal tw-leading-normal hover:tw-underline">For the Media</a>
+            </li>
+          </ul>
+        </nav>
+
+      </div>
+    </div>
+
+    <!-- Campus locations row -->
+    <div class="tw-border-t tw-border-b tw-border-white/20" style="background: rgba(0, 0, 0, 0.1);">
+      <div class="tw-max-w-brickMWL tw-mx-auto tw-px-6 tw-py-[1.875rem] tw-flex tw-flex-wrap tw-justify-center tw-items-center tw-gap-4 sm:tw-gap-8">
+        <a
+          href="https://www.babson.edu/visit-babson/wellesley-main-campus/"
+          class="tw-font-oswald tw-text-[20px] tw-font-light tw-tracking-[0.12em] tw-uppercase hover:tw-underline"
+        >Wellesley</a>
+        <span aria-hidden="true">•</span>
+        <a
+          href="https://www.babson.edu/visit-babson/babson-boston/"
+          class="tw-font-oswald tw-text-[20px] tw-font-light tw-tracking-[0.12em] tw-uppercase hover:tw-underline"
+        >Boston</a>
+        <span aria-hidden="true">•</span>
+        <a
+          href="https://www.babson.edu/visit-babson/babson-miami/"
+          class="tw-font-oswald tw-text-[20px] tw-font-light tw-tracking-[0.12em] tw-uppercase hover:tw-underline"
+        >Miami</a>
+      </div>
+    </div>
+
+    <!-- Legal + Social row -->
+    <div>
+      <div class="tw-max-w-brickMWL tw-mx-auto tw-px-6 tw-py-5 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-4">
+
+        <!-- Legal links -->
+        <div class="tw-flex tw-flex-wrap tw-items-center tw-gap-4">
+          <a href="https://www.babson.edu/terms-of-use/" class="tw-font-zilla tw-text-[16px] hover:tw-underline">Terms of Use</a>
+          <a href="https://www.babson.edu/privacy-policy/" class="tw-font-zilla tw-text-[16px] hover:tw-underline">Privacy Policy</a>
+          <a href="mailto:webmaster@babson.edu" class="tw-font-zilla tw-text-[16px] hover:tw-underline">Feedback</a>
+        </div>
+
+        <!-- Social icons -->
+        <div class="tw-flex tw-items-center tw-gap-4">
+          <a href="https://www.facebook.com/babsoncollege/" aria-label="Babson on Facebook" class="tw-text-[#C6D188] tw-text-[28px] hover:tw-opacity-80">
+            <i class="fa-brands fa-facebook-f" aria-hidden="true"></i>
+          </a>
+          <a href="https://www.instagram.com/babsoncollege/" aria-label="Babson on Instagram" class="tw-text-[#C6D188] tw-text-[28px] hover:tw-opacity-80">
+            <i class="fa-brands fa-instagram" aria-hidden="true"></i>
+          </a>
+          <a href="https://www.linkedin.com/school/babson-college/" aria-label="Babson on LinkedIn" class="tw-text-[#C6D188] tw-text-[28px] hover:tw-opacity-80">
+            <i class="fa-brands fa-linkedin-in" aria-hidden="true"></i>
+          </a>
+          <a href="https://www.tiktok.com/@babson_college" aria-label="Babson on TikTok" class="tw-text-[#C6D188] tw-text-[28px] hover:tw-opacity-80">
+            <i class="fa-brands fa-tiktok" aria-hidden="true"></i>
+          </a>
+          <a href="https://twitter.com/babson" aria-label="Babson on X (Twitter)" class="tw-text-[#C6D188] tw-text-[28px] hover:tw-opacity-80">
+            <i class="fa-brands fa-x-twitter" aria-hidden="true"></i>
+          </a>
+          <a href="https://www.youtube.com/user/BabsonMedia/" aria-label="Babson on YouTube" class="tw-text-[#C6D188] tw-text-[28px] hover:tw-opacity-80">
+            <i class="fa-brands fa-youtube" aria-hidden="true"></i>
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Copyright -->
+    <div>
+      <p class="tw-max-w-brickMWL tw-mx-auto tw-px-6 tw-py-4 tw-text-center tw-font-zilla tw-text-[16px] tw-m-0">
+        © {{ currentYear }} Babson College. All rights reserved.
+      </p>
+    </div>
+
+  </footer>
+</template>
+
+<script lang="ts">
+import { defineComponent } from 'vue'
+
+export default defineComponent({
+  computed: {
+    currentYear(): number {
+      return new Date().getFullYear()
+    },
+  },
+})
+</script>
