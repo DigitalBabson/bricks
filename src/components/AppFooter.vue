@@ -2,8 +2,8 @@
   <footer class="tw-bg-brickBabsonGreen tw-w-full tw-text-white">
 
     <!-- Upper: Logo + Address + Nav links -->
-    <div class="tw-max-w-brickMWL tw-mx-auto tw-px-6 tw-py-10">
-      <div class="tw-flex tw-flex-col lg:tw-flex-row tw-items-start tw-gap-8">
+    <div class="tw-max-w-brickMWL tw-mx-auto tw-p-[3.7rem]" style="max-width: 114rem;">
+      <div class="tw-flex tw-flex-col md:tw-flex-row tw-items-start tw-gap-8 tw-justify-between">
 
         <!-- Logo -->
         <a href="https://www.babson.edu" aria-label="Babson College home" class="tw-shrink-0 tw-text-white">
@@ -40,7 +40,7 @@
 
         <!-- Nav links (3 columns) -->
         <nav class="tw-flex-1" aria-label="Footer navigation">
-          <ul class="tw-columns-2 sm:tw-columns-3 tw-gap-x-6 tw-list-none tw-m-0 tw-p-0">
+          <ul class="tw-columns-2 lg:tw-columns-3 tw-gap-x-6 tw-list-none tw-m-0 tw-p-0">
             <li class="tw-break-inside-avoid tw-mb-2">
               <a href="https://www.givecampus.com/campaigns/5869/donations/new" class="tw-font-oswald tw-text-[16px] tw-font-normal tw-leading-normal hover:tw-underline">Make a Gift</a>
             </li>
@@ -112,7 +112,7 @@
         </div>
 
         <!-- Social icons -->
-        <div class="tw-flex tw-items-center tw-gap-4">
+        <nav class="tw-flex tw-justify-end tw-items-center tw-gap-4" aria-label="Babson social media">
           <a href="https://www.facebook.com/babsoncollege/" aria-label="Babson on Facebook" class="tw-text-[#C6D188] tw-text-[28px] hover:tw-opacity-80">
             <i class="fa-brands fa-facebook-f" aria-hidden="true"></i>
           </a>
@@ -131,7 +131,7 @@
           <a href="https://www.youtube.com/user/BabsonMedia/" aria-label="Babson on YouTube" class="tw-text-[#C6D188] tw-text-[28px] hover:tw-opacity-80">
             <i class="fa-brands fa-youtube" aria-hidden="true"></i>
           </a>
-        </div>
+        </nav>
 
       </div>
     </div>
@@ -145,6 +145,41 @@
 
   </footer>
 </template>
+
+<style>
+.tw-flex.tw-items-center.tw-gap-4 a:has(i) {
+  border: 2px solid #CCD695;
+  background: #CCD695;
+  position: relative;
+  border-radius: 100%;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin: 0 auto;
+  margin-bottom: 0.6rem;
+  transition: ease-in-out .3s;
+  display: block;
+  text-align: center;
+}
+.tw-flex.tw-items-center.tw-gap-4 a i {
+  position: absolute;
+  top: .4rem;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto auto;
+  vertical-align: middle;
+  font-size: 1.4rem;
+  color: #064;
+}
+.tw-flex.tw-items-center.tw-gap-4 a:has(i):hover {
+  border: 2px solid #ffffff;
+  background: #064;
+  opacity: 1;
+}
+.tw-flex.tw-items-center.tw-gap-4 a:hover i {
+  color: #ffffff;
+}
+</style>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
