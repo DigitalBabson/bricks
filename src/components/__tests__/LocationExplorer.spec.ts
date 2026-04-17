@@ -227,11 +227,9 @@ describe('LocationExplorer', () => {
       expect(wrapper.find('ul').attributes('role')).toBe('listbox')
     })
 
-    it('only the active item has tabindex="0"; others have tabindex="-1"', () => {
+    it('all items have tabindex="0" for Tab navigation', () => {
       const items = wrapper.findAll('nav li')
-      expect(items[0].attributes('tabindex')).toBe('0')  // first item active by default
-      expect(items[1].attributes('tabindex')).toBe('-1')
-      expect(items[2].attributes('tabindex')).toBe('-1')
+      items.forEach((item) => expect(item.attributes('tabindex')).toBe('0'))
     })
 
     it('each item has role="option" and correct aria-selected', () => {
@@ -241,46 +239,21 @@ describe('LocationExplorer', () => {
       expect(items[1].attributes('aria-selected')).toBe('false')
     })
 
-    it('arrow-down moves selection and roving tabindex to next item', async () => {
+    it('focusing an item selects it and swaps the map image', async () => {
       const items = wrapper.findAll('nav li')
-      await items[0].trigger('keydown', { key: 'ArrowDown' })
+      await items[1].trigger('focus')
 
       expect(wrapper.find('img').attributes('src')).toBe('https://example.com/map2.jpg')
-      expect(items[1].attributes('tabindex')).toBe('0')
-      expect(items[0].attributes('tabindex')).toBe('-1')
+      expect(items[1].attributes('aria-selected')).toBe('true')
+      expect(items[0].attributes('aria-selected')).toBe('false')
     })
 
-    it('arrow-up does not move past the first item', async () => {
-      const items = wrapper.findAll('nav li')
-      await items[0].trigger('keydown', { key: 'ArrowUp' })
-
-      expect(items[0].attributes('tabindex')).toBe('0')
-      expect(wrapper.find('img').attributes('src')).toBe('https://example.com/map1.jpg')
-    })
-
-    it('End key moves to last item', async () => {
-      const items = wrapper.findAll('nav li')
-      await items[0].trigger('keydown', { key: 'End' })
-
-      expect(wrapper.find('img').attributes('src')).toBe('https://example.com/map3.jpg')
-      expect(items[2].attributes('tabindex')).toBe('0')
-    })
-
-    it('Home key moves to first item', async () => {
-      const items = wrapper.findAll('nav li')
-      await items[2].trigger('click')        // select third first
-      await items[2].trigger('keydown', { key: 'Home' })
-
-      expect(wrapper.find('img').attributes('src')).toBe('https://example.com/map1.jpg')
-      expect(items[0].attributes('tabindex')).toBe('0')
-    })
-
-    it('clicking a non-active item moves the roving tabindex to it', async () => {
+    it('clicking a non-active item selects it', async () => {
       const items = wrapper.findAll('nav li')
       await items[1].trigger('click')
 
-      expect(items[1].attributes('tabindex')).toBe('0')
-      expect(items[0].attributes('tabindex')).toBe('-1')
+      expect(items[1].attributes('aria-selected')).toBe('true')
+      expect(items[0].attributes('aria-selected')).toBe('false')
     })
   })
 

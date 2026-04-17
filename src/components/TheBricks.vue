@@ -2,6 +2,7 @@
   <div
     ref="brickGrid"
     tabindex="-1"
+    aria-label="Brick results"
     class="
       bricks
       tw-container xl:tw-max-w-brickMWL
@@ -41,6 +42,7 @@ import Pagination from "./Pagination.vue";
 import { defaultEnvKey, defaultUrlKey, searchstaxEndpointKey, searchstaxTokenKey } from "../types/index"
 import type { Brick, BrickApiResponse, FileApiItem, ParkLocation } from "../types/index"
 import { searchBricks } from "../services/searchstax"
+import { PLACEHOLDER_IMAGE_PATH } from "../constants"
 
 export default defineComponent({
   components: {
@@ -139,9 +141,7 @@ export default defineComponent({
       }
     },
     getPlaceholderImagePath(): string {
-      const placeholderPath = import.meta.env.DEV_PLACEHOLDER_IMAGE
-        || '/sites/default/files/images/bricks/coming-soon-gray.jpg';
-      return this.normalizeDrupalAssetPath(placeholderPath);
+      return this.normalizeDrupalAssetPath(PLACEHOLDER_IMAGE_PATH);
     },
     isDefaultDrupalImage(
       fileId?: string,

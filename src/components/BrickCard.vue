@@ -134,6 +134,7 @@ import UiModal from "./UiModal.vue";
 import axios from "axios";
 import { defaultEnvKey, defaultUrlKey } from "../types/index"
 import type { Brick, MediaImageApiResponse, ParkLocationApiResponse } from "../types/index"
+import { PLACEHOLDER_IMAGE_PATH } from "../constants"
 
 export default defineComponent({
   props: {
@@ -150,8 +151,7 @@ export default defineComponent({
       isImgLoading: true,
       hasMissingImage: false,
       isFetchingLocation: false,
-      defaultImgPath: import.meta.env.DEV_PLACEHOLDER_IMAGE
-        || '/sites/default/files/2026-03/coming-soon-gray.jpg',
+      defaultImgPath: PLACEHOLDER_IMAGE_PATH,
     };
   },
   inject: {

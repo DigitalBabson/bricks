@@ -22,10 +22,10 @@
         <button
           ref="closeButton"
           class="
-            tw-absolute tw-right-0 tw-top-[-60px] tw-z-30
+            tw-fixed tw-top-2 tw-right-2 tw-z-30
             tw-flex tw-h-[56px] tw-w-[56px] tw-items-center tw-justify-center
             tw-rounded tw-text-white
-            min-[1250px]:tw-right-[-66px] min-[1250px]:tw-top-[-66px]
+            min-[1250px]:tw-absolute min-[1250px]:tw-top-[-66px] min-[1250px]:tw-right-[-66px]
             hover:tw-opacity-70 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white
           "
           aria-label="Close modal"

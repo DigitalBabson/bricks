@@ -26,11 +26,11 @@
           <button
             ref="closeButton"
             class="
-              tw-absolute tw-z-30 tw-right-0 tw-top-[-60px]
+              tw-fixed tw-z-30 tw-top-2 tw-right-2
               tw-w-[56px] tw-h-[56px]
               tw-flex tw-items-center tw-justify-center
               tw-rounded tw-text-white tw-leading-none
-              min-[1250px]:tw-right-[-66px] min-[1250px]:tw-top-[-66px]
+              min-[1250px]:tw-absolute min-[1250px]:tw-top-[-66px] min-[1250px]:tw-right-[-66px]
               hover:tw-opacity-70 focus-visible:tw-outline-none
               focus-visible:tw-ring-2 focus-visible:tw-ring-white
             "
@@ -40,24 +40,28 @@
             <i class="fa-solid fa-xmark tw-text-4xl"></i>
           </button>
 
-          <!-- Content: mobile stacked + centered, desktop image-fill with list overlaid -->
-          <div class="tw-flex tw-flex-col tw-flex-1 tw-min-h-0 md:tw-relative tw-overflow-hidden">
-            <!-- Map image: mobile stacked block / desktop fills container -->
+          <!-- Content: mobile stacked, desktop image-fill with list overlaid,
+               short landscape: sidebar (nav left, image right) -->
+          <div
+            class="tw-flex tw-flex-1 tw-min-h-0 tw-overflow-hidden"
+            :class="isShortLandscape ? 'tw-flex-row tw-justify-center' : 'tw-flex-col md:tw-relative'"
+          >
+            <!-- Map image -->
             <div
               ref="imageContainer"
-              class="
-                tw-order-1
-                tw-flex-shrink-0
-                md:tw-absolute md:tw-inset-0 md:tw-h-auto
-                tw-flex tw-items-center tw-justify-center md:tw-p-0
-              "
+              class="tw-flex tw-items-center tw-justify-center"
+              :class="isShortLandscape
+                ? 'tw-min-w-0'
+                : 'tw-order-1 tw-flex-shrink-0 md:tw-absolute md:tw-inset-0 md:tw-h-auto md:tw-p-0'"
             >
               <img
                 v-if="selectedLocation?.mapImageUrl"
                 ref="mapImage"
                 :src="selectedLocation.mapImageUrl"
                 :alt="`Map of ${selectedLocation.name}`"
-                class="tw-max-w-full tw-max-h-[45vh] md:tw-max-h-full md:tw-w-full md:tw-h-full tw-object-contain"
+                :class="isShortLandscape
+                  ? 'tw-max-h-full tw-w-auto tw-block'
+                  : 'tw-max-w-full tw-max-h-[45vh] md:tw-max-h-full md:tw-w-full md:tw-h-full tw-object-contain'"
                 @load="updateNavHeight"
               />
               <p
@@ -68,15 +72,12 @@
               </p>
             </div>
 
-            <!-- Location list: mobile below image (same width), desktop overlaid on image -->
+            <!-- Location list: mobile below image, desktop overlaid, short landscape: left sidebar -->
             <nav
-              class="
-                tw-order-2 tw-min-h-0
-                tw-mx-auto md:tw-mx-0
-                md:tw-absolute
-                tw-bg-white md:tw-bg-white/85
-                tw-flex tw-flex-col tw-z-20
-              "
+              class="location-nav tw-min-h-0 tw-flex tw-flex-col tw-z-20"
+              :class="isShortLandscape
+                ? 'tw-bg-white'
+                : 'tw-order-2 tw-mx-auto md:tw-mx-0 md:tw-absolute tw-bg-white md:tw-bg-white/85'"
               :style="navOverlayStyle"
               aria-label="Park locations"
             >
@@ -87,6 +88,7 @@
 
               <!-- Up chevron -->
               <div
+                v-if="isScrollable"
                 class="
                   tw-sticky tw-top-0 tw-z-10
                   tw-flex tw-justify-center tw-py-1
@@ -113,12 +115,12 @@
                 @scroll="updateChevrons"
               >
                 <li
-                  v-for="(loc, index) in locations"
+                  v-for="loc in locations"
                   :id="optionId(loc.id)"
                   :key="loc.id"
                   role="option"
                   :aria-selected="loc.id === selectedZoneId"
-                  :tabindex="index === activeIndex ? 0 : -1"
+                  tabindex="0"
                   class="
                     location-item
                     tw-px-2 tw-py-2 tw-cursor-pointer
@@ -127,11 +129,8 @@
                     tw-transition-colors tw-duration-150
                   "
                   :class="loc.id === selectedZoneId ? 'tw-font-medium' : 'hover:tw-bg-black/5'"
-                  @click="selectLocation(loc.id, index)"
-                  @keydown.arrow-down.prevent="moveActive(1)"
-                  @keydown.arrow-up.prevent="moveActive(-1)"
-                  @keydown.home.prevent="moveActiveToFirst"
-                  @keydown.end.prevent="moveActiveToLast"
+                  @click="selectLocation(loc.id)"
+                  @focus="selectLocation(loc.id)"
                 >
                   {{ loc.name }}
                 </li>
@@ -139,6 +138,7 @@
 
               <!-- Down chevron -->
               <div
+                v-if="isScrollable"
                 class="
                   tw-sticky tw-bottom-0 tw-z-10
                   tw-flex tw-justify-center tw-py-1
@@ -181,7 +181,7 @@ export default defineComponent({
   data() {
     return {
       selectedZoneId: '',
-      activeIndex: 0,
+      isScrollable: false,
       showUpChevron: false,
       showDownChevron: true,
       imageRenderedTop: 0,
@@ -189,6 +189,7 @@ export default defineComponent({
       imageRenderedLeft: 0,
       imageRenderedWidth: 0,
       isMobile: false,
+      isShortLandscape: false,
     }
   },
   computed: {
@@ -196,15 +197,24 @@ export default defineComponent({
       return this.locations.find((loc) => loc.id === this.selectedZoneId)
     },
     navOverlayStyle(): Record<string, string> {
+      // Short landscape: sidebar takes priority over mobile stacked layout
+      if (this.isShortLandscape) {
+        return {
+          order: '-1',       // render before (left of) the image in flex-row
+          flexShrink: '0',
+          width: '180px',
+          alignSelf: 'stretch',
+        }
+      }
       if (this.isMobile) {
-        // Mobile: match the rendered image width, centered
+        // Mobile portrait: match the rendered image width, centered
         if (!this.imageRenderedWidth) return {}
         return {
           width: `${this.imageRenderedWidth}px`,
           maxHeight: '40vh',
         }
       }
-      // Desktop: overlaid on the image
+      // Desktop default: overlaid on the image
       if (!this.imageRenderedHeight) return {}
       return {
         top: `${this.imageRenderedTop}px`,
@@ -219,7 +229,6 @@ export default defineComponent({
       handler(newVal: ParkLocation[]) {
         if (newVal.length && !this.selectedZoneId) {
           this.selectedZoneId = newVal[0].id
-          this.activeIndex = 0
         }
         this.$nextTick(() => this.updateChevrons())
       },
@@ -229,7 +238,7 @@ export default defineComponent({
   mounted() {
     document.addEventListener('keydown', this.onKeydown)
     lockBodyScroll()
-    this.checkMobile()
+    this.checkLayout()
     this.$nextTick(() => {
       this.updateChevrons()
       ;(this.$refs.closeButton as HTMLElement)?.focus()
@@ -245,41 +254,8 @@ export default defineComponent({
     optionId(id: string): string {
       return `location-explorer-option-${id}`
     },
-    focusActiveItem() {
-      this.$nextTick(() => {
-        const list = this.$refs.locationList as HTMLElement | undefined
-        const loc = this.locations[this.activeIndex]
-        if (!loc) return
-        const el = list?.querySelector<HTMLElement>(`[id="${this.optionId(loc.id)}"]`)
-        el?.focus()
-        el?.scrollIntoView?.({ block: 'nearest' })
-      })
-    },
-    selectLocation(id: string, index: number) {
+    selectLocation(id: string) {
       this.selectedZoneId = id
-      this.activeIndex = index
-      this.focusActiveItem()
-    },
-    moveActive(delta: number) {
-      if (!this.locations.length) return
-      const next = Math.max(0, Math.min(this.locations.length - 1, this.activeIndex + delta))
-      if (next === this.activeIndex) return
-      this.activeIndex = next
-      this.selectedZoneId = this.locations[next].id
-      this.focusActiveItem()
-    },
-    moveActiveToFirst() {
-      if (!this.locations.length || this.activeIndex === 0) return
-      this.activeIndex = 0
-      this.selectedZoneId = this.locations[0].id
-      this.focusActiveItem()
-    },
-    moveActiveToLast() {
-      const last = this.locations.length - 1
-      if (last < 0 || this.activeIndex === last) return
-      this.activeIndex = last
-      this.selectedZoneId = this.locations[last].id
-      this.focusActiveItem()
     },
     onKeydown(e: KeyboardEvent) {
       if (e.key === 'Escape') {
@@ -305,11 +281,16 @@ export default defineComponent({
         }
       }
     },
-    checkMobile() {
+    checkLayout() {
       this.isMobile = window.innerWidth < 768
+      if (typeof window.matchMedia === 'function') {
+        this.isShortLandscape =
+          window.matchMedia('screen and (max-height: 600px) and (orientation: landscape)').matches ||
+          window.matchMedia('screen and (max-height: 700px) and (min-aspect-ratio: 1/1)').matches
+      }
     },
     updateNavHeight() {
-      this.checkMobile()
+      this.checkLayout()
       const img = this.$refs.mapImage as HTMLImageElement | undefined
 
       if (!img) {
@@ -342,6 +323,7 @@ export default defineComponent({
     updateChevrons() {
       const list = this.$refs.locationList as HTMLElement | undefined
       if (!list) return
+      this.isScrollable = list.scrollHeight > list.clientHeight
       this.showUpChevron = list.scrollTop > 0
       this.showDownChevron =
         list.scrollTop + list.clientHeight < list.scrollHeight - 1
@@ -375,8 +357,10 @@ export default defineComponent({
   position: relative;
 }
 .location-item:focus-visible {
-  outline-offset: -2px;
-  box-shadow: none;
+  outline: 2px solid #000 !important;
+  outline-offset: -2px !important;
+  position: relative;
+  z-index: 99999999;
 }
 .location-item:not(:last-child)::after {
   content: '';
@@ -393,5 +377,13 @@ export default defineComponent({
 }
 .location-list::-webkit-scrollbar {
   display: none;
+}
+/* Short/wide screens: sidebar nav is fully opaque, scrollable */
+@media screen and (max-height: 600px) and (orientation: landscape),
+       screen and (max-height: 700px) and (min-aspect-ratio: 1/1) {
+  .location-nav {
+    background: #ffffff;
+    overflow-y: auto;
+  }
 }
 </style>
