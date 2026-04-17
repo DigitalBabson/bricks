@@ -356,9 +356,12 @@ export default defineComponent({
 .location-item {
   position: relative;
 }
+ul[role="listbox"] {
+  overflow-y: visible;
+}
 .location-item:focus-visible {
-  outline: 2px solid #000 !important;
-  outline-offset: -2px !important;
+  outline: 2px solid #000;
+  outline-offset: 2px;
   position: relative;
   z-index: 99999999;
 }
@@ -377,6 +380,12 @@ export default defineComponent({
 }
 .location-list::-webkit-scrollbar {
   display: none;
+}
+/* Desktop overlay: near-opaque white (overrides md:tw-bg-white/85) */
+@media (min-width: 768px) {
+  .location-nav {
+    background-color: #fffffff5;
+  }
 }
 /* Short/wide screens: sidebar nav is fully opaque, scrollable */
 @media screen and (max-height: 600px) and (orientation: landscape),

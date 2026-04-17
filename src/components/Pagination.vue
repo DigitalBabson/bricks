@@ -97,6 +97,15 @@ export default defineComponent({
 </script>
 
 <style scoped>
+@media screen and (max-width: 400px) {
+  nav.bricks__pagination {
+    font-size: 1rem;
+  }
+  nav.bricks__pagination button {
+    padding: 0.25rem 0.4rem;
+    min-width: 1.5rem;
+  }
+}
 .page-active {
   position: relative;
 }

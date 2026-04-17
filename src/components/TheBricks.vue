@@ -12,6 +12,7 @@
       lg:tw-px-brick20
       xl:tw-px-0
       tw-grid tw-grid-cols-2
+      md:tw-grid-cols-3
       lg:tw-grid-cols-4
       tw-gap-brick3
       md:tw-gap-brick5
@@ -29,6 +30,7 @@
   <pagination
     :currentPage="currentPage"
     :totalPages="totalPages"
+    :max-visible="isNarrow ? 3 : 5"
     @update:page="goToPage"
   />
 </template>
@@ -69,6 +71,7 @@ export default defineComponent({
       pageSize: 20,
       showMessage: false,
       searchTimeout: null as ReturnType<typeof setTimeout> | null,
+      isNarrow: typeof window !== 'undefined' && window.innerWidth <= 400,
     };
   },
   inject: {
@@ -294,6 +297,9 @@ export default defineComponent({
 
       return this.decorateBricksWithLocations(hydratedBricks);
     },
+    checkNarrow() {
+      this.isNarrow = window.innerWidth <= 400;
+    },
     async goToPage(page: number) {
       this.currentPage = page;
       await this.fetchBricks();
@@ -409,9 +415,21 @@ export default defineComponent({
     if (this.searchTimeout) {
       clearTimeout(this.searchTimeout);
     }
+    window.removeEventListener('resize', this.checkNarrow);
   },
   mounted() {
     this.fetchBricks();
+    window.addEventListener('resize', this.checkNarrow);
   },
 });
 </script>
+
+<style scoped>
+@media screen and (max-width: 400px) {
+  .bricks {
+    gap: 1.5rem;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+}
+</style>

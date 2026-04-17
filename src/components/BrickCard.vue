@@ -92,6 +92,7 @@
     </transition>
     <button
       class="
+        brick-card__location-btn
         tw-w-full tw-cursor-pointer tw-py-[.7rem] tw-text-brickCourtyardGreen tw-font-oswald tw-uppercase
         hover:tw-bg-brickMediumGreen hover:tw-text-white
         focus-visible:tw-bg-brickMediumGreen focus-visible:tw-text-white
@@ -450,5 +451,9 @@ export default defineComponent({
   opacity: 0;
   position: absolute;
 }
-
+@media screen and (max-width: 400px) {
+  .brick-card__location-btn {
+    font-size: 0.875rem;
+  }
+}
 </style>
