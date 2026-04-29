@@ -93,7 +93,7 @@
     <button
       class="
         brick-card__location-btn
-        tw-w-full tw-cursor-pointer tw-py-[.7rem] tw-text-brickCourtyardGreen tw-font-oswald tw-uppercase
+        tw-w-full tw-cursor-pointer tw-py-[11px] tw-text-brickCourtyardGreen tw-font-oswald tw-uppercase
         hover:tw-bg-brickMediumGreen hover:tw-text-white
         focus-visible:tw-bg-brickMediumGreen focus-visible:tw-text-white
         tw-transition-colors tw-duration-200 tw-ease-in-out

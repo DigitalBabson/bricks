@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import cssInjectedByJs from 'vite-plugin-css-injected-by-js'
 
 function resolvePagesBase(): string {
   const explicitBase = process.env.PAGES_BASE_PATH?.trim()
@@ -20,7 +21,7 @@ function resolvePagesBase(): string {
 // https://vitejs.dev/config/
 export default defineConfig({
   base: resolvePagesBase(),
-  plugins: [vue()],
+  plugins: [vue(), cssInjectedByJs()],
   envPrefix: 'DEV_',
   build: {
     rollupOptions: {

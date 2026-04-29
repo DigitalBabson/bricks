@@ -4,11 +4,11 @@
     class="
       bricks__search-form
       tw-mx-auto tw-w-full tw-max-w-[700px]
-      tw-bg-brickCourtyardGreen tw-px-8 sm:tw-px-12 tw-py-5
-      tw-flex tw-flex-col tw-gap-4
+      tw-bg-brickCourtyardGreen
     "
     @submit.prevent
   >
+    <div class="tw-px-8 sm:tw-px-12 tw-py-5 tw-flex tw-flex-col tw-gap-4">
     <div class="tw-form-control tw-text-m">
       <label
         for="search-brick"
@@ -85,7 +85,7 @@
           class="
             tw-inline-flex tw-items-center tw-gap-3 tw-rounded-[23px]
             tw-bg-white tw-px-3 tw-py-1
-            tw-font-oswald tw-text-sm tw-text-black
+            tw-font-oswald tw-text-[14px] tw-text-black
           "
         >
           {{ filter.label }}: {{ filter.value }}
@@ -106,7 +106,7 @@
         <button
           class="
             tw-rounded-[23px] tw-px-3 tw-py-1
-            tw-font-oswald tw-text-sm tw-font-normal
+            tw-font-oswald tw-text-[14px] tw-font-normal
             tw-transition-colors tw-duration-200
           "
           :class="activeFilters.length === 0
@@ -121,6 +121,7 @@
 
       </div>
     </div>
+  </div>
   </form>
 </template>
 
