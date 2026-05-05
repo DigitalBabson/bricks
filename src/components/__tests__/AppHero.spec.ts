@@ -99,23 +99,26 @@ describe('AppHero', () => {
       document.body.appendChild(t4Breadcrumbs)
 
       const wrapper = mount(AppHero, { attachTo: document.body })
-      await wrapper.vm.$nextTick()
+      try {
+        await wrapper.vm.$nextTick()
 
-      // One #page-main-content total — on our visible h1, not the T4 original
-      const allIds = document.querySelectorAll('#page-main-content')
-      expect(allIds).toHaveLength(1)
-      expect(allIds[0]).toBe(wrapper.find('h1').element)
+        // One #page-main-content total — on our visible h1, not the T4 original
+        const allIds = document.querySelectorAll('#page-main-content')
+        expect(allIds).toHaveLength(1)
+        expect(allIds[0]).toBe(wrapper.find('h1').element)
 
-      // Original T4 h1 removed from the accessibility tree
-      expect(t4H1.getAttribute('aria-hidden')).toBe('true')
+        // Original T4 h1 removed from the accessibility tree
+        expect(t4H1.getAttribute('aria-hidden')).toBe('true')
 
-      // Breadcrumbs rendered inside a labelled nav
-      const nav = wrapper.find('nav[aria-label="Breadcrumb"]')
-      expect(nav.exists()).toBe(true)
-      expect(nav.find('.c-breadcrumbs--default').exists()).toBe(true)
-
-      document.body.removeChild(t4H1)
-      document.body.removeChild(t4Breadcrumbs)
+        // Breadcrumbs rendered inside a labelled nav
+        const nav = wrapper.find('nav[aria-label="Breadcrumb"]')
+        expect(nav.exists()).toBe(true)
+        expect(nav.find('.c-breadcrumbs--default').exists()).toBe(true)
+      } finally {
+        wrapper.unmount()
+        document.body.removeChild(t4H1)
+        document.body.removeChild(t4Breadcrumbs)
+      }
     })
   })
 })
