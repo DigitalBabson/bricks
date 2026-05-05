@@ -12,7 +12,13 @@
     <title>Vite App</title>
   </head>
   <body class="tw-relative tw-w-full tw-h-screen">
+    <!-- DEV MOCK: In production, T4 renders these via navigation/content layouts -->
+    <h1 id="page-main-content" class="type__header--1">Find My Brick</h1>
+    <div id="t4-breadcrumbs" style="display:none">
+      <div class="c-breadcrumbs c-breadcrumbs--default"><ul><li><a href="/alumni/">Alumni</a></li><li><a href="/alumni/about-us/">About Us</a></li><li><a href="/alumni/about-us/visiting-campus/">Visiting Campus</a></li><li>Find My Brick</li></ul></div>
+    </div>
     <div id="app"></div>
+    <div id="bricks-modal-root"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

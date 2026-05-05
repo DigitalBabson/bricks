@@ -14,6 +14,13 @@ const drupalOrigin = endpointUrl.origin
 const searchstaxEndpoint = (import.meta.env.DEV_SEARCHSTAX_ENDPOINT ?? '').trim()
 const searchstaxToken = (import.meta.env.DEV_SEARCHSTAX_TOKEN ?? '').trim()
 
+// Ensure modal teleport root exists — T4 layout should add this, but create it defensively
+if (!document.getElementById('bricks-modal-root')) {
+  const modalRoot = document.createElement('div')
+  modalRoot.id = 'bricks-modal-root'
+  document.body.appendChild(modalRoot)
+}
+
 const app = createApp(App)
 app.provide(defaultEnvKey, drupalOrigin)
 app.provide(defaultUrlKey, drupalEndpoint)

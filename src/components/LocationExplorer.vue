@@ -1,5 +1,5 @@
 <template>
-  <teleport to="body">
+  <teleport to="#bricks-modal-root">
     <transition name="fade">
       <div
         class="
@@ -353,6 +353,12 @@ export default defineComponent({
 </style>
 
 <style scoped>
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
 .location-item {
   position: relative;
 }

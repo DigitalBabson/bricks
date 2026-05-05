@@ -62,7 +62,7 @@ Real secrets locally: create `.env.[mode].local` (gitignored) with `DEV_SEARCHST
 
 - **Tailwind prefix**: All utility classes use `tw-` prefix (e.g., `tw-w-full`, `tw-bg-brickLightGreen`). Set in `tailwind.config.js` `prefix` option.
 - **Provide/inject**: `defaultEnv` and `defaultUrl` injected (not props). Tests must supply via `global.provide`.
-- **Modals**: Always teleported to body. UiModal emits `@close`; parent controls visibility with boolean.
+- **Modals**: Teleported to `#bricks-modal-root` (not `body`). `main.ts` creates the root defensively if absent. UiModal emits `@close`; parent controls visibility with boolean.
 - **Brand colors**: `brickLightGreen`, `brickMediumGreen`, `brickCourtyardGreen`, `brickBabsonGreen`, `brickSummerNight`, `brickBabsonGrey` — defined in Tailwind config.
 - **Fonts**: Oswald (headings, buttons) and Zilla Slab (body text) via Google Fonts CDN.
 - **Font Awesome**: Loaded via kit script in `index.html` `<head>` (`kit.fontawesome.com`). Works on localhost by default. Use `fa-solid`/`fa-regular` — `fa-sharp` requires Sharp style enabled in kit settings.
@@ -75,6 +75,20 @@ Real secrets locally: create `.env.[mode].local` (gitignored) with `DEV_SEARCHST
 - **Unit tests**: `src/components/__tests__/*.spec.ts` — Vitest + Vue Test Utils + jsdom
 - **E2E tests**: `tests/e2e/*.spec.ts` — Playwright (Chromium, Firefox, WebKit, mobile viewports)
 - BrickCard tests must provide injections: `global: { provide: { defaultEnv: '...', defaultUrl: '...' } }`
+
+## T4 page markup
+
+The following must appear in the T4 content layout for the widget to function:
+
+```html
+<script type="module" src="<t4 type="media" formatter="path/*" id="2227767" />"></script>
+<div id="app"></div>
+<div id="bricks-modal-root"></div>
+```
+
+- `#app` — Vue mount point
+- `#bricks-modal-root` — teleport target for UiModal and LocationExplorer (modals). `main.ts` creates it defensively if missing, but it should be present in the layout so modals render before any user interaction.
+- The T4 page must also render `h1.type__header--1#page-main-content` (via the page content type) and `.c-breadcrumbs--default` (via the navigation layout) — AppHero reads these from the DOM on mount.
 
 ## Deployment
 

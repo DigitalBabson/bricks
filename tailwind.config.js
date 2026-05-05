@@ -1,6 +1,9 @@
 export default {
   content: ["./index.html", "./src/**/*.{vue,js,ts,jsx,tsx}"],
   prefix: "tw-",
+  corePlugins: {
+    preflight: false,
+  },
   theme: {
     extend: {
       screens: {

@@ -1,6 +1,6 @@
 <template>
 <div class="tw-flex tw-min-h-screen tw-w-full tw-flex-col">
-  <!-- <app-header /> -->
+  <app-header v-if="isDev" />
   <main class="tw-flex-1">
     <app-hero @openLocations="showLocationExplorer = true">
       <brick-filter
@@ -23,7 +23,7 @@
     :floating="true"
     @openLocations="showLocationExplorer = true"
   />
-  <!-- <app-footer /> -->
+  <app-footer v-if="isDev" />
   <location-explorer
     v-if="showLocationExplorer"
     :locations="locations"
@@ -61,6 +61,7 @@ export default defineComponent({
   },
   data() {
     return {
+      isDev: import.meta.env.DEV,
       showLocationExplorer: false,
       inscription: '',
       locationIds: [] as string[],

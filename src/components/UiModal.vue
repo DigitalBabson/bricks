@@ -1,5 +1,5 @@
 <template>
-  <teleport to="body">
+  <teleport to="#bricks-modal-root">
     <div
       class="
         tw-fixed tw-inset-0 tw-z-50
