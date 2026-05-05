@@ -1,10 +1,18 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import UiModal from '../UiModal.vue'
 
-// Reset the body scroll lock counter between tests by resetting the module
+let modalRoot: HTMLElement
+
 beforeEach(() => {
   document.body.style.overflow = ''
+  modalRoot = document.createElement('div')
+  modalRoot.id = 'bricks-modal-root'
+  document.body.appendChild(modalRoot)
+})
+
+afterEach(() => {
+  modalRoot.remove()
 })
 
 describe('UiModal', () => {
