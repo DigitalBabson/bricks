@@ -2,7 +2,7 @@
   <teleport to="#bricks-modal-root">
     <div
       class="
-        tw-fixed tw-inset-0 tw-z-50
+        tw-fixed tw-inset-0 tw-z-[90]
         tw-flex tw-items-center tw-justify-center
         tw-bg-black/[0.87]
       "
@@ -22,7 +22,7 @@
         <button
           ref="closeButton"
           class="
-            tw-fixed tw-top-2 tw-right-2 tw-z-30
+            tw-fixed tw-top-2 tw-right-2 tw-z-[95]
             tw-flex tw-h-[56px] tw-w-[56px] tw-items-center tw-justify-center
             tw-rounded tw-text-white
             min-[1250px]:tw-absolute min-[1250px]:tw-top-[-66px] min-[1250px]:tw-right-[-66px]

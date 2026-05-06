@@ -61,9 +61,26 @@ export default defineComponent({
     },
   },
   mounted() {
+    const applyBreadcrumbs = (el: HTMLElement) => {
+      this.breadcrumbsHtml = el.outerHTML
+      el.style.display = 'none'
+    }
+
     const breadcrumbs = document.querySelector<HTMLElement>('.c-breadcrumbs--default')
-    this.breadcrumbsHtml = breadcrumbs?.outerHTML ?? ''
-    if (breadcrumbs) breadcrumbs.style.display = 'none'
+    if (breadcrumbs) {
+      applyBreadcrumbs(breadcrumbs)
+    } else {
+      // T4 preview renders navigation layouts async — wait for element
+      const observer = new MutationObserver(() => {
+        const found = document.querySelector<HTMLElement>('.c-breadcrumbs--default')
+        if (found) {
+          observer.disconnect()
+          applyBreadcrumbs(found)
+        }
+      })
+      observer.observe(document.body, { childList: true, subtree: true })
+      setTimeout(() => observer.disconnect(), 3000)
+    }
 
     const header = document.querySelector<HTMLElement>('h1.type__header--1')
     if (header) {

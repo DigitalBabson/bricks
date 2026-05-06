@@ -3,7 +3,7 @@
     <transition name="fade">
       <div
         class="
-          tw-fixed tw-inset-0 tw-z-50
+          tw-fixed tw-inset-0 tw-z-[90]
           tw-flex tw-items-center tw-justify-center
           tw-bg-black/[0.87]
         "
@@ -26,7 +26,7 @@
           <button
             ref="closeButton"
             class="
-              tw-fixed tw-z-30 tw-top-2 tw-right-2
+              tw-fixed tw-z-[95] tw-top-2 tw-right-2
               tw-w-[56px] tw-h-[56px]
               tw-flex tw-items-center tw-justify-center
               tw-rounded tw-text-white tw-leading-none
