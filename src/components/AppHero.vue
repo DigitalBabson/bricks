@@ -26,7 +26,7 @@
       class="tw-hidden min-[700px]:tw-block tw-w-full min-[700px]:tw-absolute min-[700px]:tw-top-3 min-[700px]:tw-left-0 min-[700px]:tw-z-10"
     >
       <div
-        class="tw-max-w-brickMWL tw-mx-auto tw-px-6 tw-text-sm tw-font-zilla tw-text-brickBabsonGrey"
+        class="tw-max-w-brickMWL tw-mx-auto tw-text-sm tw-font-zilla tw-text-brickBabsonGrey"
         v-html="breadcrumbsHtml"
       />
     </nav>
@@ -145,6 +145,19 @@ export default defineComponent({
     const breadcrumbs = document.querySelector<HTMLElement>('.c-breadcrumbs--default')
     if (breadcrumbs) {
       applyBreadcrumbs(breadcrumbs)
+    } else if (import.meta.env.DEV) {
+      // Localhost: no T4 DOM — render placeholder breadcrumbs for local preview
+      const mock = document.createElement('div')
+      mock.className = 'c-breadcrumbs c-breadcrumbs--default bricks-breadcrumbs'
+      const ul = document.createElement('ul')
+      ;[['#', 'Alumni'], ['#', 'About Us'], [null, 'Find My Brick']].forEach(([href, text]) => {
+        const li = document.createElement('li')
+        if (href) { const a = document.createElement('a'); a.href = href; a.textContent = text; li.appendChild(a) }
+        else li.textContent = text
+        ul.appendChild(li)
+      })
+      mock.appendChild(ul)
+      this.breadcrumbsHtml = mock.outerHTML
     } else {
       // T4 preview renders navigation layouts async — wait for element
       breadcrumbsObserver = new MutationObserver(() => {
@@ -194,7 +207,7 @@ export default defineComponent({
   color: #464646;
 }
 :deep(.bricks-breadcrumbs a) {
-  color: #464646;
+  color: #54752f;
   text-decoration: none !important;
 }
 :deep(.bricks-breadcrumbs a:hover) {
@@ -202,6 +215,9 @@ export default defineComponent({
 }
 
 h1 {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 400;
+  color: #006644;
   font-size: 3.2rem;
   margin-top: 0 !important;
   padding-top: 0 !important; /* beats T4's #page-main-content { padding-top: 11rem } */
