@@ -1,5 +1,5 @@
 <template>
-  <div class="tw-w-full min-[700px]:tw-mb-[60px]">
+  <div class="tw-relative tw-w-full min-[700px]:tw-mb-[60px]">
     <section
       class="
         tw-hidden min-[700px]:tw-block
@@ -9,16 +9,6 @@
     >
       <!-- Full-coverage semi-transparent overlay -->
       <div class="tw-absolute tw-inset-0 tw-bg-white/80"></div>
-
-      <!-- Breadcrumbs: sourced from #t4-breadcrumbs div rendered by T4 navigation layout -->
-      <nav v-if="breadcrumbsHtml" aria-label="Breadcrumb"
-        class="tw-absolute tw-top-3 tw-left-0 tw-z-10 tw-w-full tw-px-6"
-      >
-        <div
-          class="tw-max-w-brickMWL tw-mx-auto tw-text-sm tw-font-zilla tw-text-brickBabsonGrey"
-          v-html="breadcrumbsHtml"
-        />
-      </nav>
 
       <!-- Desktop trigger: flush to viewport edge, anchored to content at 3xl -->
       <location-explorer-trigger
@@ -30,6 +20,16 @@
         @openLocations="$emit('openLocations')"
       />
     </section>
+
+    <!-- Breadcrumbs: rendered here (not inside section) so the nav persists across breakpoints -->
+    <nav v-if="breadcrumbsHtml" aria-label="Breadcrumb"
+      class="tw-hidden min-[700px]:tw-block tw-w-full min-[700px]:tw-absolute min-[700px]:tw-top-3 min-[700px]:tw-left-0 min-[700px]:tw-z-10"
+    >
+      <div
+        class="tw-max-w-brickMWL tw-mx-auto tw-px-6 tw-text-sm tw-font-zilla tw-text-brickBabsonGrey"
+        v-html="breadcrumbsHtml"
+      />
+    </nav>
 
     <div class="tw-relative tw-mx-auto tw-max-w-brickMWL min-[700px]:-tw-mt-[245px] min-[700px]:tw-px-6">
       <h1 id="page-main-content">{{ headerText }}</h1>
@@ -60,10 +60,86 @@ export default defineComponent({
       return import.meta.env.DEV_HERO_IMAGE || ''
     },
   },
+  beforeUnmount() {
+    ;(this as any)._breadcrumbCleanup?.()
+  },
   mounted() {
+    let injectedStyle: HTMLStyleElement | null = null
+    let headObserver: MutationObserver | null = null
+    let breadcrumbsObserver: MutationObserver | null = null
+    let markedEl: HTMLElement | null = null
+    type StyleSnapshot = { el: HTMLElement; position: string; positionPri: string; marginTop: string; marginTopPri: string }
+    let t4Snapshot: StyleSnapshot[] = []
+
+    const injectHideRule = (sourceEl: HTMLElement) => {
+      // Mark only this specific element so the rule doesn't affect other breadcrumbs on the page
+      sourceEl.setAttribute('data-bricks-hide', '')
+      markedEl = sourceEl
+      injectedStyle = document.createElement('style')
+      injectedStyle.textContent = '@media (min-width: 700px) { [data-bricks-hide].c-breadcrumbs--default { display: none !important; } }'
+      document.head.appendChild(injectedStyle)
+    }
+
+    ;(this as any)._breadcrumbCleanup = () => {
+      injectedStyle?.remove()
+      headObserver?.disconnect()
+      breadcrumbsObserver?.disconnect()
+      markedEl?.removeAttribute('data-bricks-hide')
+      t4Snapshot.forEach(({ el, position, positionPri, marginTop, marginTopPri }) => {
+        if (position) el.style.setProperty('position', position, positionPri)
+        else el.style.removeProperty('position')
+        if (marginTop) el.style.setProperty('margin-top', marginTop, marginTopPri)
+        else el.style.removeProperty('margin-top')
+      })
+    }
+
+    const fixPositions = (targets: HTMLElement[]) => {
+      targets.forEach(el => {
+        el.style.setProperty('position', 'relative', 'important')
+        el.style.setProperty('margin-top', '0', 'important')
+      })
+    }
+
     const applyBreadcrumbs = (el: HTMLElement) => {
-      this.breadcrumbsHtml = el.outerHTML
-      el.style.display = 'none'
+      const clone = el.cloneNode(true) as HTMLElement
+      clone.classList.add('bricks-breadcrumbs')
+      this.breadcrumbsHtml = clone.outerHTML
+      injectHideRule(el)
+
+      // Scope to: the original element + its droplist sibling
+      const droplist = el.parentElement?.querySelector<HTMLElement>('.c-breadcrumbs--droplist') ?? null
+      const t4Targets = [el, ...(droplist ? [droplist] : [])]
+
+      // Snapshot inline styles before mutating so we can restore on unmount
+      t4Snapshot = t4Targets.map(t => ({
+        el: t,
+        position: t.style.getPropertyValue('position'),
+        positionPri: t.style.getPropertyPriority('position'),
+        marginTop: t.style.getPropertyValue('margin-top'),
+        marginTopPri: t.style.getPropertyPriority('margin-top'),
+      }))
+
+      const fixAll = () => {
+        const renderedClone = (this.$el as HTMLElement).querySelector<HTMLElement>('.bricks-breadcrumbs')
+        fixPositions(renderedClone ? [...t4Targets, renderedClone] : t4Targets)
+      }
+
+      fixAll()
+      this.$nextTick(fixAll)
+
+      // T4 preview injects <style> blocks async after our fix runs; re-apply when any arrive
+      headObserver = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+          for (const node of m.addedNodes) {
+            if ((node as Element).tagName === 'STYLE') {
+              fixAll()
+              return
+            }
+          }
+        }
+      })
+      headObserver.observe(document.head, { childList: true })
+      setTimeout(() => headObserver?.disconnect(), 5000)
     }
 
     const breadcrumbs = document.querySelector<HTMLElement>('.c-breadcrumbs--default')
@@ -71,15 +147,15 @@ export default defineComponent({
       applyBreadcrumbs(breadcrumbs)
     } else {
       // T4 preview renders navigation layouts async — wait for element
-      const observer = new MutationObserver(() => {
+      breadcrumbsObserver = new MutationObserver(() => {
         const found = document.querySelector<HTMLElement>('.c-breadcrumbs--default')
         if (found) {
-          observer.disconnect()
+          breadcrumbsObserver?.disconnect()
           applyBreadcrumbs(found)
         }
       })
-      observer.observe(document.body, { childList: true, subtree: true })
-      setTimeout(() => observer.disconnect(), 3000)
+      breadcrumbsObserver.observe(document.body, { childList: true, subtree: true })
+      setTimeout(() => breadcrumbsObserver?.disconnect(), 3000)
     }
 
     const header = document.querySelector<HTMLElement>('h1.type__header--1')
@@ -95,9 +171,10 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* Fallback breadcrumb styles for dev preview.
-   In production, Babson's global CSS provides .c-breadcrumbs styling. */
-:deep(.c-breadcrumbs ul) {
+/* Fallback breadcrumb styles for dev/local preview.
+   In production, Babson's global CSS targets .c-breadcrumbs which the clone retains.
+   .bricks-breadcrumbs is an extra marker used to exempt the clone from our hide rule. */
+:deep(.bricks-breadcrumbs ul) {
   list-style: none;
   display: flex;
   flex-wrap: wrap;
@@ -106,27 +183,27 @@ export default defineComponent({
   margin: 0;
   padding: 0;
 }
-:deep(.c-breadcrumbs li) {
+:deep(.bricks-breadcrumbs li) {
   font-family: 'Zilla Slab', serif;
   font-size: 14px !important;
   color: #464646;
 }
-:deep(.c-breadcrumbs li + li::before) {
+:deep(.bricks-breadcrumbs li + li::before) {
   content: '/';
   margin-right: 0.25rem;
   color: #464646;
 }
-:deep(.c-breadcrumbs a) {
+:deep(.bricks-breadcrumbs a) {
   color: #464646;
-  text-decoration: none;
+  text-decoration: none !important;
 }
-:deep(.c-breadcrumbs a:hover) {
-  text-decoration: underline;
+:deep(.bricks-breadcrumbs a:hover) {
+  text-decoration: underline !important;
 }
 
 h1 {
   font-size: 3.2rem;
-  margin-top: 0 !important; /* beats T4's #page-main-content { margin-top: -11rem } */
+  margin-top: 0 !important;
   padding-top: 0 !important; /* beats T4's #page-main-content { padding-top: 11rem } */
   margin-bottom: 1.8rem;
   margin-left: 0;
@@ -135,6 +212,7 @@ h1 {
 @media screen and (min-width: 40em) {
   h1 {
     font-size: 3.8rem;
+    margin-top: 1.5rem !important;
     margin-bottom: 1.8rem;
   }
 }

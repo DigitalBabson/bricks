@@ -110,10 +110,12 @@ describe('AppHero', () => {
         // Original T4 h1 removed from the accessibility tree
         expect(t4H1.getAttribute('aria-hidden')).toBe('true')
 
-        // Breadcrumbs rendered inside a labelled nav
+        // Breadcrumbs rendered inside a labelled nav; T4 classes preserved for production CSS, bricks-breadcrumbs added as marker
         const nav = wrapper.find('nav[aria-label="Breadcrumb"]')
         expect(nav.exists()).toBe(true)
-        expect(nav.find('.c-breadcrumbs--default').exists()).toBe(true)
+        const clone = nav.find('.bricks-breadcrumbs')
+        expect(clone.exists()).toBe(true)
+        expect(clone.classes()).toContain('c-breadcrumbs--default')
       } finally {
         wrapper.unmount()
         document.body.removeChild(t4H1)

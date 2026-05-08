@@ -12,6 +12,10 @@ dist-ssr
 !.env.stage2
 !.env.production
 
+# Local tooling artifacts
+.playwright-mcp/
+*.original.md
+
 # Testing
 coverage
 .nyc_output
