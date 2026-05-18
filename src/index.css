@@ -45,6 +45,11 @@ body { font-size: 1.6rem; } /* 16px */
   font-family: inherit;
 }
 
+:where(#app, #bricks-modal-root) a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
 .bricks__search-form label {
   margin-bottom: .2rem;
 }

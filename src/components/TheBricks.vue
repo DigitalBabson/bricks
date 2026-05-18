@@ -425,6 +425,17 @@ export default defineComponent({
 </script>
 
 <style scoped>
+/* Offset scrollIntoView (called in goToPage) so the grid lands below
+   the T4 sticky header instead of scrolling behind it. */
+.bricks {
+  scroll-margin-top: 10rem;
+}
+
+/* The grid is only ever focused programmatically (via goToPage) — suppress
+   the focus ring so it does not appear on page load or after pagination. */
+.bricks:focus {
+  outline: none;
+}
 @media screen and (max-width: 400px) {
   .bricks {
     gap: 1.5rem;

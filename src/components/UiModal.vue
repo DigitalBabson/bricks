@@ -50,6 +50,11 @@ export default defineComponent({
     label: { type: String, default: 'Dialog' },
   },
   emits: ['close'],
+  data() {
+    return {
+      previouslyFocused: null as HTMLElement | null,
+    }
+  },
   methods: {
     handleDocumentKeydown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
@@ -76,6 +81,9 @@ export default defineComponent({
     },
   },
   mounted() {
+    // Remember what was focused before the modal opened so we can restore
+    // focus to it on close — keeps Tab order continuous from the opener.
+    this.previouslyFocused = (document.activeElement as HTMLElement) || null
     document.addEventListener('keydown', this.handleDocumentKeydown)
     lockBodyScroll()
     this.$nextTick(() => {
@@ -85,6 +93,11 @@ export default defineComponent({
   beforeUnmount() {
     document.removeEventListener('keydown', this.handleDocumentKeydown)
     unlockBodyScroll()
+    const prev = this.previouslyFocused
+    if (prev && typeof prev.focus === 'function' && document.body.contains(prev)) {
+      prev.focus()
+    }
+    this.previouslyFocused = null
   },
 })
 </script>

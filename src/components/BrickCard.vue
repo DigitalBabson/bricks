@@ -75,7 +75,7 @@
         aria-hidden="true"
         class="
           tw-absolute tw-right-0 tw-top-0 tw-z-10 tw-bg-[#ffffffe0] tw-px-3 tw-py-3
-          tw-cursor-pointer tw-font-oswald tw-text-base tw-uppercase tw-text-black
+          tw-cursor-pointer tw-font-oswald tw-text-[1.6rem] tw-uppercase tw-text-black
           tw-transition-all tw-duration-200
           lg:tw-opacity-0
           group-hover:tw-opacity-100 group-focus-within:tw-opacity-100

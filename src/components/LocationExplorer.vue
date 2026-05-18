@@ -361,9 +361,11 @@ ul {
 
 .location-item {
   position: relative;
+  margin-bottom: 0;
+  padding: 10px;
 }
 ul[role="listbox"] {
-  overflow-y: visible;
+  overflow-y: auto;
 }
 .location-item:focus-visible {
   outline: 2px solid #000;

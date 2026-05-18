@@ -9,16 +9,6 @@
     >
       <!-- Full-coverage semi-transparent overlay -->
       <div class="tw-absolute tw-inset-0 tw-bg-white/80"></div>
-
-      <!-- Desktop trigger: flush to viewport edge, anchored to content at 3xl -->
-      <location-explorer-trigger
-        class="
-          tw-hidden lg:tw-block
-          tw-absolute tw-top-12 tw-z-10
-          tw-right-0
-        "
-        @openLocations="$emit('openLocations')"
-      />
     </section>
 
     <!-- Breadcrumbs: rendered here (not inside section) so the nav persists across breakpoints -->
@@ -26,10 +16,20 @@
       class="tw-hidden min-[700px]:tw-block tw-w-full min-[700px]:tw-absolute min-[700px]:tw-top-3 min-[700px]:tw-left-0 min-[700px]:tw-z-10"
     >
       <div
-        class="tw-max-w-brickMWL tw-mx-auto tw-text-sm tw-font-zilla tw-text-brickBabsonGrey"
+        class="tw-mx-auto tw-text-sm tw-font-zilla tw-text-brickBabsonGrey"
         v-html="breadcrumbsHtml"
       />
     </nav>
+
+    <!-- Desktop trigger: placed after breadcrumbs in DOM so tab order is breadcrumbs → trigger -->
+    <location-explorer-trigger
+      class="
+        tw-hidden lg:tw-block
+        tw-absolute tw-top-12 tw-z-10
+        tw-right-0
+      "
+      @openLocations="$emit('openLocations')"
+    />
 
     <div class="tw-relative tw-mx-auto tw-max-w-brickMWL min-[700px]:-tw-mt-[245px] min-[700px]:tw-px-6">
       <h1 id="page-main-content">{{ headerText }}</h1>
@@ -67,16 +67,18 @@ export default defineComponent({
     let injectedStyle: HTMLStyleElement | null = null
     let headObserver: MutationObserver | null = null
     let breadcrumbsObserver: MutationObserver | null = null
-    let markedEl: HTMLElement | null = null
+    let markedEls: HTMLElement[] = []
     type StyleSnapshot = { el: HTMLElement; position: string; positionPri: string; marginTop: string; marginTopPri: string }
     let t4Snapshot: StyleSnapshot[] = []
 
-    const injectHideRule = (sourceEl: HTMLElement) => {
-      // Mark only this specific element so the rule doesn't affect other breadcrumbs on the page
-      sourceEl.setAttribute('data-bricks-hide', '')
-      markedEl = sourceEl
+    const injectHideRule = (els: HTMLElement[]) => {
+      // Mark default breadcrumb, droplist sibling, and their shared parent .cell.
+      // Only hide at >=700px — our cloned <nav> takes over there. On mobile (<700px)
+      // the cloned nav is hidden, so we let T4's native droplist (with + button) render.
+      els.forEach(el => el.setAttribute('data-bricks-hide', ''))
+      markedEls = els
       injectedStyle = document.createElement('style')
-      injectedStyle.textContent = '@media (min-width: 700px) { [data-bricks-hide].c-breadcrumbs--default { display: none !important; } }'
+      injectedStyle.textContent = '@media (min-width: 700px) { [data-bricks-hide] { display: none !important; } }'
       document.head.appendChild(injectedStyle)
     }
 
@@ -84,7 +86,7 @@ export default defineComponent({
       injectedStyle?.remove()
       headObserver?.disconnect()
       breadcrumbsObserver?.disconnect()
-      markedEl?.removeAttribute('data-bricks-hide')
+      markedEls.forEach(el => el.removeAttribute('data-bricks-hide'))
       t4Snapshot.forEach(({ el, position, positionPri, marginTop, marginTopPri }) => {
         if (position) el.style.setProperty('position', position, positionPri)
         else el.style.removeProperty('position')
@@ -101,13 +103,44 @@ export default defineComponent({
     }
 
     const applyBreadcrumbs = (el: HTMLElement) => {
-      const clone = el.cloneNode(true) as HTMLElement
-      clone.classList.add('bricks-breadcrumbs')
-      this.breadcrumbsHtml = clone.outerHTML
-      injectHideRule(el)
+      // T4's `#section-content a:hover` rule (with ~60 :not() pseudos + !important on
+      // color/background) outranks any author CSS we can write. Inline-style attribute
+      // with !important is the only thing that beats it per cascade rules.
+      const styleClone = (source: HTMLElement): string => {
+        const clone = source.cloneNode(true) as HTMLElement
+        clone.classList.add('bricks-breadcrumbs')
+        clone.querySelectorAll('a').forEach((a) => {
+          const existing = a.getAttribute('style') ?? ''
+          a.setAttribute(
+            'style',
+            `${existing}background:transparent !important;color:#54752f !important;`,
+          )
+        })
+        return clone.outerHTML
+      }
 
-      // Scope to: the original element + its droplist sibling
+      // Find companion elements
       const droplist = el.parentElement?.querySelector<HTMLElement>('.c-breadcrumbs--droplist') ?? null
+      const parent = el.parentElement
+
+      // Clone both default breadcrumbs and the droplist (if present) so the mobile
+      // "+" expander appears, matching behaviour on other Babson pages.
+      this.breadcrumbsHtml = styleClone(el) + (droplist ? styleClone(droplist) : '')
+
+      // Only treat the parent as a hide target if it's an isolated breadcrumb wrapper —
+      // i.e. a Foundation `.cell` whose children are exclusively `.c-breadcrumbs*` variants.
+      // This matches the T4 page layout (where the wrapper holds only breadcrumbs) but
+      // refuses to hide `<body>` (unit-test fixture) or any broader container that ever
+      // wraps real page content alongside the breadcrumbs.
+      const wrapperIsIsolated = !!parent
+        && parent.tagName === 'DIV'
+        && parent.classList.contains('cell')
+        && Array.from(parent.children).every(child => child.classList.contains('c-breadcrumbs'))
+      const wrapper = wrapperIsIsolated ? parent : null
+
+      const hideTargets = [el, ...(droplist ? [droplist] : []), ...(wrapper ? [wrapper] : [])]
+      injectHideRule(hideTargets)
+
       const t4Targets = [el, ...(droplist ? [droplist] : [])]
 
       // Snapshot inline styles before mutating so we can restore on unmount
@@ -219,7 +252,7 @@ h1 {
   font-weight: 400;
   color: #006644;
   font-size: 3.2rem;
-  margin-top: 0 !important;
+  margin-top: 1.5rem !important;
   padding-top: 0 !important; /* beats T4's #page-main-content { padding-top: 11rem } */
   margin-bottom: 1.8rem;
   margin-left: 0;

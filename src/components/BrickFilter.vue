@@ -8,7 +8,7 @@
     "
     @submit.prevent
   >
-    <div class="tw-px-8 sm:tw-px-12 tw-py-5 tw-flex tw-flex-col tw-gap-4">
+    <div class="tw-px-8 sm:tw-px-12 tw-py-[2rem] tw-flex tw-flex-col tw-gap-[1.6rem]">
     <div class="tw-form-control tw-text-m">
       <label
         for="search-brick"
@@ -18,7 +18,7 @@
       </label>
       <input
         id="search-brick"
-        class="tw-w-full tw-border tw-border-gray-300 tw-px-3 tw-py-1 tw-leading-8 tw-font-oswald"
+        class="tw-w-full tw-border-0 tw-px-3 tw-py-1 tw-h-[4.4rem] tw-leading-[1.5] tw-font-oswald"
         :value="inscription"
         type="text"
         @input="$emit('update:inscription', ($event.target as HTMLInputElement).value)"
@@ -105,7 +105,7 @@
 
         <button
           class="
-            tw-rounded-[23px] tw-px-3 tw-py-1
+            tw-rounded-[23px] tw-px-3 tw-py-1 tw-h-[2.74rem]
             tw-font-oswald tw-text-[14px] tw-font-normal
             tw-transition-colors tw-duration-200
           "
@@ -356,6 +356,21 @@ export default defineComponent({
 </script>
 
 <style scoped>
+/* T4 global styles color labels by default — force white inside this form */
+.bricks__search-form label {
+  color: #fff !important;
+}
+
+/* T4 list styles add bottom margin to li — strip it inside the listbox */
+.bricks__location-listbox li {
+  margin-bottom: 0;
+}
+
+/* Ensure overflow-y: scroll persists on page load regardless of T4 global overrides */
+.bricks__location-listbox {
+  overflow-y: scroll;
+}
+
 /* ── Scrollbar: Android Chrome / desktop Chrome/Edge (webkit pseudo-elements work) ── */
 .bricks__location-listbox::-webkit-scrollbar-track {
   background: #d0d0d0;
