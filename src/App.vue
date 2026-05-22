@@ -1,5 +1,5 @@
 <template>
-<div class="w-full">
+<div class="tw-w-full tw-pb-brick40 md:tw-pb-brick60 lg:tw-pb-brick80">
   <the-bricks/>
 </div>
 </template>
@@ -13,7 +13,21 @@ export default {
 	components: {
 		TheBricks,
     BabsonHeader
-	}
+	},
+  provide() {
+    const drupalEnv = {
+      local: 'https://d9.ddev.site',
+      dev: "https://dev.intranet.babson.edu",
+      stage: "https://stage.intranet.babson.edu",
+      stage2: "https://stage2.intranet.babson.edu",
+      prod: "https://intranet.babson.edu"
+    }
+    const feedUrl = "/jsonapi/"
+    return  {
+      defaultEnv:  drupalEnv.prod,
+      defaultUrl:  drupalEnv.prod + feedUrl
+    }
+  }
 }
 // This starter template is using Vue 3 experimental <script setup> SFCs
 // Check out https://github.com/vuejs/rfcs/blob/script-setup-2/active-rfcs/0000-script-setup.md
