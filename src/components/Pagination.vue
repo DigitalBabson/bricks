@@ -119,4 +119,11 @@ export default defineComponent({
   height: 4px;
   background-color: #587C32;
 }
+.bricks__pagination button[disabled] {
+  background: var(--white, #ffffff);
+  border: 1.5px solid var(--white, #ffffff);
+}
+.bricks__pagination button[disabled] i {
+  color: var(--englewood-cliffs, #6c6f70);
+}
 </style>

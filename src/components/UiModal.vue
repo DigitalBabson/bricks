@@ -48,6 +48,10 @@ import { lockBodyScroll, unlockBodyScroll } from '../composables/useBodyScrollLo
 export default defineComponent({
   props: {
     label: { type: String, default: 'Dialog' },
+    // When provided, on close we focus the element matching this selector instead of
+    // the opener. Use for modals where the natural next focus target isn't the trigger
+    // (e.g. Brick Location modal → filter input).
+    returnFocusSelector: { type: String, default: '' },
   },
   emits: ['close'],
   data() {
@@ -93,9 +97,12 @@ export default defineComponent({
   beforeUnmount() {
     document.removeEventListener('keydown', this.handleDocumentKeydown)
     unlockBodyScroll()
-    const prev = this.previouslyFocused
-    if (prev && typeof prev.focus === 'function' && document.body.contains(prev)) {
-      prev.focus()
+    const override = this.returnFocusSelector
+      ? document.querySelector<HTMLElement>(this.returnFocusSelector)
+      : null
+    const target = override ?? this.previouslyFocused
+    if (target && typeof target.focus === 'function' && document.body.contains(target)) {
+      target.focus()
     }
     this.previouslyFocused = null
   },

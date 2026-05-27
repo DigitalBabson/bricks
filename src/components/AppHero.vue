@@ -31,6 +31,14 @@
       @openLocations="$emit('openLocations')"
     />
 
+    <!-- Floating (tablet/mobile) trigger: rendered here too so it tabs immediately after
+         breadcrumbs on every viewport, matching the desktop ordering. -->
+    <location-explorer-trigger
+      class="lg:tw-hidden"
+      :floating="true"
+      @openLocations="$emit('openLocations')"
+    />
+
     <div class="tw-relative tw-mx-auto tw-max-w-brickMWL min-[700px]:-tw-mt-[245px] min-[700px]:tw-px-6">
       <h1 id="page-main-content">{{ headerText }}</h1>
       <div class="tw-mx-auto tw-w-full tw-max-w-[700px]">

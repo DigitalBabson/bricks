@@ -249,6 +249,13 @@ export default defineComponent({
     document.removeEventListener('keydown', this.onKeydown)
     unlockBodyScroll()
     window.removeEventListener('resize', this.updateNavHeight)
+    // Per ITCMS-7535 comment 509211: closing the Location Explorer (via X or Esc)
+    // should land focus in the filter so the next Tab continues inside it,
+    // rather than dropping back to <body> and restarting from page top.
+    const filterInput = document.querySelector<HTMLElement>('#search-brick')
+    if (filterInput && document.body.contains(filterInput)) {
+      filterInput.focus()
+    }
   },
   methods: {
     optionId(id: string): string {
@@ -366,6 +373,10 @@ ul {
 }
 ul[role="listbox"] {
   overflow-y: auto;
+  /* Inner padding gives edge items room for their focus ring
+     (outline-offset 2px + outline 2px = 4px) without clipping
+     under the scroll container's overflow box. */
+  padding: 4px;
 }
 .location-item:focus-visible {
   outline: 2px solid #000;

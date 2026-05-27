@@ -18,11 +18,6 @@
       />
     </div>
   </main>
-  <location-explorer-trigger
-    class="lg:tw-hidden"
-    :floating="true"
-    @openLocations="showLocationExplorer = true"
-  />
   <app-footer v-if="isDev" />
   <location-explorer
     v-if="showLocationExplorer"
@@ -40,7 +35,6 @@ import AppHeader from './components/AppHeader.vue'
 import AppHero from './components/AppHero.vue'
 import AppFooter from './components/AppFooter.vue'
 import BrickFilter from './components/BrickFilter.vue'
-import LocationExplorerTrigger from './components/LocationExplorerTrigger.vue'
 import LocationExplorer from './components/LocationExplorer.vue'
 import { defaultEnvKey, defaultUrlKey } from './types/index'
 import type { ParkLocation, ParkLocationsApiResponse } from './types/index'
@@ -52,7 +46,6 @@ export default defineComponent({
     AppHero,
     AppFooter,
     BrickFilter,
-    LocationExplorerTrigger,
     LocationExplorer,
   },
   inject: {

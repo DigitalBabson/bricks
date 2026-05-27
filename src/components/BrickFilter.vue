@@ -371,31 +371,16 @@ export default defineComponent({
   overflow-y: scroll;
 }
 
-/* ── Scrollbar: Android Chrome / desktop Chrome/Edge (webkit pseudo-elements work) ── */
+/* ── Scrollbar: visible on load, consistent across breakpoints ── */
 .bricks__location-listbox::-webkit-scrollbar-track {
   background: #d0d0d0;
 }
 .bricks__location-listbox::-webkit-scrollbar-thumb {
   background-color: #555;
-  border-radius: 4px;
+  border-radius: 8rem;
 }
-@media (min-width: 1024px) {
-  .bricks__location-listbox {
-    scrollbar-width: thin;
-    scrollbar-color: #555 #d0d0d0;
-  }
-  .bricks__location-listbox::-webkit-scrollbar { width: 8px; }
-}
-@media (max-width: 1023px) {
-  .bricks__location-listbox {
-    scrollbar-width: auto;
-    scrollbar-color: #555 #d0d0d0;
-  }
-  /* Separate rules — comma-grouping with :focus + ::-webkit-scrollbar
-     causes Chromium to silently drop the entire selector list */
-  .bricks__location-listbox::-webkit-scrollbar       { width: 24px; }
-  .bricks__location-listbox:focus::-webkit-scrollbar { width: 24px; }
-  .bricks__location-listbox:focus-visible::-webkit-scrollbar { width: 24px; }
+.bricks__location-listbox::-webkit-scrollbar {
+  width: 1rem;
 }
 
 
