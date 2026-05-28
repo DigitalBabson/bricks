@@ -432,9 +432,14 @@ export default defineComponent({
 }
 
 /* The grid is only ever focused programmatically (via goToPage) — suppress
-   the focus ring so it does not appear on page load or after pagination. */
+   the focus ring so it does not appear on page load or after pagination.
+   box-shadow:unset kills the global `*:focus-visible { box-shadow: 0 0 0 6px #fff }`
+   white ring (index.css) that showed after selecting a new page. */
 .bricks:focus {
   outline: none;
+  box-shadow: unset;
+  z-index: unset;
+  position: relative;
 }
 @media screen and (max-width: 400px) {
   .bricks {

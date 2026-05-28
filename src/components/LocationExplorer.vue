@@ -202,7 +202,7 @@ export default defineComponent({
         return {
           order: '-1',       // render before (left of) the image in flex-row
           flexShrink: '0',
-          width: '180px',
+          width: '188px',
           alignSelf: 'stretch',
         }
       }
@@ -219,7 +219,7 @@ export default defineComponent({
       return {
         top: `${this.imageRenderedTop}px`,
         left: `${this.imageRenderedLeft + 10}px`,
-        width: '180px',
+        width: '188px',
         maxHeight: `${this.imageRenderedHeight - 20}px`,
       }
     },
@@ -387,7 +387,7 @@ ul[role="listbox"] {
 .location-item:not(:last-child)::after {
   content: '';
   position: absolute;
-  bottom: 0;
+  bottom: -.25px;
   left: 50%;
   transform: translateX(-50%);
   width: 70px;

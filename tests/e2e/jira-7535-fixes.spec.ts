@@ -149,6 +149,27 @@ test.describe('Issue #9 – Brick grid container has no focus outline', () => {
     const grid = page.locator('.bricks')
     // After programmatic focus the outline should be suppressed
     await expect(grid).toHaveCSS('outline-style', 'none')
+    // ITCMS-7535 #510146: the global `*:focus-visible { box-shadow: 0 0 0 6px #fff }`
+    // rule painted a white ring around the grid after pagination. `.bricks:focus`
+    // must zero it out — assert box-shadow explicitly, not just outline.
+    await expect(grid).toHaveCSS('box-shadow', 'none')
+  })
+
+  test('brick grid container has no box-shadow ring after selecting a new page', async ({ page }) => {
+    // Repro the reported path: keyboard-driven page change → goToPage → grid.focus()
+    const altPage = page.locator('.bricks__pagination button', { hasText: /^\d+$/ })
+      .filter({ hasNot: page.locator('.page-active') })
+      .first()
+    const hasPagination = await altPage.count()
+    test.skip(hasPagination === 0, 'single page of results — no alternate page button to click')
+
+    await altPage.focus()
+    await altPage.click()
+    await waitForBricks(page)
+
+    const grid = page.locator('.bricks')
+    await expect(grid).toHaveCSS('box-shadow', 'none')
+    await expect(grid).toHaveCSS('outline-style', 'none')
   })
 
   test('brick grid container is not focused on initial page load', async ({ page }) => {
