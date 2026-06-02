@@ -453,7 +453,7 @@ export default defineComponent({
 }
 @media screen and (max-width: 400px) {
   .brick-card__location-btn {
-    font-size: 0.875rem;
+    font-size: 1.4rem;
   }
 }
 </style>

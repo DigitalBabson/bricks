@@ -387,12 +387,18 @@ ul[role="listbox"] {
 .location-item:not(:last-child)::after {
   content: '';
   position: absolute;
-  bottom: -.25px;
+  bottom: .5px;
   left: 50%;
   transform: translateX(-50%);
   width: 70px;
   height: 1px;
   background: rgba(0, 0, 0, 0.15);
+}
+/* Hide the separator on the focused item so the focus ring's bottom edge
+   is not visually overlapped by the half-line under the row. Same specificity
+   as the rule above; source order makes display:none win when both match. */
+.location-item:focus-visible::after {
+  display: none;
 }
 .location-list {
   scrollbar-width: none;

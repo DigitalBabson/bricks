@@ -99,7 +99,7 @@ export default defineComponent({
 <style scoped>
 @media screen and (max-width: 400px) {
   nav.bricks__pagination {
-    font-size: 1rem;
+    font-size: 1.6rem;
   }
   nav.bricks__pagination button {
     padding: 0.25rem 0.4rem;

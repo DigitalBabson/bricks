@@ -81,9 +81,23 @@ export default defineComponent({
 
       return `${this.apiBaseOrigin}${url}`
     },
-    clearAllFilters() {
+    clearAllFilters(fromKeyboard?: boolean) {
       this.inscription = ''
       this.locationIds = []
+      // Only redirect focus when activation came from the keyboard. Pointer users
+      // (mouse/touch) would experience an unexpected scroll-to-grid otherwise.
+      // Safari drops focus to <body> on keyboard Enter because Clear-All disables
+      // itself in the same tick. We focus the grid container — not a specific card —
+      // because the locationIds watcher kicks off an async refetch in TheBricks; the
+      // card list is replaced when the request resolves, so a card we'd focused on
+      // $nextTick could be detached before the user's next Tab. The .bricks div has
+      // tabindex="-1" so it survives refetches and Tab from there enters the first
+      // card. preventScroll keeps the viewport anchored.
+      if (!fromKeyboard) return
+      this.$nextTick(() => {
+        const grid = document.querySelector<HTMLElement>('.bricks')
+        grid?.focus({ preventScroll: true })
+      })
     },
     async fetchLocations() {
       try {

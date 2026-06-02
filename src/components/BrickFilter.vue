@@ -114,7 +114,7 @@
             : 'tw-bg-white tw-text-black hover:tw-bg-gray-100 tw-cursor-pointer'"
           :disabled="activeFilters.length === 0"
           type="button"
-          @click="$emit('clearAll')"
+          @click="onClearAll($event)"
         >
           Clear all
         </button>
@@ -152,7 +152,9 @@ export default defineComponent({
   emits: {
     'update:inscription': (value: string) => typeof value === 'string',
     'update:locationIds': (value: string[]) => Array.isArray(value),
-    clearAll: () => true,
+    // fromKeyboard tells the parent whether the activation was keyboard-initiated
+    // so it can decide whether to move focus to the first brick (Safari fix).
+    clearAll: (fromKeyboard?: boolean) => fromKeyboard === undefined || typeof fromKeyboard === 'boolean',
   },
   data() {
     return {
@@ -279,6 +281,13 @@ export default defineComponent({
         'update:locationIds',
         this.locationIds.filter((selectedLocationId) => selectedLocationId !== locationId),
       )
+    },
+    onClearAll(event: MouseEvent) {
+      // MouseEvent.detail is 0 for keyboard-initiated clicks (Enter/Space on
+      // a focused button) and >=1 for real pointer activations. Pass that flag
+      // up so the parent only moves focus on keyboard activation — pointer
+      // users keep their viewport position.
+      this.$emit('clearAll', event.detail === 0)
     },
     onListboxFocus() {
       this.isListboxFocused = true

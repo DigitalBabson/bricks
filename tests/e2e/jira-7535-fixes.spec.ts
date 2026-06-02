@@ -180,3 +180,132 @@ test.describe('Issue #9 – Brick grid container has no focus outline', () => {
     expect(isGridFocused).toBe(false)
   })
 })
+
+// ---------------------------------------------------------------------------
+// #510424 – narrow-viewport font sizes (≤400px)
+// ---------------------------------------------------------------------------
+
+test.describe('Issue #510424 – narrow-viewport font sizes (≤400px)', () => {
+  test.use({ viewport: { width: 375, height: 812 } })
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/')
+    await waitForBricks(page)
+  })
+
+  test('pagination nav font-size is 1.6rem (16px at 10px base)', async ({ page }) => {
+    const nav = page.locator('nav.bricks__pagination')
+    const hasPagination = await nav.count()
+    test.skip(hasPagination === 0, 'single page of results — no pagination rendered')
+    await expect(nav).toHaveCSS('font-size', '16px')
+  })
+
+  test('brick-card location button font-size is 1.4rem (14px at 10px base)', async ({ page }) => {
+    const locBtn = page.locator('.brick-card__location-btn').first()
+    await expect(locBtn).toHaveCSS('font-size', '14px')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// #510424 – LocationExplorer separator polish on focus
+// ---------------------------------------------------------------------------
+
+test.describe('Issue #510424 – LocationExplorer separator polish', () => {
+  test.use({ viewport: { width: 375, height: 812 } })
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/')
+    await waitForBricks(page)
+    // Open the explorer via the floating trigger
+    const trigger = page.locator('button.tw-fixed', { hasText: /view.*brick.*location/i })
+    await trigger.click()
+    await page.locator('[aria-label="Close location explorer"]').waitFor()
+  })
+
+  test('non-focused, non-last .location-item separator bottom is .5px', async ({ page }) => {
+    const bottom = await page.evaluate(() => {
+      const item = document.querySelector('.location-item:not(:last-child)')
+      return item ? getComputedStyle(item, '::after').bottom : null
+    })
+    expect(bottom).toBe('0.5px')
+  })
+
+  test('focused .location-item hides its ::after separator', async ({ page }) => {
+    // :focus-visible only matches keyboard-initiated focus, so use real Tab presses
+    // (programmatic .focus() would not trigger the pseudo-class).
+    for (let i = 0; i < 25; i++) {
+      const onItem = await page.evaluate(() =>
+        document.activeElement?.classList.contains('location-item'),
+      )
+      if (onItem) break
+      await page.keyboard.press('Tab')
+    }
+    const result = await page.evaluate(() => {
+      const focused = document.activeElement
+      return focused?.classList.contains('location-item')
+        ? { reached: true, display: getComputedStyle(focused, '::after').display }
+        : { reached: false, display: null }
+    })
+    expect(result.reached).toBe(true)
+    expect(result.display).toBe('none')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// #510424 – Clear-All returns focus to first brick (Safari focus-loss fix)
+// ---------------------------------------------------------------------------
+
+test.describe('Issue #510424 – Clear-All returns focus to first brick', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/')
+    await waitForBricks(page)
+  })
+
+  test('pressing Enter on Clear-All moves focus to the .bricks grid (and survives refetch)', async ({ page }) => {
+    // Activate a location filter so Clear-All becomes enabled and a refetch will fire on clear.
+    const firstOption = page.locator('.bricks__location-listbox [role="option"]').first()
+    await firstOption.click()
+    await waitForBricks(page)
+
+    const clearAll = page.getByRole('button', { name: 'Clear all' })
+    await expect(clearAll).toBeEnabled()
+    await clearAll.focus()
+
+    // Wait for the post-clear refetch network response so we know the brick list
+    // has remounted (cards inside .bricks have replaced). Using the network signal
+    // rather than DOM fingerprints because filtered/unfiltered top-results can
+    // coincide and produce identical DOM content.
+    const [, _response] = await Promise.all([
+      page.keyboard.press('Enter'),
+      page.waitForResponse((r) => /\/bricks\?/.test(r.url()) && r.ok(), { timeout: 5000 }),
+    ])
+    // Give Vue one tick to remount cards after the response resolves.
+    await page.waitForTimeout(50)
+
+    // Focus must STILL be on the stable grid container after the cards remounted.
+    // If we had focused a specific card it would now be detached → body.
+    const focusOnGrid = await page.evaluate(() => {
+      const grid = document.querySelector('.bricks')
+      return document.activeElement === grid
+    })
+    expect(focusOnGrid).toBe(true)
+  })
+
+  test('mouse click on Clear-All does NOT redirect focus to the .bricks grid', async ({ page }) => {
+    const firstOption = page.locator('.bricks__location-listbox [role="option"]').first()
+    await firstOption.click()
+    await waitForBricks(page)
+
+    const clearAll = page.getByRole('button', { name: 'Clear all' })
+    await expect(clearAll).toBeEnabled()
+    // Playwright's .click() dispatches a synthetic mouse click (MouseEvent.detail >= 1).
+    await clearAll.click()
+    await waitForBricks(page)
+
+    const focusOnGrid = await page.evaluate(() => {
+      const grid = document.querySelector('.bricks')
+      return document.activeElement === grid
+    })
+    expect(focusOnGrid).toBe(false)
+  })
+})
