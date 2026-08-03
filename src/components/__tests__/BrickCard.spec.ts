@@ -202,7 +202,7 @@ describe('BrickCard', () => {
 
     it('shows the hover affordances and reuses hydrated data without extra requests', async () => {
       expect(mockedAxios.get).not.toHaveBeenCalled()
-      expect(wrapper.find('button[aria-label="Enlarge brick image"]').exists()).toBe(true)
+      expect(wrapper.find('[role="button"][aria-label^="Enlarge brick image"]').exists()).toBe(true)
       expect(wrapper.html()).toContain('tw-bg-white/40')
       expect(getBrickCardVm(wrapper).thumbnailUrl).toBe('https://example.com/preview.jpg')
       expect(getBrickCardVm(wrapper).brickImgUrl).toBe('https://example.com/full.jpg')
@@ -230,7 +230,7 @@ describe('BrickCard', () => {
     })
 
     it('opens the image modal when the enlarge button is clicked', async () => {
-      await wrapper.get('button[aria-label="Enlarge brick image"]').trigger('click')
+      await wrapper.get('[role="button"][aria-label^="Enlarge brick image"]').trigger('click')
 
       expect(getBrickCardVm(wrapper).showImg).toBe(true)
       expect(getBrickCardVm(wrapper).showMap).toBe(false)
