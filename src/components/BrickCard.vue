@@ -446,7 +446,7 @@ export default defineComponent({
   }
   .brick__map-caption {
     display: block;
-    flex: 0 0 200px;
+    flex: 0 0 275px;
     align-self: stretch;
     max-height: var(--brick-map-height);
     overflow-y: auto;
