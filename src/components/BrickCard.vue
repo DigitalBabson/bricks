@@ -446,7 +446,8 @@ export default defineComponent({
   }
   .brick__map-caption {
     display: block;
-    flex: 0 0 275px;
+    /* Narrow phones keep the slimmer column — see the md override below. */
+    flex: 0 0 200px;
     align-self: stretch;
     max-height: var(--brick-map-height);
     overflow-y: auto;
@@ -457,6 +458,11 @@ export default defineComponent({
 @media screen and (min-width: 768px) {
   .brick__map-wrapper {
     --brick-map-height: 80vh;
+  }
+  /* Roomier caption for long location names and inscriptions. Held back below
+     768px, where the extra width would leave the caption wider than the map. */
+  .brick__map-caption {
+    flex-basis: 275px;
   }
 }
 .fade-enter-active,
