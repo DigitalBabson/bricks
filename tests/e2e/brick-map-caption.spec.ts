@@ -225,3 +225,69 @@ test.describe('Brick map caption visibility', () => {
     })
   }
 })
+
+async function boxesFor(page: Page) {
+  const caption = await page.locator('.brick__map-caption').boundingBox()
+  const image = await page.locator('.brick__map-image').boundingBox()
+
+  expect(caption).not.toBeNull()
+  expect(image).not.toBeNull()
+
+  return { caption: caption!, image: image! }
+}
+
+// Short landscape: the map has too little height for a caption stacked below it.
+const shortLandscapeViewports: ViewportSpec[] = [
+  { name: 'phone-landscape-844x390', width: 844, height: 390 },
+  { name: 'tablet-landscape-1024x600', width: 1024, height: 600 },
+  { name: 'short-window-1280x700', width: 1280, height: 700 },
+]
+
+// Portrait, plus full-height desktop — these keep the original stacked layout.
+const stackedViewports: ViewportSpec[] = [
+  { name: 'phone-portrait-390x844', width: 390, height: 844 },
+  { name: 'tablet-portrait-768x1024', width: 768, height: 1024 },
+  { name: 'desktop-1440x900', width: 1440, height: 900 },
+]
+
+// ITCMS-7734 #519550: on short landscape screens the location modal lays out
+// side-by-side (map left, caption right) like the Location Explorer, instead of
+// stacking the caption under the map. Desktop is deliberately untouched.
+test.describe('Brick map short-landscape layout', () => {
+  for (const viewport of shortLandscapeViewports) {
+    test(`places the caption beside the map at ${viewport.name}`, async ({ page }, testInfo) => {
+      await page.setViewportSize({ width: viewport.width, height: viewport.height })
+      await installMapCaptionMocks(page)
+      await openMapModal(page)
+
+      const { caption, image } = await boxesFor(page)
+
+      // Caption starts at or after the map's right edge...
+      expect(caption.x).toBeGreaterThanOrEqual(image.x + image.width - 1)
+      // ...and shares vertical space with it rather than sitting below.
+      expect(caption.y).toBeLessThan(image.y + image.height)
+
+      await expectFullyInViewport(page.locator('.brick__map-caption'), viewport)
+      await expectFullyInViewport(page.locator('.brick__map-image'), viewport)
+      await saveScreenshot(page, testInfo, viewport.name)
+    })
+  }
+
+  for (const viewport of stackedViewports) {
+    test(`keeps the caption stacked under the map at ${viewport.name}`, async ({ page }, testInfo) => {
+      await page.setViewportSize({ width: viewport.width, height: viewport.height })
+      await installMapCaptionMocks(page)
+      await openMapModal(page)
+
+      const { caption, image } = await boxesFor(page)
+
+      // Caption sits directly under the map — flush against it, with no
+      // inline-baseline strip showing the dark overlay through the seam.
+      expect(caption.y).toBeGreaterThanOrEqual(image.y + image.height - 1)
+      expect(caption.y).toBeLessThanOrEqual(image.y + image.height + 1)
+
+      await expectFullyInViewport(page.locator('.brick__map-caption'), viewport)
+      await saveScreenshot(page, testInfo, viewport.name)
+    })
+  }
+})
