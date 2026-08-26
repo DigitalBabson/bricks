@@ -6,21 +6,40 @@ type ViewportSpec = {
   height: number
 }
 
-function buildSvgDataUrl(width: number, height: number, label: string, fill: string): string {
-  const svg = [
+type ImageSpec = {
+  width: number
+  height: number
+  label: string
+  fill: string
+}
+
+function buildSvg({ width, height, label, fill }: ImageSpec): string {
+  return [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
     `<rect width="${width}" height="${height}" fill="${fill}"/>`,
     `<text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"`,
     ` font-family="Arial, sans-serif" font-size="42" fill="#ffffff">${label}</text>`,
     '</svg>',
   ].join('')
-
-  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`
 }
 
-const thumbnailImageUrl = buildSvgDataUrl(1200, 675, 'Brick Thumbnail', '#1f6f5f')
-const fullImageUrl = buildSvgDataUrl(1600, 900, 'Brick Full Image', '#245447')
-const mapImageUrl = buildSvgDataUrl(1200, 760, 'North Garden Map', '#355c7d')
+// Fixture images must be served from absolute http(s) URLs, not data: URIs.
+// BrickCard's resolveAssetUrl() passes through anything starting with http but
+// treats everything else as a Drupal-relative path and prepends the API origin,
+// so a data: URI becomes "https://origin/data:image/svg+xml,..." and never
+// loads. A broken <img> still reports a bounding box, so layout assertions
+// would silently measure the broken-image icon instead of the map. The .invalid
+// TLD guarantees a route miss fails loudly rather than reaching a real host.
+const IMAGE_HOST = 'https://bricks-fixtures.invalid'
+const thumbnailImageUrl = `${IMAGE_HOST}/brick-thumbnail.svg`
+const fullImageUrl = `${IMAGE_HOST}/brick-full.svg`
+const mapImageUrl = `${IMAGE_HOST}/north-garden-map.svg`
+
+const fixtureImages: Record<string, ImageSpec> = {
+  [thumbnailImageUrl]: { width: 1200, height: 675, label: 'Brick Thumbnail', fill: '#1f6f5f' },
+  [fullImageUrl]: { width: 1600, height: 900, label: 'Brick Full Image', fill: '#245447' },
+  [mapImageUrl]: { width: 1200, height: 760, label: 'North Garden Map', fill: '#355c7d' },
+}
 
 const parkLocationsResponse = {
   data: [
@@ -147,6 +166,28 @@ async function installMapCaptionMocks(page: Page) {
   await page.route('**/jsonapi/bricks?**', async (route) => {
     await fulfillJson(route, bricksResponse)
   })
+
+  for (const [url, spec] of Object.entries(fixtureImages)) {
+    await page.route(url, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'image/svg+xml',
+        body: buildSvg(spec),
+      })
+    })
+  }
+}
+
+// A broken <img> still reports a bounding box, so every geometry assertion in
+// this file needs the map to have actually decoded first.
+async function expectMapImageLoaded(page: Page) {
+  await expect
+    .poll(() =>
+      page
+        .locator('.brick__map-image')
+        .evaluate((el) => (el as HTMLImageElement).naturalWidth)
+    )
+    .toBeGreaterThan(0)
 }
 
 async function openMapModal(page: Page) {
@@ -164,6 +205,8 @@ async function openMapModal(page: Page) {
 
   await page.getByRole('button', { name: /view location details/i }).click()
   await expect(page.locator('.brick__map-caption')).toBeVisible()
+  await expect(page.locator('.brick__map-image')).toBeVisible()
+  await expectMapImageLoaded(page)
 }
 
 async function expectFullyInViewport(locator: Locator, viewport: ViewportSpec) {
