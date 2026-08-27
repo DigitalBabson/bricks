@@ -49,14 +49,20 @@ Configured via Vite's mode system — `.env.[mode]` files loaded at build time.
 | Command | Mode / env file | Drupal endpoint |
 |---------|-----------------|-----------------|
 | `npm run dev` | `.env.dev` | `babsondev.prod.acquia-sites.com` |
-| `npm run dev:stage` | `.env.stage` | `test-www.babson.edu` |
-| `npm run dev:stage2` | `.env.stage2` | `stage2.babson.edu` |
+| `npm run dev:local` | `.env.localdev` | `acquia-babson.ddev.site` (local DDEV) |
+| `npm run dev:stage` | `.env.stage` | `babsonstg.prod.acquia-sites.com` |
+| `npm run dev:stage2` | `.env.stage2` | `babsonstg2.prod.acquia-sites.com` |
 | `npm run dev:prod` | `.env.production` | `contentfiles.babson.edu` |
-| `npm run build:stage` | `.env.stage` | `test-www.babson.edu` |
-| `npm run build:stage2` | `.env.stage2` | `stage2.babson.edu` |
+| `npm run build:dev` | `.env.dev` | `babsondev.prod.acquia-sites.com` |
+| `npm run build:stage` | `.env.stage` | `babsonstg.prod.acquia-sites.com` |
+| `npm run build:stage2` | `.env.stage2` | `babsonstg2.prod.acquia-sites.com` |
 | `npm run build:production` | `.env.production` | `contentfiles.babson.edu` |
 
 Real secrets locally: create `.env.[mode].local` (gitignored) with `DEV_SEARCHSTAX_TOKEN`.
+`stage`, `stage2` and `production` builds **fail** if that token is still the
+`your-*-token-here` placeholder — otherwise SearchStax rejects every keyword
+search and the app silently falls back to Drupal `CONTAINS`. The dev server
+warns instead of failing. `dev`/`localdev` are exempt; their committed tokens work.
 
 ## Key conventions
 
