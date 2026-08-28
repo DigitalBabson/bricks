@@ -109,7 +109,7 @@
       <div class="brick__map-wrapper tw-mx-auto tw-table">
         <img
           v-if="parkLocationImgURL"
-          class="tw-object-contain tw-max-w-full tw-max-h-[calc(90vh_-_160px)] md:tw-max-h-[calc(80vh_-_160px)]"
+          class="brick__map-image tw-object-contain tw-max-w-full tw-max-h-[calc(90vh_-_160px)] md:tw-max-h-[calc(80vh_-_160px)]"
           :src="parkLocationImgURL"
         />
         <div
@@ -415,6 +415,55 @@ export default defineComponent({
 <style scoped>
 .brick__map-caption {
   caption-side: bottom;
+}
+/* The map is the only content of the table's anonymous cell. Left inline it
+   sits on the text baseline, which reserves descender space and shows up as a
+   ~4px dark strip between the map and the caption below it. */
+.brick__map-image {
+  display: block;
+}
+/* Short landscape screens (phones/tablets turned sideways, short wide windows):
+   lay the location modal out side-by-side — map left, caption right — instead of
+   stacking the caption underneath, so the map isn't squeezed into what little
+   height is left. Same breakpoints as the Location Explorer's landscape sidebar
+   (ITCMS-7734 #519550). Desktop and portrait keep the stacked
+   table/table-caption layout above. */
+@media screen and (max-height: 600px) and (orientation: landscape),
+       screen and (max-height: 700px) and (min-aspect-ratio: 1/1) {
+  .brick__map-wrapper {
+    --brick-map-height: 90vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+  }
+  .brick__map-image {
+    max-height: var(--brick-map-height);
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    min-width: 0;
+  }
+  .brick__map-caption {
+    display: block;
+    /* Narrow phones keep the slimmer column — see the md override below. */
+    flex: 0 0 200px;
+    align-self: stretch;
+    max-height: var(--brick-map-height);
+    overflow-y: auto;
+  }
+}
+/* The modal shell is max-h-[90vh] but a fixed h-[80vh] from md up, so the
+   side-by-side layout has that much room to work with. */
+@media screen and (min-width: 768px) {
+  .brick__map-wrapper {
+    --brick-map-height: 80vh;
+  }
+  /* Roomier caption for long location names and inscriptions. Held back below
+     768px, where the extra width would leave the caption wider than the map. */
+  .brick__map-caption {
+    flex-basis: 275px;
+  }
 }
 .fade-enter-active,
 .fade-leave-active {
