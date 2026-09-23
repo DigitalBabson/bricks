@@ -136,6 +136,7 @@ import axios from "axios";
 import { defaultEnvKey, defaultUrlKey } from "../types/index"
 import type { Brick, MediaImageApiResponse, ParkLocationApiResponse } from "../types/index"
 import { PLACEHOLDER_IMAGE_PATH } from "../constants"
+import { isDefaultDrupalImage } from "../utils/placeholderImage"
 
 export default defineComponent({
   props: {
@@ -190,53 +191,6 @@ export default defineComponent({
     },
   },
   methods: {
-    getPlaceholderImageUuid(): string {
-      return import.meta.env.DEV_PLACEHOLDER_IMAGE_UUID ?? '';
-    },
-    normalizeDrupalAssetPath(value?: string): string {
-      if (!value) {
-        return '';
-      }
-
-      const withoutQuery = value.split('?')[0];
-      if (withoutQuery.startsWith('public://')) {
-        return `/sites/default/files/${withoutQuery.slice('public://'.length)}`;
-      }
-
-      try {
-        return new URL(withoutQuery).pathname;
-      } catch {
-        return withoutQuery;
-      }
-    },
-    getPlaceholderImagePath(): string {
-      return this.normalizeDrupalAssetPath(this.defaultImgPath);
-    },
-    isDefaultDrupalImage(
-      fileId?: string,
-      file?: { attributes?: { uri?: { value?: string; url?: string } } }
-    ): boolean {
-      const placeholderUuid = this.getPlaceholderImageUuid();
-      if (placeholderUuid && fileId === placeholderUuid) {
-        return true;
-      }
-
-      if (!file?.attributes) {
-        return false;
-      }
-
-      const placeholderPath = this.getPlaceholderImagePath();
-      if (!placeholderPath) {
-        return false;
-      }
-
-      const candidates = [
-        this.normalizeDrupalAssetPath(file.attributes.uri?.value),
-        this.normalizeDrupalAssetPath(file.attributes.uri?.url),
-      ];
-
-      return candidates.some((value) => value === placeholderPath);
-    },
     handleImageClick() {
       if (this.showComingSoonOverlay) {
         return;
@@ -322,7 +276,7 @@ export default defineComponent({
         const url = this.apiUrl + `file/file/` + this.brick.brickImage + `?fields[file--file]=uri,url,image_style_uri`;
         const response = await axios.get<MediaImageApiResponse>(url);
         const file = response?.data?.data;
-        if (this.isDefaultDrupalImage(this.brick.brickImage, file)) {
+        if (isDefaultDrupalImage(this.brick.brickImage, file)) {
           this.hasMissingImage = true;
           const fallback = this.fallbackImgUrl;
           this.thumbnailUrl = fallback;

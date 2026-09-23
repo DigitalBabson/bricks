@@ -44,7 +44,7 @@ import Pagination from "./Pagination.vue";
 import { defaultEnvKey, defaultUrlKey, searchstaxEndpointKey, searchstaxTokenKey } from "../types/index"
 import type { Brick, BrickApiResponse, FileApiItem, ParkLocation } from "../types/index"
 import { searchBricks } from "../services/searchstax"
-import { PLACEHOLDER_IMAGE_PATH } from "../constants"
+import { isDefaultDrupalImage } from "../utils/placeholderImage"
 
 export default defineComponent({
   components: {
@@ -124,53 +124,6 @@ export default defineComponent({
     },
   },
   methods: {
-    getPlaceholderImageUuid(): string {
-      return import.meta.env.DEV_PLACEHOLDER_IMAGE_UUID ?? '';
-    },
-    normalizeDrupalAssetPath(value?: string): string {
-      if (!value) {
-        return '';
-      }
-
-      const withoutQuery = value.split('?')[0];
-      if (withoutQuery.startsWith('public://')) {
-        return `/sites/default/files/${withoutQuery.slice('public://'.length)}`;
-      }
-
-      try {
-        return new URL(withoutQuery).pathname;
-      } catch {
-        return withoutQuery;
-      }
-    },
-    getPlaceholderImagePath(): string {
-      return this.normalizeDrupalAssetPath(PLACEHOLDER_IMAGE_PATH);
-    },
-    isDefaultDrupalImage(
-      fileId?: string,
-      file?: { attributes?: { uri?: { value?: string; url?: string } } }
-    ): boolean {
-      const placeholderUuid = this.getPlaceholderImageUuid();
-      if (placeholderUuid && fileId === placeholderUuid) {
-        return true;
-      }
-
-      if (!file?.attributes) {
-        return false;
-      }
-
-      const placeholderPath = this.getPlaceholderImagePath();
-      if (!placeholderPath) {
-        return false;
-      }
-
-      const candidates = [
-        this.normalizeDrupalAssetPath(file.attributes.uri?.value),
-        this.normalizeDrupalAssetPath(file.attributes.uri?.url),
-      ];
-
-      return candidates.some((value) => value === placeholderPath);
-    },
     buildDrupalImageQuery(): string {
       return '&include=field_brick_image' +
         '&fields[brick]=field_brick_inscription,field_brick_image,field_brick_zone' +
@@ -223,7 +176,7 @@ export default defineComponent({
         ? 'default'
         : brickItem.relationships.field_brick_image.data.id;
       const imageFile = brickImage === 'default' ? undefined : includedFiles.get(brickImage);
-      const isPlaceholderImage = brickImage === 'default' || this.isDefaultDrupalImage(brickImage, imageFile);
+      const isPlaceholderImage = brickImage === 'default' || isDefaultDrupalImage(brickImage, imageFile);
       const previewUrl = this.resolveAssetUrl(
         imageFile?.attributes?.image_style_uri?.brick_preview ??
         imageFile?.attributes?.image_style_uri?.brick ??
@@ -273,7 +226,7 @@ export default defineComponent({
 
       const hydratedBricks = bricks.map((brick) => {
         const imageFile = imageFiles.get(brick.brickImage);
-        const isPlaceholderImage = brick.brickImage === 'default' || this.isDefaultDrupalImage(brick.brickImage, imageFile);
+        const isPlaceholderImage = brick.brickImage === 'default' || isDefaultDrupalImage(brick.brickImage, imageFile);
         const previewUrl = this.resolveAssetUrl(
           imageFile?.attributes?.image_style_uri?.brick_preview ??
           imageFile?.attributes?.image_style_uri?.brick ??
