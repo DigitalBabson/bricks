@@ -117,11 +117,11 @@
           class="brick__map-caption tw-table-caption tw-bg-white tw-px-6 tw-py-4 tw-text-left"
         >
           <div class="tw-mb-2">
-            <span class="tw-font-oswald tw-text-[18px] tw-text-black tw-mr-1">Brick Location:</span>
+            <span class="tw-font-oswald tw-text-[18px] tw-text-black">Brick Location: </span>
             <span class="tw-font-zilla tw-text-[19px] tw-text-black">{{ parkLocation }}</span>
           </div>
           <div>
-            <span class="tw-font-oswald tw-text-[18px] tw-text-black tw-mr-1">Brick Inscription:</span>
+            <span class="tw-font-oswald tw-text-[18px] tw-text-black">Brick Inscription: </span>
             <span class="tw-font-zilla tw-text-[19px] tw-text-black">{{ brick.inscription }}</span>
           </div>
         </div>
