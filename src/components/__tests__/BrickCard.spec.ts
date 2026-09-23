@@ -142,7 +142,17 @@ describe('BrickCard', () => {
     it('renders the coming-soon overlay and disables the enlarge affordance', () => {
       expect(wrapper.text()).toContain('John Doe 1985')
       expect(wrapper.text()).toContain('Image Coming Soon')
-      expect(wrapper.find('button[aria-label="Enlarge brick image"]').exists()).toBe(false)
+      expect(wrapper.find('[role="button"][aria-label^="Enlarge brick image"]').exists()).toBe(false)
+    })
+
+    it('does not present the placeholder media as clickable or focusable', () => {
+      const media = wrapper.find('.brick-card__media')
+
+      expect(media.classes()).toContain('tw-cursor-default')
+      expect(media.classes()).not.toContain('tw-cursor-pointer')
+      expect(media.attributes('tabindex')).toBeUndefined()
+      expect(media.attributes('role')).toBeUndefined()
+      expect(media.attributes('aria-label')).toBeUndefined()
     })
 
     it('does not open the image modal when the placeholder image is clicked', async () => {
@@ -203,6 +213,8 @@ describe('BrickCard', () => {
     it('shows the hover affordances and reuses hydrated data without extra requests', async () => {
       expect(mockedAxios.get).not.toHaveBeenCalled()
       expect(wrapper.find('[role="button"][aria-label^="Enlarge brick image"]').exists()).toBe(true)
+      expect(wrapper.find('.brick-card__media').classes()).toContain('tw-cursor-pointer')
+      expect(wrapper.find('.brick-card__media').attributes('tabindex')).toBe('0')
       expect(wrapper.html()).toContain('tw-bg-white/40')
       expect(getBrickCardVm(wrapper).thumbnailUrl).toBe('https://example.com/preview.jpg')
       expect(getBrickCardVm(wrapper).brickImgUrl).toBe('https://example.com/full.jpg')
@@ -282,7 +294,7 @@ describe('BrickCard', () => {
       expect(wrapper.text()).toContain('MICHAEL JAMES PACE CLASS OF 2015')
       expect(wrapper.text()).toContain('Image Coming Soon')
       expect(wrapper.html()).toContain('tw-bg-white/70')
-      expect(wrapper.find('button[aria-label="Enlarge brick image"]').exists()).toBe(false)
+      expect(wrapper.find('[role="button"][aria-label^="Enlarge brick image"]').exists()).toBe(false)
 
       await wrapper.find('img').trigger('click')
 
@@ -297,7 +309,7 @@ describe('BrickCard', () => {
 
       expect(wrapper.text()).toContain('MICHAEL JAMES PACE CLASS OF 2015')
       expect(wrapper.text()).toContain('Image Coming Soon')
-      expect(wrapper.find('button[aria-label="Enlarge brick image"]').exists()).toBe(false)
+      expect(wrapper.find('[role="button"][aria-label^="Enlarge brick image"]').exists()).toBe(false)
       expect(mockedAxios.get).not.toHaveBeenCalled()
 
       await wrapper.find('img').trigger('click')

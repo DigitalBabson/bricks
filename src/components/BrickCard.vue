@@ -5,10 +5,11 @@
     "
   >
     <div
-      class="brick-card__media tw-group tw-cursor-pointer"
-      tabindex="0"
-      role="button"
-      :aria-label="`Enlarge brick image: ${brick?.inscription || 'Brick'}`"
+      class="brick-card__media tw-group"
+      :class="showComingSoonOverlay ? 'tw-cursor-default' : 'tw-cursor-pointer'"
+      :tabindex="showComingSoonOverlay ? undefined : 0"
+      :role="showComingSoonOverlay ? undefined : 'button'"
+      :aria-label="showComingSoonOverlay ? undefined : `Enlarge brick image: ${brick?.inscription || 'Brick'}`"
       @click="handleImageClick"
       @keydown.enter.prevent="handleImageClick"
       @keydown.space.prevent="handleImageClick"
