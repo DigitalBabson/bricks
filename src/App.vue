@@ -38,6 +38,7 @@ import BrickFilter from './components/BrickFilter.vue'
 import LocationExplorer from './components/LocationExplorer.vue'
 import { defaultEnvKey, defaultUrlKey } from './types/index'
 import type { ParkLocation, ParkLocationsApiResponse } from './types/index'
+import { withCacheBuster } from './utils/cacheBuster'
 
 export default defineComponent({
   components: {
@@ -106,7 +107,7 @@ export default defineComponent({
           `?include=field_brick_zone_image,field_brick_zone_image.field_media_image` +
           `&fields[parkLocation]=name,field_brick_zone_image` +
           `&fields[media--image]=field_media_image` +
-          `&fields[file--file]=uri,url,image_style_uri` +
+          `&fields[file--file]=uri,url,image_style_uri,changed` +
           `&sort=name`
         const response = await axios.get<ParkLocationsApiResponse>(url)
         const included = response.data.included ?? []
@@ -130,7 +131,7 @@ export default defineComponent({
           return {
             id: location.id,
             name: location.attributes.name,
-            mapImageUrl: this.resolveAssetUrl(imagePath),
+            mapImageUrl: withCacheBuster(this.resolveAssetUrl(imagePath), file?.attributes?.changed),
           }
         })
 

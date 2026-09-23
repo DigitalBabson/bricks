@@ -45,6 +45,7 @@ import { defaultEnvKey, defaultUrlKey, searchstaxEndpointKey, searchstaxTokenKey
 import type { Brick, BrickApiResponse, FileApiItem, ParkLocation } from "../types/index"
 import { searchBricks } from "../services/searchstax"
 import { isDefaultDrupalImage } from "../utils/placeholderImage"
+import { withCacheBuster } from "../utils/cacheBuster"
 
 export default defineComponent({
   components: {
@@ -127,7 +128,7 @@ export default defineComponent({
     buildDrupalImageQuery(): string {
       return '&include=field_brick_image' +
         '&fields[brick]=field_brick_inscription,field_brick_image,field_brick_zone' +
-        '&fields[file--file]=uri,url,image_style_uri';
+        '&fields[file--file]=uri,url,image_style_uri,changed';
     },
     resolveAssetUrl(url?: string): string | undefined {
       if (!url) {
@@ -153,7 +154,7 @@ export default defineComponent({
         '?filter[id-filter][condition][path]=id' +
         '&filter[id-filter][condition][operator]=IN' +
         filters +
-        '&fields[file--file]=uri,url,image_style_uri';
+        '&fields[file--file]=uri,url,image_style_uri,changed';
     },
     getLocationDetails(locationId: string) {
       return this.locations.find((location) => location.id === locationId);
@@ -177,15 +178,16 @@ export default defineComponent({
         : brickItem.relationships.field_brick_image.data.id;
       const imageFile = brickImage === 'default' ? undefined : includedFiles.get(brickImage);
       const isPlaceholderImage = brickImage === 'default' || isDefaultDrupalImage(brickImage, imageFile);
-      const previewUrl = this.resolveAssetUrl(
+      const changed = imageFile?.attributes?.changed;
+      const previewUrl = withCacheBuster(this.resolveAssetUrl(
         imageFile?.attributes?.image_style_uri?.brick_preview ??
         imageFile?.attributes?.image_style_uri?.brick ??
         imageFile?.attributes?.uri?.url
-      );
-      const fullUrl = this.resolveAssetUrl(
+      ), changed);
+      const fullUrl = withCacheBuster(this.resolveAssetUrl(
         imageFile?.attributes?.image_style_uri?.brick_large ??
         imageFile?.attributes?.uri?.url
-      );
+      ), changed);
       const brickParkLocation = brickItem.relationships.field_brick_zone.data?.id ?? '';
       const location = this.getLocationDetails(brickParkLocation);
 
@@ -227,15 +229,16 @@ export default defineComponent({
       const hydratedBricks = bricks.map((brick) => {
         const imageFile = imageFiles.get(brick.brickImage);
         const isPlaceholderImage = brick.brickImage === 'default' || isDefaultDrupalImage(brick.brickImage, imageFile);
-        const previewUrl = this.resolveAssetUrl(
+        const changed = imageFile?.attributes?.changed;
+        const previewUrl = withCacheBuster(this.resolveAssetUrl(
           imageFile?.attributes?.image_style_uri?.brick_preview ??
           imageFile?.attributes?.image_style_uri?.brick ??
           imageFile?.attributes?.uri?.url
-        );
-        const fullUrl = this.resolveAssetUrl(
+        ), changed);
+        const fullUrl = withCacheBuster(this.resolveAssetUrl(
           imageFile?.attributes?.image_style_uri?.brick_large ??
           imageFile?.attributes?.uri?.url
-        );
+        ), changed);
         const location = this.getLocationDetails(brick.brickParkLocation);
 
         return {

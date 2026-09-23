@@ -35,6 +35,7 @@ export interface BrickApiResponse {
     attributes: {
       uri?: { value?: string; url?: string }
       image_style_uri?: ImageStyleUri
+      changed?: string
     }
   }>
   links: { next?: { href: string } }
@@ -47,6 +48,7 @@ export interface FileApiItem {
   attributes?: {
     uri?: { value?: string; url?: string }
     image_style_uri?: ImageStyleUri
+    changed?: string
   }
 }
 
@@ -90,6 +92,7 @@ export interface ParkLocationsApiResponse {
     attributes: {
       uri?: { value?: string; url?: string }
       image_style_uri?: ImageStyleUri
+      changed?: string
       [key: string]: unknown
     }
     relationships?: {
@@ -123,6 +126,7 @@ export interface ParkLocationApiResponse {
     attributes: {
       uri?: { value?: string; url?: string }
       image_style_uri?: ImageStyleUri
+      changed?: string
     }
     relationships?: {
       field_media_image?: { data: { type: string; id: string } | null }

@@ -154,7 +154,7 @@ describe('TheBricks', () => {
     expect(url).toContain('&sort=field_sort_alpha')
     expect(url).toContain('&include=field_brick_image')
     expect(url).toContain('&fields[brick]=field_brick_inscription,field_brick_image,field_brick_zone')
-    expect(url).toContain('&fields[file--file]=uri,url,image_style_uri')
+    expect(url).toContain('&fields[file--file]=uri,url,image_style_uri,changed')
   })
 
   it('uses Drupal IN filtering when locationIds are present', async () => {
@@ -244,6 +244,23 @@ describe('TheBricks', () => {
 
     expect(vm.bricks[0].brickImagePreviewUrl).toBe('https://cdn.example.com/img-1-preview.jpg')
     expect(vm.bricks[0].brickImageFullUrl).toBe('https://cdn.example.com/img-1-full.jpg')
+  })
+
+  it('versions image URLs with the file changed timestamp so replaced images bypass caches', async () => {
+    const replaced = makeIncludedFile('img-1', 'https://cdn.example.com/img-1-preview.jpg?itok=abc')
+    Object.assign(replaced.attributes, { changed: '2026-09-23T16:33:02+00:00' })
+    mockedAxios.get.mockResolvedValue(mockApiResponse([makeBrick('1', 'Alpha', 'loc-1', 'img-1')], 1, [replaced]))
+
+    const wrapper = mountTheBricks()
+    await flushPromises()
+
+    const vm = wrapper.vm as InstanceType<typeof TheBricks> & {
+      bricks: Array<{ brickImagePreviewUrl?: string; brickImageFullUrl?: string }>
+    }
+
+    expect(vm.bricks[0].brickImagePreviewUrl).toBe('https://cdn.example.com/img-1-preview.jpg?itok=abc&v=1790181182')
+    expect(vm.bricks[0].brickImageFullUrl).toBe('https://cdn.example.com/img-1-full.jpg?v=1790181182')
+    expect(mockedAxios.get.mock.calls[0][0]).toContain('fields[file--file]=uri,url,image_style_uri,changed')
   })
 
   it('marks Drupal default placeholder images as coming-soon bricks', async () => {

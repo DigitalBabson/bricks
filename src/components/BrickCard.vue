@@ -138,6 +138,7 @@ import { defaultEnvKey, defaultUrlKey } from "../types/index"
 import type { Brick, MediaImageApiResponse, ParkLocationApiResponse } from "../types/index"
 import { PLACEHOLDER_IMAGE_PATH } from "../constants"
 import { isDefaultDrupalImage } from "../utils/placeholderImage"
+import { withCacheBuster } from "../utils/cacheBuster"
 
 export default defineComponent({
   props: {
@@ -274,7 +275,7 @@ export default defineComponent({
       }
 
       try {
-        const url = this.apiUrl + `file/file/` + this.brick.brickImage + `?fields[file--file]=uri,url,image_style_uri`;
+        const url = this.apiUrl + `file/file/` + this.brick.brickImage + `?fields[file--file]=uri,url,image_style_uri,changed`;
         const response = await axios.get<MediaImageApiResponse>(url);
         const file = response?.data?.data;
         if (isDefaultDrupalImage(this.brick.brickImage, file)) {
@@ -287,12 +288,13 @@ export default defineComponent({
         }
 
         const imageData = response?.data?.data?.attributes?.image_style_uri;
-        const previewUrl = this.resolveAssetUrl(
+        const changed = response?.data?.data?.attributes?.changed;
+        const previewUrl = withCacheBuster(this.resolveAssetUrl(
           imageData?.brick_preview ?? imageData?.brick ?? response?.data?.data?.attributes?.uri?.url
-        );
-        const fullUrl = this.resolveAssetUrl(
+        ), changed);
+        const fullUrl = withCacheBuster(this.resolveAssetUrl(
           imageData?.brick_large ?? response?.data?.data?.attributes?.uri?.url
-        );
+        ), changed);
 
         if (previewUrl && fullUrl) {
           this.thumbnailUrl = previewUrl;
@@ -328,7 +330,7 @@ export default defineComponent({
           `?include=field_brick_zone_image,field_brick_zone_image.field_media_image` +
           `&fields[parkLocation]=name,field_brick_zone_image` +
           `&fields[media--image]=field_media_image` +
-          `&fields[file--file]=uri,url,image_style_uri`;
+          `&fields[file--file]=uri,url,image_style_uri,changed`;
         const response = await axios.get<ParkLocationApiResponse>(url);
         this.parkLocation = response?.data?.data?.attributes?.name || "";
 
@@ -342,11 +344,11 @@ export default defineComponent({
           ? included.find((item) => item.type === 'file--file' && item.id === fileId)
           : undefined;
 
-        this.parkLocationImgURL = this.resolveAssetUrl(
+        this.parkLocationImgURL = withCacheBuster(this.resolveAssetUrl(
           file?.attributes?.image_style_uri?.full_im ??
           file?.attributes?.image_style_uri?.brick_large ??
           file?.attributes?.uri?.url
-        );
+        ), file?.attributes?.changed);
       } catch {
         this.parkLocation = "";
         this.parkLocationImgURL = "";

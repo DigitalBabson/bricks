@@ -171,7 +171,7 @@ describe('BrickCard', () => {
         '?include=field_brick_zone_image,field_brick_zone_image.field_media_image' +
         '&fields[parkLocation]=name,field_brick_zone_image' +
         '&fields[media--image]=field_media_image' +
-        '&fields[file--file]=uri,url,image_style_uri'
+        '&fields[file--file]=uri,url,image_style_uri,changed'
       )
       expect(getBrickCardVm(wrapper).parkLocation).toBe('Zone 1')
       expect(getBrickCardVm(wrapper).parkLocationImgURL).toBe('https://example.com/map-large.jpg')
