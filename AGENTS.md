@@ -51,11 +51,11 @@ Configured via Vite's mode system — `.env.[mode]` files loaded at build time.
 | `npm run dev` | `.env.dev` | `babsondev.prod.acquia-sites.com` |
 | `npm run dev:local` | `.env.localdev` | `acquia-babson.ddev.site` (local DDEV) |
 | `npm run dev:stage` | `.env.stage` | `babsonstg.prod.acquia-sites.com` |
-| `npm run dev:stage2` | `.env.stage2` | `babsonstg2.prod.acquia-sites.com` |
+| `npm run dev:stage2` | `.env.stage2` | `stage2.contentfiles.babson.edu` |
 | `npm run dev:prod` | `.env.production` | `contentfiles.babson.edu` |
 | `npm run build:dev` | `.env.dev` | `babsondev.prod.acquia-sites.com` |
 | `npm run build:stage` | `.env.stage` | `babsonstg.prod.acquia-sites.com` |
-| `npm run build:stage2` | `.env.stage2` | `babsonstg2.prod.acquia-sites.com` |
+| `npm run build:stage2` | `.env.stage2` | `stage2.contentfiles.babson.edu` |
 | `npm run build:production` | `.env.production` | `contentfiles.babson.edu` |
 
 Real secrets locally: create `.env.[mode].local` (gitignored) with `DEV_SEARCHSTAX_TOKEN`.
