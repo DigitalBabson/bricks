@@ -68,7 +68,7 @@ describe('App', () => {
       '?include=field_brick_zone_image,field_brick_zone_image.field_media_image' +
       '&fields[parkLocation]=name,field_brick_zone_image' +
       '&fields[media--image]=field_media_image' +
-      '&fields[file--file]=uri,url,image_style_uri' +
+      '&fields[file--file]=uri,url,image_style_uri,changed' +
       '&sort=name'
     )
 

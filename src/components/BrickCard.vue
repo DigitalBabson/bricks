@@ -5,10 +5,11 @@
     "
   >
     <div
-      class="brick-card__media tw-group tw-cursor-pointer"
-      tabindex="0"
-      role="button"
-      :aria-label="`Enlarge brick image: ${brick?.inscription || 'Brick'}`"
+      class="brick-card__media tw-group"
+      :class="showComingSoonOverlay ? 'tw-cursor-default' : 'tw-cursor-pointer'"
+      :tabindex="showComingSoonOverlay ? undefined : 0"
+      :role="showComingSoonOverlay ? undefined : 'button'"
+      :aria-label="showComingSoonOverlay ? undefined : `Enlarge brick image: ${brick?.inscription || 'Brick'}`"
       @click="handleImageClick"
       @keydown.enter.prevent="handleImageClick"
       @keydown.space.prevent="handleImageClick"
@@ -116,11 +117,11 @@
           class="brick__map-caption tw-table-caption tw-bg-white tw-px-6 tw-py-4 tw-text-left"
         >
           <div class="tw-mb-2">
-            <span class="tw-font-oswald tw-text-[18px] tw-text-black tw-mr-1">Brick Location:</span>
+            <span class="tw-font-oswald tw-text-[18px] tw-text-black">Brick Location: </span>
             <span class="tw-font-zilla tw-text-[19px] tw-text-black">{{ parkLocation }}</span>
           </div>
           <div>
-            <span class="tw-font-oswald tw-text-[18px] tw-text-black tw-mr-1">Brick Inscription:</span>
+            <span class="tw-font-oswald tw-text-[18px] tw-text-black">Brick Inscription: </span>
             <span class="tw-font-zilla tw-text-[19px] tw-text-black">{{ brick.inscription }}</span>
           </div>
         </div>
@@ -136,6 +137,8 @@ import axios from "axios";
 import { defaultEnvKey, defaultUrlKey } from "../types/index"
 import type { Brick, MediaImageApiResponse, ParkLocationApiResponse } from "../types/index"
 import { PLACEHOLDER_IMAGE_PATH } from "../constants"
+import { isDefaultDrupalImage } from "../utils/placeholderImage"
+import { withCacheBuster } from "../utils/cacheBuster"
 
 export default defineComponent({
   props: {
@@ -190,53 +193,6 @@ export default defineComponent({
     },
   },
   methods: {
-    getPlaceholderImageUuid(): string {
-      return import.meta.env.DEV_PLACEHOLDER_IMAGE_UUID ?? '';
-    },
-    normalizeDrupalAssetPath(value?: string): string {
-      if (!value) {
-        return '';
-      }
-
-      const withoutQuery = value.split('?')[0];
-      if (withoutQuery.startsWith('public://')) {
-        return `/sites/default/files/${withoutQuery.slice('public://'.length)}`;
-      }
-
-      try {
-        return new URL(withoutQuery).pathname;
-      } catch {
-        return withoutQuery;
-      }
-    },
-    getPlaceholderImagePath(): string {
-      return this.normalizeDrupalAssetPath(this.defaultImgPath);
-    },
-    isDefaultDrupalImage(
-      fileId?: string,
-      file?: { attributes?: { uri?: { value?: string; url?: string } } }
-    ): boolean {
-      const placeholderUuid = this.getPlaceholderImageUuid();
-      if (placeholderUuid && fileId === placeholderUuid) {
-        return true;
-      }
-
-      if (!file?.attributes) {
-        return false;
-      }
-
-      const placeholderPath = this.getPlaceholderImagePath();
-      if (!placeholderPath) {
-        return false;
-      }
-
-      const candidates = [
-        this.normalizeDrupalAssetPath(file.attributes.uri?.value),
-        this.normalizeDrupalAssetPath(file.attributes.uri?.url),
-      ];
-
-      return candidates.some((value) => value === placeholderPath);
-    },
     handleImageClick() {
       if (this.showComingSoonOverlay) {
         return;
@@ -319,10 +275,10 @@ export default defineComponent({
       }
 
       try {
-        const url = this.apiUrl + `file/file/` + this.brick.brickImage + `?fields[file--file]=uri,url,image_style_uri`;
+        const url = this.apiUrl + `file/file/` + this.brick.brickImage + `?fields[file--file]=uri,url,image_style_uri,changed`;
         const response = await axios.get<MediaImageApiResponse>(url);
         const file = response?.data?.data;
-        if (this.isDefaultDrupalImage(this.brick.brickImage, file)) {
+        if (isDefaultDrupalImage(this.brick.brickImage, file)) {
           this.hasMissingImage = true;
           const fallback = this.fallbackImgUrl;
           this.thumbnailUrl = fallback;
@@ -332,12 +288,13 @@ export default defineComponent({
         }
 
         const imageData = response?.data?.data?.attributes?.image_style_uri;
-        const previewUrl = this.resolveAssetUrl(
+        const changed = response?.data?.data?.attributes?.changed;
+        const previewUrl = withCacheBuster(this.resolveAssetUrl(
           imageData?.brick_preview ?? imageData?.brick ?? response?.data?.data?.attributes?.uri?.url
-        );
-        const fullUrl = this.resolveAssetUrl(
+        ), changed);
+        const fullUrl = withCacheBuster(this.resolveAssetUrl(
           imageData?.brick_large ?? response?.data?.data?.attributes?.uri?.url
-        );
+        ), changed);
 
         if (previewUrl && fullUrl) {
           this.thumbnailUrl = previewUrl;
@@ -373,7 +330,7 @@ export default defineComponent({
           `?include=field_brick_zone_image,field_brick_zone_image.field_media_image` +
           `&fields[parkLocation]=name,field_brick_zone_image` +
           `&fields[media--image]=field_media_image` +
-          `&fields[file--file]=uri,url,image_style_uri`;
+          `&fields[file--file]=uri,url,image_style_uri,changed`;
         const response = await axios.get<ParkLocationApiResponse>(url);
         this.parkLocation = response?.data?.data?.attributes?.name || "";
 
@@ -387,11 +344,11 @@ export default defineComponent({
           ? included.find((item) => item.type === 'file--file' && item.id === fileId)
           : undefined;
 
-        this.parkLocationImgURL = this.resolveAssetUrl(
+        this.parkLocationImgURL = withCacheBuster(this.resolveAssetUrl(
           file?.attributes?.image_style_uri?.full_im ??
           file?.attributes?.image_style_uri?.brick_large ??
           file?.attributes?.uri?.url
-        );
+        ), file?.attributes?.changed);
       } catch {
         this.parkLocation = "";
         this.parkLocationImgURL = "";

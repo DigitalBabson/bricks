@@ -47,11 +47,11 @@ API endpoints are configured via Vite's mode system. Each mode loads a `.env.[mo
 
 | Mode | Env file | Drupal endpoint |
 |------|----------|-----------------|
-| `dev` | `.env.dev` | `babsondev.prod.acquia-sites.com` |
-| `localdev` | `.env.localdev` | Local overrides |
-| `stage` | `.env.stage` | `test-www.babson.edu` |
-| `stage2` | `.env.stage2` | `stage2.babson.edu` |
-| `production` | `.env.production` | `intranet.babson.edu` |
+| `dev` | `.env.dev` | `dev.contentfiles.babson.edu` |
+| `localdev` | `.env.localdev` | `acquia-babson.ddev.site` (local DDEV) |
+| `stage` | `.env.stage` | `stage.contentfiles.babson.edu` |
+| `stage2` | `.env.stage2` | `stage2.contentfiles.babson.edu` |
+| `production` | `.env.production` | `contentfiles.babson.edu` |
 
 To override values locally without committing secrets, create `.env.[mode].local` (gitignored).
 
@@ -105,8 +105,8 @@ npm run build:production    # outputs to dist/
 
 The build produces `dist/assets/index-*.js` and `dist/assets/index-*.css` (hashed filenames). Upload these files to T4 media under **javascript/bricks**.
 
-- **Prod**: https://www.babson.edu/kmhpbricks/
-- **Stage**: https://test-www.babson.edu/kmhpbricks/
+- **Prod**: https://babson.edu/alumni/about-us/visiting-campus/find-my-brick/
+- **Test**: https://test-www.babson.edu/alumni/about-us/visiting-campus/find-my-brick/
 
 ### GitHub Pages (review deploy)
 

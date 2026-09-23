@@ -48,14 +48,14 @@ Configured via Vite's mode system — `.env.[mode]` files loaded at build time.
 
 | Command | Mode / env file | Drupal endpoint |
 |---------|-----------------|-----------------|
-| `npm run dev` | `.env.dev` | `babsondev.prod.acquia-sites.com` |
+| `npm run dev` | `.env.dev` | `dev.contentfiles.babson.edu` |
 | `npm run dev:local` | `.env.localdev` | `acquia-babson.ddev.site` (local DDEV) |
-| `npm run dev:stage` | `.env.stage` | `babsonstg.prod.acquia-sites.com` |
-| `npm run dev:stage2` | `.env.stage2` | `babsonstg2.prod.acquia-sites.com` |
+| `npm run dev:stage` | `.env.stage` | `stage.contentfiles.babson.edu` |
+| `npm run dev:stage2` | `.env.stage2` | `stage2.contentfiles.babson.edu` |
 | `npm run dev:prod` | `.env.production` | `contentfiles.babson.edu` |
-| `npm run build:dev` | `.env.dev` | `babsondev.prod.acquia-sites.com` |
-| `npm run build:stage` | `.env.stage` | `babsonstg.prod.acquia-sites.com` |
-| `npm run build:stage2` | `.env.stage2` | `babsonstg2.prod.acquia-sites.com` |
+| `npm run build:dev` | `.env.dev` | `dev.contentfiles.babson.edu` |
+| `npm run build:stage` | `.env.stage` | `stage.contentfiles.babson.edu` |
+| `npm run build:stage2` | `.env.stage2` | `stage2.contentfiles.babson.edu` |
 | `npm run build:production` | `.env.production` | `contentfiles.babson.edu` |
 
 Real secrets locally: create `.env.[mode].local` (gitignored) with `DEV_SEARCHSTAX_TOKEN`.
@@ -98,4 +98,4 @@ The following must appear in the T4 content layout for the widget to function:
 
 ## Deployment
 
-Build output in `dist/` uploaded to Terminal Four CMS (bricks directory in media). App embedded in Babson.edu. Prod: https://www.babson.edu/kmhpbricks/ Test: https://test-www.babson.edu/kmhpbricks/
+Build output in `dist/` uploaded to Terminal Four CMS (bricks directory in media). App embedded in Babson.edu. Prod page: https://babson.edu/alumni/about-us/visiting-campus/find-my-brick/ Test page: https://test-www.babson.edu/alumni/about-us/visiting-campus/find-my-brick/
