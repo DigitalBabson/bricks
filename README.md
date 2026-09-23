@@ -47,11 +47,11 @@ API endpoints are configured via Vite's mode system. Each mode loads a `.env.[mo
 
 | Mode | Env file | Drupal endpoint |
 |------|----------|-----------------|
-| `dev` | `.env.dev` | `babsondev.prod.acquia-sites.com` |
-| `localdev` | `.env.localdev` | Local overrides |
-| `stage` | `.env.stage` | `test-www.babson.edu` |
-| `stage2` | `.env.stage2` | `stage2.babson.edu` |
-| `production` | `.env.production` | `intranet.babson.edu` |
+| `dev` | `.env.dev` | `dev.contentfiles.babson.edu` |
+| `localdev` | `.env.localdev` | `acquia-babson.ddev.site` (local DDEV) |
+| `stage` | `.env.stage` | `stage.contentfiles.babson.edu` |
+| `stage2` | `.env.stage2` | `stage2.contentfiles.babson.edu` |
+| `production` | `.env.production` | `contentfiles.babson.edu` |
 
 To override values locally without committing secrets, create `.env.[mode].local` (gitignored).
 

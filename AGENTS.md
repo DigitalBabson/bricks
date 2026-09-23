@@ -48,13 +48,13 @@ Configured via Vite's mode system — `.env.[mode]` files loaded at build time.
 
 | Command | Mode / env file | Drupal endpoint |
 |---------|-----------------|-----------------|
-| `npm run dev` | `.env.dev` | `babsondev.prod.acquia-sites.com` |
+| `npm run dev` | `.env.dev` | `dev.contentfiles.babson.edu` |
 | `npm run dev:local` | `.env.localdev` | `acquia-babson.ddev.site` (local DDEV) |
-| `npm run dev:stage` | `.env.stage` | `babsonstg.prod.acquia-sites.com` |
+| `npm run dev:stage` | `.env.stage` | `stage.contentfiles.babson.edu` |
 | `npm run dev:stage2` | `.env.stage2` | `stage2.contentfiles.babson.edu` |
 | `npm run dev:prod` | `.env.production` | `contentfiles.babson.edu` |
-| `npm run build:dev` | `.env.dev` | `babsondev.prod.acquia-sites.com` |
-| `npm run build:stage` | `.env.stage` | `babsonstg.prod.acquia-sites.com` |
+| `npm run build:dev` | `.env.dev` | `dev.contentfiles.babson.edu` |
+| `npm run build:stage` | `.env.stage` | `stage.contentfiles.babson.edu` |
 | `npm run build:stage2` | `.env.stage2` | `stage2.contentfiles.babson.edu` |
 | `npm run build:production` | `.env.production` | `contentfiles.babson.edu` |
 
