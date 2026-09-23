@@ -98,4 +98,4 @@ The following must appear in the T4 content layout for the widget to function:
 
 ## Deployment
 
-Build output in `dist/` uploaded to Terminal Four CMS (bricks directory in media). App embedded in Babson.edu. Prod: https://www.babson.edu/kmhpbricks/ Test: https://test-www.babson.edu/kmhpbricks/
+Build output in `dist/` uploaded to Terminal Four CMS (bricks directory in media). App embedded in Babson.edu. Prod page: https://babson.edu/alumni/about-us/visiting-campus/find-my-brick/ Test page: https://test-www.babson.edu/alumni/about-us/visiting-campus/find-my-brick/

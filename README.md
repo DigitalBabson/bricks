@@ -105,8 +105,8 @@ npm run build:production    # outputs to dist/
 
 The build produces `dist/assets/index-*.js` and `dist/assets/index-*.css` (hashed filenames). Upload these files to T4 media under **javascript/bricks**.
 
-- **Prod**: https://www.babson.edu/kmhpbricks/
-- **Stage**: https://test-www.babson.edu/kmhpbricks/
+- **Prod**: https://babson.edu/alumni/about-us/visiting-campus/find-my-brick/
+- **Test**: https://test-www.babson.edu/alumni/about-us/visiting-campus/find-my-brick/
 
 ### GitHub Pages (review deploy)
 
