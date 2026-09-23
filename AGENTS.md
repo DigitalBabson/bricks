@@ -23,7 +23,7 @@ Vue 3 SPA. Displays memorial bricks from Drupal JSON:API backend. Vite + Tailwin
 ### Component hierarchy
 
 ```
-App.vue                    → provides defaultEnv/defaultUrl via provide/inject
+App.vue                    → injects defaultEnv/defaultUrl (provided in main.ts)
 ├── AppHero                → hero section; renders BrickFilter in slot
 │   └── BrickFilter        → inscription search + location multiselect, v-model two-way binding
 ├── TheBricks.vue          → fetches brick list, manages search/pagination state
@@ -35,7 +35,7 @@ App.vue                    → provides defaultEnv/defaultUrl via provide/inject
 
 ### Data flow
 
-1. **App.vue** provides API base URL via `provide()` (defaults to prod `intranet.babson.edu/jsonapi/`)
+1. **main.ts** provides API base URL via `provide()`; **App.vue** injects it (falls back to prod `contentfiles.babson.edu/jsonapi/` when `DEV_DRUPAL_ENDPOINT` is unset)
 2. **TheBricks** fetches paginated brick list; watches `inscription` for search (min 3 chars, 500ms debounce); uses SearchStax when keyword active, falls back to Drupal CONTAINS
 3. **BrickCard** receives `brick` prop, makes two API calls on `mounted()`:
    - `file/file/{id}` → thumbnail + full image URLs (with image style URIs)
@@ -48,15 +48,21 @@ Configured via Vite's mode system — `.env.[mode]` files loaded at build time.
 
 | Command | Mode / env file | Drupal endpoint |
 |---------|-----------------|-----------------|
-| `npm run dev` | `.env.dev` | `babsondev.prod.acquia-sites.com` |
-| `npm run dev:stage` | `.env.stage` | `test-www.babson.edu` |
-| `npm run dev:stage2` | `.env.stage2` | `stage2.babson.edu` |
-| `npm run dev:prod` | `.env.production` | `intranet.babson.edu` |
-| `npm run build:stage` | `.env.stage` | `test-www.babson.edu` |
-| `npm run build:stage2` | `.env.stage2` | `stage2.babson.edu` |
-| `npm run build:production` | `.env.production` | `intranet.babson.edu` |
+| `npm run dev` | `.env.dev` | `dev.contentfiles.babson.edu` |
+| `npm run dev:local` | `.env.localdev` | `acquia-babson.ddev.site` (local DDEV) |
+| `npm run dev:stage` | `.env.stage` | `stage.contentfiles.babson.edu` |
+| `npm run dev:stage2` | `.env.stage2` | `stage2.contentfiles.babson.edu` |
+| `npm run dev:prod` | `.env.production` | `contentfiles.babson.edu` |
+| `npm run build:dev` | `.env.dev` | `dev.contentfiles.babson.edu` |
+| `npm run build:stage` | `.env.stage` | `stage.contentfiles.babson.edu` |
+| `npm run build:stage2` | `.env.stage2` | `stage2.contentfiles.babson.edu` |
+| `npm run build:production` | `.env.production` | `contentfiles.babson.edu` |
 
 Real secrets locally: create `.env.[mode].local` (gitignored) with `DEV_SEARCHSTAX_TOKEN`.
+`stage`, `stage2` and `production` builds **fail** if that token is still the
+`your-*-token-here` placeholder — otherwise SearchStax rejects every keyword
+search and the app silently falls back to Drupal `CONTAINS`. The dev server
+warns instead of failing. `dev`/`localdev` are exempt; their committed tokens work.
 
 ## Key conventions
 
@@ -92,4 +98,4 @@ The following must appear in the T4 content layout for the widget to function:
 
 ## Deployment
 
-Build output in `dist/` uploaded to Terminal Four CMS (bricks directory in media). App embedded in Babson.edu. Prod: https://www.babson.edu/kmhpbricks/ Test: https://test-www.babson.edu/kmhpbricks/
+Build output in `dist/` uploaded to Terminal Four CMS (bricks directory in media). App embedded in Babson.edu. Prod page: https://babson.edu/alumni/about-us/visiting-campus/find-my-brick/ Test page: https://test-www.babson.edu/alumni/about-us/visiting-campus/find-my-brick/

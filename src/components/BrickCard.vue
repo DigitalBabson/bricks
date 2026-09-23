@@ -5,10 +5,11 @@
     "
   >
     <div
-      class="brick-card__media tw-group tw-cursor-pointer"
-      tabindex="0"
-      role="button"
-      :aria-label="`Enlarge brick image: ${brick?.inscription || 'Brick'}`"
+      class="brick-card__media tw-group"
+      :class="showComingSoonOverlay ? 'tw-cursor-default' : 'tw-cursor-pointer'"
+      :tabindex="showComingSoonOverlay ? undefined : 0"
+      :role="showComingSoonOverlay ? undefined : 'button'"
+      :aria-label="showComingSoonOverlay ? undefined : `Enlarge brick image: ${brick?.inscription || 'Brick'}`"
       @click="handleImageClick"
       @keydown.enter.prevent="handleImageClick"
       @keydown.space.prevent="handleImageClick"
@@ -109,18 +110,18 @@
       <div class="brick__map-wrapper tw-mx-auto tw-table">
         <img
           v-if="parkLocationImgURL"
-          class="tw-object-contain tw-max-w-full tw-max-h-[calc(90vh_-_160px)] md:tw-max-h-[calc(80vh_-_160px)]"
+          class="brick__map-image tw-object-contain tw-max-w-full tw-max-h-[calc(90vh_-_160px)] md:tw-max-h-[calc(80vh_-_160px)]"
           :src="parkLocationImgURL"
         />
         <div
           class="brick__map-caption tw-table-caption tw-bg-white tw-px-6 tw-py-4 tw-text-left"
         >
           <div class="tw-mb-2">
-            <span class="tw-font-oswald tw-text-[18px] tw-text-black tw-mr-1">Brick Location:</span>
+            <span class="tw-font-oswald tw-text-[18px] tw-text-black">Brick Location: </span>
             <span class="tw-font-zilla tw-text-[19px] tw-text-black">{{ parkLocation }}</span>
           </div>
           <div>
-            <span class="tw-font-oswald tw-text-[18px] tw-text-black tw-mr-1">Brick Inscription:</span>
+            <span class="tw-font-oswald tw-text-[18px] tw-text-black">Brick Inscription: </span>
             <span class="tw-font-zilla tw-text-[19px] tw-text-black">{{ brick.inscription }}</span>
           </div>
         </div>
@@ -136,6 +137,8 @@ import axios from "axios";
 import { defaultEnvKey, defaultUrlKey } from "../types/index"
 import type { Brick, MediaImageApiResponse, ParkLocationApiResponse } from "../types/index"
 import { PLACEHOLDER_IMAGE_PATH } from "../constants"
+import { isDefaultDrupalImage } from "../utils/placeholderImage"
+import { withCacheBuster } from "../utils/cacheBuster"
 
 export default defineComponent({
   props: {
@@ -190,53 +193,6 @@ export default defineComponent({
     },
   },
   methods: {
-    getPlaceholderImageUuid(): string {
-      return import.meta.env.DEV_PLACEHOLDER_IMAGE_UUID ?? '';
-    },
-    normalizeDrupalAssetPath(value?: string): string {
-      if (!value) {
-        return '';
-      }
-
-      const withoutQuery = value.split('?')[0];
-      if (withoutQuery.startsWith('public://')) {
-        return `/sites/default/files/${withoutQuery.slice('public://'.length)}`;
-      }
-
-      try {
-        return new URL(withoutQuery).pathname;
-      } catch {
-        return withoutQuery;
-      }
-    },
-    getPlaceholderImagePath(): string {
-      return this.normalizeDrupalAssetPath(this.defaultImgPath);
-    },
-    isDefaultDrupalImage(
-      fileId?: string,
-      file?: { attributes?: { uri?: { value?: string; url?: string } } }
-    ): boolean {
-      const placeholderUuid = this.getPlaceholderImageUuid();
-      if (placeholderUuid && fileId === placeholderUuid) {
-        return true;
-      }
-
-      if (!file?.attributes) {
-        return false;
-      }
-
-      const placeholderPath = this.getPlaceholderImagePath();
-      if (!placeholderPath) {
-        return false;
-      }
-
-      const candidates = [
-        this.normalizeDrupalAssetPath(file.attributes.uri?.value),
-        this.normalizeDrupalAssetPath(file.attributes.uri?.url),
-      ];
-
-      return candidates.some((value) => value === placeholderPath);
-    },
     handleImageClick() {
       if (this.showComingSoonOverlay) {
         return;
@@ -319,10 +275,10 @@ export default defineComponent({
       }
 
       try {
-        const url = this.apiUrl + `file/file/` + this.brick.brickImage + `?fields[file--file]=uri,url,image_style_uri`;
+        const url = this.apiUrl + `file/file/` + this.brick.brickImage + `?fields[file--file]=uri,url,image_style_uri,changed`;
         const response = await axios.get<MediaImageApiResponse>(url);
         const file = response?.data?.data;
-        if (this.isDefaultDrupalImage(this.brick.brickImage, file)) {
+        if (isDefaultDrupalImage(this.brick.brickImage, file)) {
           this.hasMissingImage = true;
           const fallback = this.fallbackImgUrl;
           this.thumbnailUrl = fallback;
@@ -332,12 +288,13 @@ export default defineComponent({
         }
 
         const imageData = response?.data?.data?.attributes?.image_style_uri;
-        const previewUrl = this.resolveAssetUrl(
+        const changed = response?.data?.data?.attributes?.changed;
+        const previewUrl = withCacheBuster(this.resolveAssetUrl(
           imageData?.brick_preview ?? imageData?.brick ?? response?.data?.data?.attributes?.uri?.url
-        );
-        const fullUrl = this.resolveAssetUrl(
+        ), changed);
+        const fullUrl = withCacheBuster(this.resolveAssetUrl(
           imageData?.brick_large ?? response?.data?.data?.attributes?.uri?.url
-        );
+        ), changed);
 
         if (previewUrl && fullUrl) {
           this.thumbnailUrl = previewUrl;
@@ -373,7 +330,7 @@ export default defineComponent({
           `?include=field_brick_zone_image,field_brick_zone_image.field_media_image` +
           `&fields[parkLocation]=name,field_brick_zone_image` +
           `&fields[media--image]=field_media_image` +
-          `&fields[file--file]=uri,url,image_style_uri`;
+          `&fields[file--file]=uri,url,image_style_uri,changed`;
         const response = await axios.get<ParkLocationApiResponse>(url);
         this.parkLocation = response?.data?.data?.attributes?.name || "";
 
@@ -387,11 +344,11 @@ export default defineComponent({
           ? included.find((item) => item.type === 'file--file' && item.id === fileId)
           : undefined;
 
-        this.parkLocationImgURL = this.resolveAssetUrl(
+        this.parkLocationImgURL = withCacheBuster(this.resolveAssetUrl(
           file?.attributes?.image_style_uri?.full_im ??
           file?.attributes?.image_style_uri?.brick_large ??
           file?.attributes?.uri?.url
-        );
+        ), file?.attributes?.changed);
       } catch {
         this.parkLocation = "";
         this.parkLocationImgURL = "";
@@ -415,6 +372,55 @@ export default defineComponent({
 <style scoped>
 .brick__map-caption {
   caption-side: bottom;
+}
+/* The map is the only content of the table's anonymous cell. Left inline it
+   sits on the text baseline, which reserves descender space and shows up as a
+   ~4px dark strip between the map and the caption below it. */
+.brick__map-image {
+  display: block;
+}
+/* Short landscape screens (phones/tablets turned sideways, short wide windows):
+   lay the location modal out side-by-side — map left, caption right — instead of
+   stacking the caption underneath, so the map isn't squeezed into what little
+   height is left. Same breakpoints as the Location Explorer's landscape sidebar
+   (ITCMS-7734 #519550). Desktop and portrait keep the stacked
+   table/table-caption layout above. */
+@media screen and (max-height: 600px) and (orientation: landscape),
+       screen and (max-height: 700px) and (min-aspect-ratio: 1/1) {
+  .brick__map-wrapper {
+    --brick-map-height: 90vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+  }
+  .brick__map-image {
+    max-height: var(--brick-map-height);
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    min-width: 0;
+  }
+  .brick__map-caption {
+    display: block;
+    /* Narrow phones keep the slimmer column — see the md override below. */
+    flex: 0 0 200px;
+    align-self: stretch;
+    max-height: var(--brick-map-height);
+    overflow-y: auto;
+  }
+}
+/* The modal shell is max-h-[90vh] but a fixed h-[80vh] from md up, so the
+   side-by-side layout has that much room to work with. */
+@media screen and (min-width: 768px) {
+  .brick__map-wrapper {
+    --brick-map-height: 80vh;
+  }
+  /* Roomier caption for long location names and inscriptions. Held back below
+     768px, where the extra width would leave the caption wider than the map. */
+  .brick__map-caption {
+    flex-basis: 275px;
+  }
 }
 .fade-enter-active,
 .fade-leave-active {

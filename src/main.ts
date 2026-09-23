@@ -3,7 +3,7 @@ import App from './App.vue'
 import "./index.css";
 import { defaultEnvKey, defaultUrlKey, searchstaxEndpointKey, searchstaxTokenKey } from './types/index'
 
-// Read the Drupal JSON:API endpoint from .env (e.g. https://babsondev.prod.acquia-sites.com/jsonapi/)
+// Read the Drupal JSON:API endpoint from .env (e.g. https://dev.contentfiles.babson.edu/jsonapi/)
 // Falls back to the production contentfiles endpoint if the env var is not set.
 const drupalEndpoint = (import.meta.env.DEV_DRUPAL_ENDPOINT ?? '').trim() || 'https://contentfiles.babson.edu/jsonapi/'
 
