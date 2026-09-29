@@ -4,28 +4,25 @@ async function waitForBricks(page: Page) {
   await page.waitForSelector('.brick-card', { timeout: 15000 })
 }
 
-async function openExplorerDesktop(page: Page) {
-  // The hero trigger is visible on md+ viewports
-  const trigger = page.locator('.tw-hidden.md\\:tw-block').filter({ hasText: 'View Map of Brick Locations' })
-  await trigger.click()
-  await page.locator('[aria-label="Close location explorer"]').waitFor()
-}
-
-async function openExplorerMobile(page: Page) {
-  // The floating trigger is visible on mobile (<md)
-  const trigger = page.locator('button.tw-fixed', { hasText: 'View Map of Brick Locations' })
-  await trigger.click()
+// AppHero renders two triggers: the hero one (lg+) and a floating one below lg.
+// Only one is displayed at a time, and getByRole skips the hidden one.
+async function openExplorer(page: Page) {
+  await page.getByRole('button', { name: 'View Brick Locations', exact: true }).click()
   await page.locator('[aria-label="Close location explorer"]').waitFor()
 }
 
 test.describe('Location Explorer — Desktop', () => {
+  // Pin a desktop size so the mobile projects (Pixel 5, iPhone 12) don't run
+  // these at phone width, where the list sits full-width below the map.
+  test.use({ viewport: { width: 1280, height: 800 } })
+
   test.beforeEach(async ({ page }) => {
     await page.goto('/')
     await waitForBricks(page)
   })
 
   test('opens the overlay from the hero trigger', async ({ page }) => {
-    await openExplorerDesktop(page)
+    await openExplorer(page)
 
     const nav = page.locator('nav[aria-label="Park locations"]')
     await expect(nav).toBeVisible()
@@ -35,7 +32,7 @@ test.describe('Location Explorer — Desktop', () => {
   })
 
   test('lists multiple locations in the sidebar', async ({ page }) => {
-    await openExplorerDesktop(page)
+    await openExplorer(page)
 
     const items = page.locator('nav[aria-label="Park locations"] li')
     await expect(items.first()).toBeVisible()
@@ -44,15 +41,15 @@ test.describe('Location Explorer — Desktop', () => {
   })
 
   test('selects the first location by default', async ({ page }) => {
-    await openExplorerDesktop(page)
+    await openExplorer(page)
 
     const firstItem = page.locator('nav[aria-label="Park locations"] li').first()
+    await expect(firstItem).toHaveAttribute('aria-selected', 'true')
     await expect(firstItem).toHaveClass(/tw-font-medium/)
-    await expect(firstItem).toHaveClass(/tw-underline/)
   })
 
   test('clicking a location updates the map image', async ({ page }) => {
-    await openExplorerDesktop(page)
+    await openExplorer(page)
 
     const items = page.locator('nav[aria-label="Park locations"] li')
     const firstItem = items.first()
@@ -75,7 +72,7 @@ test.describe('Location Explorer — Desktop', () => {
   })
 
   test('renders only one map image at a time', async ({ page }) => {
-    await openExplorerDesktop(page)
+    await openExplorer(page)
 
     const images = page.locator('img[alt^="Map of"]')
     await expect(images).toHaveCount(1)
@@ -89,7 +86,7 @@ test.describe('Location Explorer — Desktop', () => {
   })
 
   test('closes the overlay via the × button', async ({ page }) => {
-    await openExplorerDesktop(page)
+    await openExplorer(page)
 
     const closeButton = page.locator('[aria-label="Close location explorer"]')
     await closeButton.click()
@@ -98,7 +95,7 @@ test.describe('Location Explorer — Desktop', () => {
   })
 
   test('closes the overlay via Escape key', async ({ page }) => {
-    await openExplorerDesktop(page)
+    await openExplorer(page)
 
     await page.keyboard.press('Escape')
 
@@ -106,7 +103,7 @@ test.describe('Location Explorer — Desktop', () => {
   })
 
   test('closes the overlay via backdrop click', async ({ page }) => {
-    await openExplorerDesktop(page)
+    await openExplorer(page)
 
     // Click in the top-left corner of the backdrop, which is outside the content
     const backdrop = page.locator('.tw-bg-black\\/\\[0\\.87\\]')
@@ -118,8 +115,8 @@ test.describe('Location Explorer — Desktop', () => {
     await expect(page.locator('nav[aria-label="Park locations"]')).toHaveCount(0)
   })
 
-  test('desktop layout shows sidebar on left and map on right', async ({ page }) => {
-    await openExplorerDesktop(page)
+  test('desktop layout overlays the location list on the left of the map', async ({ page }) => {
+    await openExplorer(page)
 
     const nav = page.locator('nav[aria-label="Park locations"]')
     const mapImage = page.locator('img[alt^="Map of"]')
@@ -129,12 +126,13 @@ test.describe('Location Explorer — Desktop', () => {
 
     expect(navBox).toBeTruthy()
     expect(mapBox).toBeTruthy()
-    // Sidebar should be to the left of the map
-    expect(navBox!.x).toBeLessThan(mapBox!.x)
+    // The list sits over the map's left side rather than beside it
+    expect(navBox!.x).toBeGreaterThanOrEqual(mapBox!.x - 1)
+    expect(navBox!.x + navBox!.width).toBeLessThan(mapBox!.x + mapBox!.width / 2)
   })
 
   test('re-opening resets to the first location', async ({ page }) => {
-    await openExplorerDesktop(page)
+    await openExplorer(page)
 
     // Select the second location
     const secondItem = page.locator('nav[aria-label="Park locations"] li').nth(1)
@@ -146,7 +144,7 @@ test.describe('Location Explorer — Desktop', () => {
     await expect(page.locator('nav[aria-label="Park locations"]')).toHaveCount(0)
 
     // Re-open
-    await openExplorerDesktop(page)
+    await openExplorer(page)
 
     // First location should be selected again
     const firstItem = page.locator('nav[aria-label="Park locations"] li').first()
@@ -163,14 +161,14 @@ test.describe('Location Explorer — Mobile', () => {
   })
 
   test('opens the overlay from the floating trigger', async ({ page }) => {
-    await openExplorerMobile(page)
+    await openExplorer(page)
 
     const nav = page.locator('nav[aria-label="Park locations"]')
     await expect(nav).toBeVisible()
   })
 
   test('mobile layout shows map above the location list', async ({ page }) => {
-    await openExplorerMobile(page)
+    await openExplorer(page)
 
     const mapImage = page.locator('img[alt^="Map of"]')
     const nav = page.locator('nav[aria-label="Park locations"]')
@@ -188,22 +186,22 @@ test.describe('Location Explorer — Mobile', () => {
   })
 
   test('location list items are centered', async ({ page }) => {
-    await openExplorerMobile(page)
+    await openExplorer(page)
 
     const firstItem = page.locator('nav[aria-label="Park locations"] li').first()
     await expect(firstItem).toHaveCSS('text-align', 'center')
   })
 
-  test('selected location uses medium weight with underline', async ({ page }) => {
-    await openExplorerMobile(page)
+  test('selected location is marked selected and uses medium weight', async ({ page }) => {
+    await openExplorer(page)
 
     const firstItem = page.locator('nav[aria-label="Park locations"] li').first()
+    await expect(firstItem).toHaveAttribute('aria-selected', 'true')
     await expect(firstItem).toHaveClass(/tw-font-medium/)
-    await expect(firstItem).toHaveClass(/tw-underline/)
   })
 
   test('closes the overlay on mobile', async ({ page }) => {
-    await openExplorerMobile(page)
+    await openExplorer(page)
 
     const closeButton = page.locator('[aria-label="Close location explorer"]')
     await closeButton.click()

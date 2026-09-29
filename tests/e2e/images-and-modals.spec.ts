@@ -1,4 +1,32 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Locator, type Page } from '@playwright/test';
+
+// Placeholder ("Image Coming Soon") cards don't open a modal, so use a card that
+// has a real photo.
+function cardWithPhoto(page: Page, index = 0): Locator {
+  return page
+    .locator('.brick-card')
+    .filter({ has: page.locator('[role="button"][aria-label^="Enlarge brick image"]') })
+    .nth(index);
+}
+
+function imageDialog(page: Page): Locator {
+  return page.getByRole('dialog', { name: /^Brick image:/ });
+}
+
+function mapDialog(page: Page): Locator {
+  return page.getByRole('dialog', { name: /^Location map:/ });
+}
+
+function closeButton(page: Page): Locator {
+  return page.getByRole('button', { name: 'Close modal', exact: true });
+}
+
+function overlayOpacity(page: Page): Promise<number> {
+  return page
+    .locator('#bricks-modal-root > div')
+    .first()
+    .evaluate((el) => Number(getComputedStyle(el).opacity));
+}
 
 test.describe('Image Display and Modals', () => {
   test.beforeEach(async ({ page }) => {
@@ -7,167 +35,99 @@ test.describe('Image Display and Modals', () => {
   });
 
   test('brick cards display images', async ({ page }) => {
-    // Verify at least one brick card has an image
-    const firstCard = page.locator('.brick-card').first();
-    const image = firstCard.locator('img');
+    const image = page.locator('.brick-card').first().locator('img');
 
     await expect(image).toBeVisible();
     await expect(image).toHaveAttribute('src');
   });
 
   test('clicking image opens modal with larger view', async ({ page }) => {
-    // Click on first brick image
-    const firstCard = page.locator('.brick-card').first();
-    const cardImage = firstCard.locator('img');
+    await cardWithPhoto(page).locator('img').click();
 
-    await cardImage.click();
-
-    // Wait for modal to appear
-    // Modal is teleported to body, so search globally
-    const modal = page.locator('body').getByRole('img').last();
-
-    // Verify modal is visible
-    await expect(modal).toBeVisible();
+    await expect(imageDialog(page)).toBeVisible();
+    await expect(imageDialog(page).getByRole('img')).toBeVisible();
   });
 
   test('modal has close button', async ({ page }) => {
-    // Open modal
-    const firstCard = page.locator('.brick-card').first();
-    const cardImage = firstCard.locator('img');
-    await cardImage.click();
+    await cardWithPhoto(page).locator('img').click();
 
-    // Look for close button (typically shows "X")
-    const closeButton = page.getByRole('button', { name: /x/i });
-    await expect(closeButton).toBeVisible();
+    await expect(closeButton(page)).toBeVisible();
   });
 
   test('clicking close button closes modal', async ({ page }) => {
-    // Open modal
-    const firstCard = page.locator('.brick-card').first();
-    const cardImage = firstCard.locator('img');
-    await cardImage.click();
+    await cardWithPhoto(page).locator('img').click();
+    await expect(imageDialog(page)).toBeVisible();
 
-    // Verify modal is open
-    await page.waitForTimeout(500);
+    await closeButton(page).click();
 
-    // Click close button
-    const closeButton = page.getByRole('button', { name: /x/i }).first();
-    await closeButton.click();
-
-    // Wait for modal to close
-    await page.waitForTimeout(500);
-
-    // Verify modal is no longer in viewport (or has opacity 0)
-    // This might need adjustment based on your fade animation
+    await expect(imageDialog(page)).toHaveCount(0);
   });
 
   test('clicking backdrop closes modal', async ({ page }) => {
-    // Open modal
-    const firstCard = page.locator('.brick-card').first();
-    const cardImage = firstCard.locator('img');
-    await cardImage.click();
+    await cardWithPhoto(page).locator('img').click();
+    await expect(imageDialog(page)).toBeVisible();
 
-    await page.waitForTimeout(500);
+    // The overlay fills the viewport; its top-left corner is outside the dialog.
+    await page.locator('#bricks-modal-root > div').first().click({ position: { x: 10, y: 10 } });
 
-    // Click on backdrop (dark overlay area)
-    // Find an element that's part of the backdrop
-    const backdrop = page.locator('.absolute.inset-0').first();
-    await backdrop.click({ position: { x: 10, y: 10 } });
-
-    // Wait for modal close animation
-    await page.waitForTimeout(600);
-
-    // Modal should be closed (verify by checking if close button is not visible)
-    const closeButton = page.getByRole('button', { name: /x/i });
-    const isVisible = await closeButton.isVisible().catch(() => false);
-    expect(isVisible).toBe(false);
+    await expect(imageDialog(page)).toHaveCount(0);
   });
 
-  test('view on map button opens zone map modal', async ({ page }) => {
-    const firstCard = page.locator('.brick-card').first();
-    const mapButton = firstCard.getByRole('button', { name: /view on map/i });
-
+  test('view location details button opens zone map modal', async ({ page }) => {
+    const mapButton = page
+      .locator('.brick-card')
+      .first()
+      .getByRole('button', { name: /view location details for/i });
     await expect(mapButton).toBeVisible();
 
-    // Click the button
     await mapButton.click();
 
-    // Wait for modal
-    await page.waitForTimeout(500);
-
-    // Verify modal with map image is displayed
-    const modalImages = page.locator('body').getByRole('img');
-    const imageCount = await modalImages.count();
-
-    // Should have at least the map image visible
-    expect(imageCount).toBeGreaterThan(0);
+    await expect(mapDialog(page)).toBeVisible();
+    await expect(mapDialog(page).getByText('Brick Location:')).toBeVisible();
   });
 
   test('can open and close multiple modals sequentially', async ({ page }) => {
-    const firstCard = page.locator('.brick-card').first();
+    const card = cardWithPhoto(page);
 
-    // Open image modal
-    const cardImage = firstCard.locator('img');
-    await cardImage.click();
-    await page.waitForTimeout(500);
+    await card.locator('img').click();
+    await expect(imageDialog(page)).toBeVisible();
+    await closeButton(page).click();
+    await expect(imageDialog(page)).toHaveCount(0);
 
-    // Close it
-    const closeButton = page.getByRole('button', { name: /x/i }).first();
-    await closeButton.click();
-    await page.waitForTimeout(600);
+    await card.getByRole('button', { name: /view location details for/i }).click();
 
-    // Open map modal
-    const mapButton = firstCard.getByRole('button', { name: /view on map/i });
-    await mapButton.click();
-    await page.waitForTimeout(500);
-
-    // Verify map modal is visible
-    const modalImages = page.locator('body').getByRole('img');
-    await expect(modalImages.last()).toBeVisible();
+    await expect(mapDialog(page)).toBeVisible();
   });
 
   test('multiple brick cards can open their own modals', async ({ page }) => {
-    // Get count of cards
-    const cardCount = await page.locator('.brick-card').count();
+    const first = cardWithPhoto(page, 0);
+    const second = cardWithPhoto(page, 1);
+    test.skip((await second.count()) === 0, 'fewer than two bricks with photos on the first page');
 
-    if (cardCount >= 2) {
-      // Open first card's image
-      const firstCard = page.locator('.brick-card').first();
-      await firstCard.locator('img').click();
-      await page.waitForTimeout(500);
+    await first.locator('img').click();
+    await expect(imageDialog(page)).toBeVisible();
+    await closeButton(page).click();
+    await expect(imageDialog(page)).toHaveCount(0);
 
-      // Close it
-      const closeButton = page.getByRole('button', { name: /x/i }).first();
-      await closeButton.click();
-      await page.waitForTimeout(600);
+    const secondInscription = (await second.locator('[role="button"][aria-label^="Enlarge brick image"]')
+      .getAttribute('aria-label'))!.replace(/^Enlarge brick image:\s*/, '');
+    await second.locator('img').click();
 
-      // Open second card's image
-      const secondCard = page.locator('.brick-card').nth(1);
-      await secondCard.locator('img').click();
-      await page.waitForTimeout(500);
-
-      // Verify modal is open
-      const modalImage = page.locator('body').getByRole('img').last();
-      await expect(modalImage).toBeVisible();
-    }
+    await expect(page.getByRole('dialog', { name: `Brick image: ${secondInscription}` })).toBeVisible();
   });
 
-  test('modal fade animation works', async ({ page }) => {
-    const firstCard = page.locator('.brick-card').first();
-    const cardImage = firstCard.locator('img');
+  test('modal fades in and out', async ({ page }) => {
+    await cardWithPhoto(page).locator('img').click();
 
-    // Get initial state
-    await cardImage.click();
+    // Partly transparent while the 0.5s transition runs, then fully opaque.
+    await expect.poll(() => overlayOpacity(page), { intervals: [20] }).toBeLessThan(1);
+    await expect.poll(() => overlayOpacity(page)).toBe(1);
 
-    // Modal should fade in (give time for animation)
-    await page.waitForTimeout(600);
+    await closeButton(page).click();
 
-    // Close modal
-    const closeButton = page.getByRole('button', { name: /x/i }).first();
-    await closeButton.click();
-
-    // Modal should fade out
-    await page.waitForTimeout(600);
+    // Still in the DOM, fading, before it's removed.
+    await expect.poll(() => overlayOpacity(page), { intervals: [20] }).toBeLessThan(1);
+    await expect(imageDialog(page)).toHaveCount(0);
   });
 });
 

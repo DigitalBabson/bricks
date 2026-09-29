@@ -1,44 +1,42 @@
 <template>
-  <teleport to="#bricks-modal-root">
+  <div
+    class="
+      tw-fixed tw-inset-0 tw-z-[90]
+      tw-flex tw-items-center tw-justify-center
+      tw-bg-black/[0.87]
+    "
+    @click.self="$emit('close')"
+  >
     <div
+      ref="dialogContainer"
+      role="dialog"
+      aria-modal="true"
+      :aria-label="label"
       class="
-        tw-fixed tw-inset-0 tw-z-[90]
-        tw-flex tw-items-center tw-justify-center
-        tw-bg-black/[0.87]
+        tw-relative tw-flex tw-w-[90vw] tw-max-h-[90vh] tw-flex-col
+        tw-items-center tw-justify-center tw-shadow-xl
+        md:tw-h-[80vh] md:tw-max-w-[1100px]
       "
-      @click.self="$emit('close')"
     >
-      <div
-        ref="dialogContainer"
-        role="dialog"
-        aria-modal="true"
-        :aria-label="label"
+      <button
+        ref="closeButton"
         class="
-          tw-relative tw-flex tw-w-[90vw] tw-max-h-[90vh] tw-flex-col
-          tw-items-center tw-justify-center tw-shadow-xl
-          md:tw-h-[80vh] md:tw-max-w-[1100px]
+          tw-fixed tw-top-2 tw-right-2 tw-z-[95]
+          tw-flex tw-h-[56px] tw-w-[56px] tw-items-center tw-justify-center
+          tw-rounded tw-text-white
+          min-[1250px]:tw-absolute min-[1250px]:tw-top-[-66px] min-[1250px]:tw-right-[-66px]
+          hover:tw-opacity-70 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white
         "
+        aria-label="Close modal"
+        @click="$emit('close')"
       >
-        <button
-          ref="closeButton"
-          class="
-            tw-fixed tw-top-2 tw-right-2 tw-z-[95]
-            tw-flex tw-h-[56px] tw-w-[56px] tw-items-center tw-justify-center
-            tw-rounded tw-text-white
-            min-[1250px]:tw-absolute min-[1250px]:tw-top-[-66px] min-[1250px]:tw-right-[-66px]
-            hover:tw-opacity-70 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white
-          "
-          aria-label="Close modal"
-          @click="$emit('close')"
-        >
-          <i class="fa-solid fa-xmark tw-text-4xl"></i>
-        </button>
-        <div class="tw-flex tw-max-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-hidden">
-          <slot />
-        </div>
+        <i class="fa-solid fa-xmark tw-text-4xl"></i>
+      </button>
+      <div class="tw-flex tw-max-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-hidden">
+        <slot />
       </div>
     </div>
-  </teleport>
+  </div>
 </template>
 
 <script lang="ts">

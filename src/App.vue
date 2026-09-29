@@ -2,7 +2,10 @@
 <div class="tw-flex tw-min-h-screen tw-w-full tw-flex-col">
   <app-header v-if="isDev" />
   <main class="tw-flex-1">
-    <app-hero @openLocations="showLocationExplorer = true">
+    <app-hero
+      @openLocations="showLocationExplorer = true"
+      @prefetchLocations="prefetchLocationMap"
+    >
       <brick-filter
         v-model:inscription="inscription"
         v-model:locationIds="locationIds"
@@ -19,11 +22,15 @@
     </div>
   </main>
   <app-footer v-if="isDev" />
-  <location-explorer
-    v-if="showLocationExplorer"
-    :locations="locations"
-    @close="showLocationExplorer = false"
-  />
+  <teleport to="#bricks-modal-root">
+    <transition name="fade">
+      <location-explorer
+        v-if="showLocationExplorer"
+        :locations="locations"
+        @close="showLocationExplorer = false"
+      />
+    </transition>
+  </teleport>
 </div>
 </template>
 
@@ -39,6 +46,7 @@ import LocationExplorer from './components/LocationExplorer.vue'
 import { defaultEnvKey, defaultUrlKey } from './types/index'
 import type { ParkLocation, ParkLocationsApiResponse } from './types/index'
 import { withCacheBuster } from './utils/cacheBuster'
+import { preloadImage } from './utils/preloadImage'
 
 export default defineComponent({
   components: {
@@ -71,6 +79,10 @@ export default defineComponent({
     },
   },
   methods: {
+    // The explorer opens on the first location, so that's the map to warm.
+    prefetchLocationMap() {
+      preloadImage(this.locations[0]?.mapImageUrl)
+    },
     resolveAssetUrl(url?: string): string {
       if (!url) {
         return ''
@@ -122,10 +134,12 @@ export default defineComponent({
           const file = fileId
             ? included.find((item) => item.id === fileId && item.type === 'file--file')
             : undefined
+          // Serve the original upload: full_im keeps the same dimensions but
+          // re-saves the palette PNG as RGBA at ~2.5x the size, and brick_large
+          // crops the square map to 1500x1000.
           const imagePath =
-            file?.attributes?.image_style_uri?.full_im ??
-            file?.attributes?.image_style_uri?.brick_large ??
             file?.attributes?.uri?.url ??
+            file?.attributes?.image_style_uri?.full_im ??
             ''
 
           return {
@@ -158,3 +172,26 @@ export default defineComponent({
   },
 })
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-leave-active {
+  pointer-events: none;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: none;
+  }
+}
+</style>

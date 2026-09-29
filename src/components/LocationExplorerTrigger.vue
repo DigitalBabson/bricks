@@ -8,6 +8,9 @@
       tw-transition-colors tw-duration-200
     "
     :class="buttonClasses"
+    @pointerenter="$emit('prefetchLocations')"
+    @pointerdown="$emit('prefetchLocations')"
+    @focus="$emit('prefetchLocations')"
     @click="$emit('openLocations')"
   >
     View Brick Locations
@@ -30,7 +33,7 @@ export default defineComponent({
   props: {
     floating: { type: Boolean, default: false },
   },
-  emits: ['openLocations'],
+  emits: ['openLocations', 'prefetchLocations'],
   setup(props) {
     const buttonClasses = computed(() =>
       props.floating

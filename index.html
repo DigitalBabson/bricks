@@ -9,7 +9,13 @@
     <meta property="og:title" content="Bricks">
     <meta property="og:url" content="https://babson.edu/alumni/about-us/visiting-campus/find-my-brick/">
     <meta property="og:description" content="">
-    <title>Vite App</title>
+    <title>Find My Brick</title>
+    <!-- DEV MOCK: the T4 page sets these globally. Without them, padded full-width
+         elements overflow narrow viewports here but not on the real page. -->
+    <style>
+      *, *::before, *::after { box-sizing: border-box; }
+      body { margin: 0; }
+    </style>
   </head>
   <body class="tw-relative tw-w-full tw-h-screen">
     <!-- DEV MOCK: In production, T4 renders these via navigation/content layouts -->

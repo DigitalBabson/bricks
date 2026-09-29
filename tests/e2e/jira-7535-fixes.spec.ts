@@ -157,8 +157,9 @@ test.describe('Issue #9 – Brick grid container has no focus outline', () => {
 
   test('brick grid container has no box-shadow ring after selecting a new page', async ({ page }) => {
     // Repro the reported path: keyboard-driven page change → goToPage → grid.focus()
-    const altPage = page.locator('.bricks__pagination button', { hasText: /^\d+$/ })
-      .filter({ hasNot: page.locator('.page-active') })
+    // `hasNot` only looks at descendants, so it can't exclude the current page's
+    // own button. Filter on the button itself instead.
+    const altPage = page.locator('.bricks__pagination button:not([aria-current="page"])', { hasText: /^\d+$/ })
       .first()
     const hasPagination = await altPage.count()
     test.skip(hasPagination === 0, 'single page of results — no alternate page button to click')

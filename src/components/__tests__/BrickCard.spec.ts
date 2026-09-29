@@ -5,9 +5,12 @@ import BrickCard from '../BrickCard.vue'
 import UiModal from '../UiModal.vue'
 import type { Brick } from '../../types/index'
 import { defaultEnvKey, defaultUrlKey } from '../../types/index'
+import { preloadImage } from '../../utils/preloadImage'
 
 vi.mock('axios')
 const mockedAxios = vi.mocked(axios, true)
+
+vi.mock('../../utils/preloadImage', () => ({ preloadImage: vi.fn() }))
 
 function mockParkLocationResponse() {
   return {
@@ -31,7 +34,10 @@ function mockParkLocationResponse() {
           id: 'file-1',
           attributes: {
             uri: { url: '/sites/default/files/map.jpg' },
-            image_style_uri: { brick_large: 'https://example.com/map-large.jpg' },
+            image_style_uri: {
+              full_im: 'https://example.com/styles/full_im/map.jpg?itok=a',
+              brick_large: 'https://example.com/styles/brick_large/map.jpg?itok=b',
+            },
           },
         },
       ],
@@ -174,7 +180,7 @@ describe('BrickCard', () => {
         '&fields[file--file]=uri,url,image_style_uri,changed'
       )
       expect(getBrickCardVm(wrapper).parkLocation).toBe('Zone 1')
-      expect(getBrickCardVm(wrapper).parkLocationImgURL).toBe('https://example.com/map-large.jpg')
+      expect(getBrickCardVm(wrapper).parkLocationImgURL).toBe('https://example.com/sites/default/files/map.jpg')
     })
 
     it('keeps the location button keyboard reachable', async () => {
@@ -246,6 +252,25 @@ describe('BrickCard', () => {
 
       expect(getBrickCardVm(wrapper).showImg).toBe(true)
       expect(getBrickCardVm(wrapper).showMap).toBe(false)
+    })
+
+    it.each(['pointerenter', 'pointerdown', 'focus'])('preloads the map on %s of the location button', async (event) => {
+      await getLocationButton(wrapper).trigger(event)
+
+      expect(preloadImage).toHaveBeenCalledWith('https://example.com/map-zone-2.jpg')
+      expect(getBrickCardVm(wrapper).showMap).toBe(false)
+    })
+
+    it('fades the map image in once it loads', async () => {
+      await getLocationButton(wrapper).trigger('click')
+      const mapImg = wrapper.find('img[src="https://example.com/map-zone-2.jpg"]')
+
+      expect(mapImg.classes()).toContain('bricks-img-fade')
+      expect(mapImg.classes()).not.toContain('is-loaded')
+
+      await mapImg.trigger('load')
+
+      expect(mapImg.classes()).toContain('is-loaded')
     })
 
     it('opens the map modal from the location button without fetching again', async () => {
