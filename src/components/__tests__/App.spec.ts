@@ -31,8 +31,8 @@ const locationsResponse = {
     included: [
       { type: 'media--image', id: 'media-1', attributes: {}, relationships: { field_media_image: { data: { type: 'file--file', id: 'file-1' } } } },
       { type: 'media--image', id: 'media-2', attributes: {}, relationships: { field_media_image: { data: { type: 'file--file', id: 'file-2' } } } },
-      { type: 'file--file', id: 'file-1', attributes: { uri: { url: '/sites/default/files/map1.png' }, image_style_uri: { brick_large: 'https://example.com/styles/map1-large.png' } } },
-      { type: 'file--file', id: 'file-2', attributes: { uri: { url: '/sites/default/files/map2.png' }, image_style_uri: { brick_large: 'https://example.com/styles/map2-large.png' } } },
+      { type: 'file--file', id: 'file-1', attributes: { uri: { url: '/sites/default/files/map1.png' }, image_style_uri: { full_im: 'https://example.com/styles/full_im/map1.png?itok=a', brick_large: 'https://example.com/styles/brick_large/map1.png?itok=b' } } },
+      { type: 'file--file', id: 'file-2', attributes: { uri: { url: '/sites/default/files/map2.png' }, image_style_uri: { full_im: 'https://example.com/styles/full_im/map2.png?itok=c', brick_large: 'https://example.com/styles/brick_large/map2.png?itok=d' } } },
     ],
   },
 }
@@ -78,8 +78,27 @@ describe('App', () => {
 
     const vm = wrapper.vm as unknown as { locations: Array<{ id: string; name: string; mapImageUrl: string }> }
     expect(vm.locations).toEqual([
-      { id: 'loc-1', name: 'Class Walk of 2019', mapImageUrl: 'https://example.com/styles/map1-large.png' },
-      { id: 'loc-2', name: 'Rodger Babson Statue', mapImageUrl: 'https://example.com/styles/map2-large.png' },
+      { id: 'loc-1', name: 'Class Walk of 2019', mapImageUrl: 'https://example.com/sites/default/files/map1.png' },
+      { id: 'loc-2', name: 'Rodger Babson Statue', mapImageUrl: 'https://example.com/sites/default/files/map2.png' },
+    ])
+  })
+
+  it('falls back to full_im, never the cropped brick_large, when the original path is missing', async () => {
+    const response = structuredClone(locationsResponse)
+    for (const item of response.data.included) {
+      if (item.type === 'file--file') {
+        (item.attributes as { uri?: unknown }).uri = undefined
+      }
+    }
+    mockedAxios.get.mockResolvedValueOnce(response)
+
+    const wrapper = mountApp()
+    await flushPromises()
+
+    const vm = wrapper.vm as unknown as { locations: Array<{ mapImageUrl: string }> }
+    expect(vm.locations.map((location) => location.mapImageUrl)).toEqual([
+      'https://example.com/styles/full_im/map1.png?itok=a',
+      'https://example.com/styles/full_im/map2.png?itok=c',
     ])
   })
 
@@ -89,7 +108,7 @@ describe('App', () => {
 
     wrapper.findComponent({ name: 'AppHero' }).vm.$emit('prefetchLocations')
 
-    expect(preloadImage).toHaveBeenCalledWith('https://example.com/styles/map1-large.png')
+    expect(preloadImage).toHaveBeenCalledWith('https://example.com/sites/default/files/map1.png')
   })
 
   it('resets inscription and locationIds with clearAllFilters', async () => {

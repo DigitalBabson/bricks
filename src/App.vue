@@ -134,10 +134,12 @@ export default defineComponent({
           const file = fileId
             ? included.find((item) => item.id === fileId && item.type === 'file--file')
             : undefined
+          // Serve the original upload: full_im keeps the same dimensions but
+          // re-saves the palette PNG as RGBA at ~2.5x the size, and brick_large
+          // crops the square map to 1500x1000.
           const imagePath =
-            file?.attributes?.image_style_uri?.full_im ??
-            file?.attributes?.image_style_uri?.brick_large ??
             file?.attributes?.uri?.url ??
+            file?.attributes?.image_style_uri?.full_im ??
             ''
 
           return {

@@ -360,10 +360,10 @@ export default defineComponent({
           ? included.find((item) => item.type === 'file--file' && item.id === fileId)
           : undefined;
 
+        // Original upload, as in App.vue's fetchLocations.
         this.parkLocationImgURL = withCacheBuster(this.resolveAssetUrl(
-          file?.attributes?.image_style_uri?.full_im ??
-          file?.attributes?.image_style_uri?.brick_large ??
-          file?.attributes?.uri?.url
+          file?.attributes?.uri?.url ??
+          file?.attributes?.image_style_uri?.full_im
         ), file?.attributes?.changed);
       } catch {
         this.parkLocation = "";
