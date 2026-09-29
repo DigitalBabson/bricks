@@ -14,6 +14,7 @@ dist-ssr
 
 # Local tooling artifacts
 .playwright-mcp/
+.codex/
 *.original.md
 
 # Testing
