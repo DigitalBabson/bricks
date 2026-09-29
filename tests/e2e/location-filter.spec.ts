@@ -75,7 +75,7 @@ test.describe('Location Filter', () => {
   })
 
   test('resets pagination to page 1 when a location is selected', async ({ page }) => {
-    const pageTwoButton = page.getByRole('button', { name: '2', exact: true })
+    const pageTwoButton = page.getByRole('button', { name: 'Page 2', exact: true })
     await Promise.all([
       waitForBrickResponse(page),
       pageTwoButton.click(),
@@ -149,7 +149,7 @@ test.describe('Location Filter', () => {
       firstOption.click(),
     ])
 
-    const filteredPageTwo = page.getByRole('button', { name: '2', exact: true })
+    const filteredPageTwo = page.getByRole('button', { name: 'Page 2', exact: true })
     test.skip(!(await filteredPageTwo.isVisible()), 'Selected location has only one page in current dev data')
 
     await Promise.all([

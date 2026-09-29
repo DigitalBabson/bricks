@@ -78,8 +78,8 @@ test.describe('Brick Search Functionality', () => {
     await waitForBrowseRequest(page)
 
     await expect(searchInput).toHaveValue('')
-    const resetCards = await page.locator('.brick-card').count()
-    expect(resetCards).toBe(initialCards)
+    // The response lands before the cards re-render, so wait for the count
+    await expect(page.locator('.brick-card')).toHaveCount(initialCards)
   })
 
   test('search is case-insensitive', async ({ page }) => {
@@ -123,7 +123,6 @@ test.describe('Brick Search Functionality', () => {
     await searchInput.clear()
     await waitForBrowseRequest(page)
 
-    const finalCount = await page.locator('.brick-card').count()
-    expect(finalCount).toBe(initialCount)
+    await expect(page.locator('.brick-card')).toHaveCount(initialCount)
   })
 })

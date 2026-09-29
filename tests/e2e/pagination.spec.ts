@@ -7,7 +7,20 @@ test.describe('Sorting and Pagination', () => {
   });
 
   test('bricks load in alphabetical order', async ({ page }) => {
-    // Extract inscriptions from image alt attributes (inscription is only in alt and modal)
+    // Drupal sorts on field_sort_alpha, a separate sort key, so "A.J. BOYAJIAN"
+    // lands between "A. FIRAT" and "A. JAY" in a way no rule on the inscription
+    // alone reproduces. Check that the app asks for that sort and renders the
+    // bricks in the order Drupal returns them.
+    const bricksResponse = page.waitForResponse(
+      (resp) => resp.url().includes('/jsonapi/bricks?') && resp.url().includes('sort=field_sort_alpha') && resp.ok()
+    );
+    await page.goto('/');
+    const body = await (await bricksResponse).json();
+    const expected: string[] = body.data.map(
+      (brick: { attributes: { field_brick_inscription: string } }) => brick.attributes.field_brick_inscription
+    );
+    await page.waitForSelector('.brick-card', { timeout: 15000 });
+
     const inscriptions = await page.locator('.brick-card img').evaluateAll(imgs =>
       imgs
         .map(img => img.getAttribute('alt') ?? '')
@@ -15,12 +28,7 @@ test.describe('Sorting and Pagination', () => {
     );
 
     expect(inscriptions.length).toBeGreaterThan(1);
-
-    // Verify the list is sorted A–Z (case-insensitive to match DB collation)
-    const sorted = [...inscriptions].sort((a, b) =>
-      a.localeCompare(b, undefined, { sensitivity: 'base' })
-    );
-    expect(inscriptions).toEqual(sorted);
+    expect(inscriptions).toEqual(expected.slice(0, inscriptions.length));
   });
 
   test('pagination control is visible on initial load', async ({ page }) => {
@@ -39,11 +47,11 @@ test.describe('Sorting and Pagination', () => {
   });
 
   test('clicking page 2 loads new bricks and highlights page 2', async ({ page }) => {
-    // Get first brick on page 1
-    const firstBrickPage1 = await page.locator('.brick-card').first().textContent();
+    // Cards show the inscription only in the image alt text
+    const firstBrickPage1 = await page.locator('.brick-card img').first().getAttribute('alt');
 
     // Click page 2
-    const page2Button = page.locator('nav[aria-label="Page navigation"] button', { hasText: '2' });
+    const page2Button = page.getByRole('button', { name: 'Page 2', exact: true });
     await page2Button.click();
 
     // Wait for new data to load
@@ -59,8 +67,7 @@ test.describe('Sorting and Pagination', () => {
     await expect(prevButton).toBeEnabled();
 
     // Bricks should be different from page 1
-    const firstBrickPage2 = await page.locator('.brick-card').first().textContent();
-    expect(firstBrickPage2).not.toEqual(firstBrickPage1);
+    await expect(page.locator('.brick-card img').first()).not.toHaveAttribute('alt', firstBrickPage1!);
   });
 
   test('next arrow advances to next page', async ({ page }) => {

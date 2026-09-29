@@ -76,10 +76,8 @@ const parkLocationsResponse = {
       type: 'file--file',
       id: 'file-zone-1',
       attributes: {
-        uri: { url: '/sites/default/files/map-zone-1.svg' },
-        image_style_uri: {
-          brick_large: mapImageUrl,
-        },
+        // Maps are served from the original upload (uri.url), not an image style.
+        uri: { url: mapImageUrl },
       },
     },
   ],

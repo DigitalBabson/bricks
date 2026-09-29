@@ -6,7 +6,7 @@ test.describe('Navigation and Layout', () => {
   });
 
   test('page loads successfully', async ({ page }) => {
-    await expect(page).toHaveTitle(/Bricks/i);
+    await expect(page).toHaveTitle(/Find My Brick/i);
   });
 
   test('displays Babson header', async ({ page }) => {
@@ -34,8 +34,8 @@ test.describe('Navigation and Layout', () => {
     const image = firstCard.locator('img');
     await expect(image).toBeVisible();
 
-    // Each card should have "View on map" button
-    const button = firstCard.getByRole('button', { name: /view on map/i });
+    // Each card should have a "View location details" button
+    const button = firstCard.getByRole('button', { name: /view location details for/i });
     await expect(button).toBeVisible();
   });
 
@@ -108,7 +108,7 @@ test.describe('Navigation and Layout', () => {
     await expect(searchInput).toHaveValue('John Doe');
 
     // Clear with keyboard
-    await page.keyboard.press('Control+A');
+    await page.keyboard.press('ControlOrMeta+A');
     await page.keyboard.press('Backspace');
     await expect(searchInput).toHaveValue('');
   });
@@ -142,11 +142,9 @@ test.describe('Navigation and Layout', () => {
     // This test checks what happens if there's no data
     // Either cards are shown or a message is displayed
 
-    const hasCards = await page.locator('.brick-card').count() > 0;
-    const hasMessage = await page.getByText(/no bricks/i).isVisible().catch(() => false);
-
-    // Either should be true
-    expect(hasCards || hasMessage).toBe(true);
+    // Wait for the first response to render one or the other
+    const cardOrMessage = page.locator('.brick-card').or(page.getByText(/no bricks/i));
+    await expect(cardOrMessage.first()).toBeVisible({ timeout: 15000 });
   });
 });
 
