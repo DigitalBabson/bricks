@@ -59,3 +59,20 @@ body { font-size: 1.6rem; } /* 16px */
   margin-top: 0 !important;
   margin-bottom: 0 !important;
 }
+
+/* v-fade-in-on-load (src/directives/fadeInOnLoad.ts): map images fade in once
+   loaded rather than popping in over an already-open modal. */
+.bricks-img-fade {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.bricks-img-fade.is-loaded {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bricks-img-fade {
+    transition: none;
+  }
+}

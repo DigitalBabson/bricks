@@ -29,6 +29,7 @@
         tw-right-0
       "
       @openLocations="$emit('openLocations')"
+      @prefetchLocations="$emit('prefetchLocations')"
     />
 
     <!-- Floating (tablet/mobile) trigger: rendered here too so it tabs immediately after
@@ -37,6 +38,7 @@
       class="lg:tw-hidden"
       :floating="true"
       @openLocations="$emit('openLocations')"
+      @prefetchLocations="$emit('prefetchLocations')"
     />
 
     <div class="tw-relative tw-mx-auto tw-max-w-brickMWL min-[700px]:-tw-mt-[245px] min-[700px]:tw-px-6">
@@ -56,7 +58,7 @@ export default defineComponent({
   components: {
     LocationExplorerTrigger,
   },
-  emits: ['openLocations'],
+  emits: ['openLocations', 'prefetchLocations'],
   data() {
     return {
       breadcrumbsHtml: '',

@@ -3,9 +3,12 @@ import { flushPromises, mount } from '@vue/test-utils'
 import axios from 'axios'
 import App from '../../App.vue'
 import { defaultEnvKey, defaultUrlKey } from '../../types/index'
+import { preloadImage } from '../../utils/preloadImage'
 
 vi.mock('axios')
 const mockedAxios = vi.mocked(axios, true)
+
+vi.mock('../../utils/preloadImage', () => ({ preloadImage: vi.fn() }))
 
 const locationsResponse = {
   data: {
@@ -43,7 +46,7 @@ function mountApp() {
       },
       stubs: {
         AppHeader: true,
-        AppHero: { template: '<div><slot /></div>' },
+        AppHero: { name: 'AppHero', template: '<div><slot /></div>' },
         BrickFilter: true,
         TheBricks: true,
         LocationExplorerTrigger: true,
@@ -78,6 +81,15 @@ describe('App', () => {
       { id: 'loc-1', name: 'Class Walk of 2019', mapImageUrl: 'https://example.com/styles/map1-large.png' },
       { id: 'loc-2', name: 'Rodger Babson Statue', mapImageUrl: 'https://example.com/styles/map2-large.png' },
     ])
+  })
+
+  it('preloads the first location map when the explorer trigger is about to be used', async () => {
+    const wrapper = mountApp()
+    await flushPromises()
+
+    wrapper.findComponent({ name: 'AppHero' }).vm.$emit('prefetchLocations')
+
+    expect(preloadImage).toHaveBeenCalledWith('https://example.com/styles/map1-large.png')
   })
 
   it('resets inscription and locationIds with clearAllFilters', async () => {

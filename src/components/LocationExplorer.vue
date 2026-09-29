@@ -55,6 +55,7 @@
           <img
             v-if="selectedLocation?.mapImageUrl"
             ref="mapImage"
+            v-fade-in-on-load
             :src="selectedLocation.mapImageUrl"
             :alt="`Map of ${selectedLocation.name}`"
             :class="isShortLandscape
@@ -165,8 +166,12 @@ import { defineComponent } from 'vue'
 import type { PropType } from 'vue'
 import type { ParkLocation } from '../types/index'
 import { lockBodyScroll, unlockBodyScroll } from '../composables/useBodyScrollLock'
+import { fadeInOnLoad } from '../directives/fadeInOnLoad'
 
 export default defineComponent({
+  directives: {
+    fadeInOnLoad,
+  },
   props: {
     locations: {
       type: Array as PropType<ParkLocation[]>,

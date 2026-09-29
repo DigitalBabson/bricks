@@ -5,9 +5,12 @@ import BrickCard from '../BrickCard.vue'
 import UiModal from '../UiModal.vue'
 import type { Brick } from '../../types/index'
 import { defaultEnvKey, defaultUrlKey } from '../../types/index'
+import { preloadImage } from '../../utils/preloadImage'
 
 vi.mock('axios')
 const mockedAxios = vi.mocked(axios, true)
+
+vi.mock('../../utils/preloadImage', () => ({ preloadImage: vi.fn() }))
 
 function mockParkLocationResponse() {
   return {
@@ -246,6 +249,25 @@ describe('BrickCard', () => {
 
       expect(getBrickCardVm(wrapper).showImg).toBe(true)
       expect(getBrickCardVm(wrapper).showMap).toBe(false)
+    })
+
+    it.each(['pointerenter', 'pointerdown', 'focus'])('preloads the map on %s of the location button', async (event) => {
+      await getLocationButton(wrapper).trigger(event)
+
+      expect(preloadImage).toHaveBeenCalledWith('https://example.com/map-zone-2.jpg')
+      expect(getBrickCardVm(wrapper).showMap).toBe(false)
+    })
+
+    it('fades the map image in once it loads', async () => {
+      await getLocationButton(wrapper).trigger('click')
+      const mapImg = wrapper.find('img[src="https://example.com/map-zone-2.jpg"]')
+
+      expect(mapImg.classes()).toContain('bricks-img-fade')
+      expect(mapImg.classes()).not.toContain('is-loaded')
+
+      await mapImg.trigger('load')
+
+      expect(mapImg.classes()).toContain('is-loaded')
     })
 
     it('opens the map modal from the location button without fetching again', async () => {

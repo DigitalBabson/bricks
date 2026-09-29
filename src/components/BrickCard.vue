@@ -102,6 +102,9 @@
         tw-transition-colors tw-duration-200 tw-ease-in-out
       "
       :aria-label="'View location details for ' + brick.inscription"
+      @pointerenter="preloadMap"
+      @pointerdown="preloadMap"
+      @focus="preloadMap"
       @click.stop="openMap"
     >
       View location details
@@ -113,6 +116,7 @@
         <div class="brick__map-wrapper tw-mx-auto tw-table">
           <img
             v-if="parkLocationImgURL"
+            v-fade-in-on-load
             class="brick__map-image tw-object-contain tw-max-w-full tw-max-h-[calc(90vh_-_160px)] md:tw-max-h-[calc(80vh_-_160px)]"
             :src="parkLocationImgURL"
           />
@@ -137,6 +141,8 @@
 <script lang="ts">
 import { defineComponent, type PropType } from "vue";
 import UiModal from "./UiModal.vue";
+import { fadeInOnLoad } from "../directives/fadeInOnLoad";
+import { preloadImage } from "../utils/preloadImage";
 import axios from "axios";
 import { defaultEnvKey, defaultUrlKey } from "../types/index"
 import type { Brick, MediaImageApiResponse, ParkLocationApiResponse } from "../types/index"
@@ -168,6 +174,9 @@ export default defineComponent({
   },
   components: {
     UiModal,
+  },
+  directives: {
+    fadeInOnLoad,
   },
   computed: {
     isComingSoon(): boolean {
@@ -203,6 +212,9 @@ export default defineComponent({
       }
 
       this.openImg();
+    },
+    preloadMap() {
+      preloadImage(this.parkLocationImgURL || this.brick.parkLocationImgURL);
     },
     openMap() {
       if (!this.parkLocation && this.brick.parkLocationName) {

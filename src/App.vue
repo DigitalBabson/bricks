@@ -2,7 +2,10 @@
 <div class="tw-flex tw-min-h-screen tw-w-full tw-flex-col">
   <app-header v-if="isDev" />
   <main class="tw-flex-1">
-    <app-hero @openLocations="showLocationExplorer = true">
+    <app-hero
+      @openLocations="showLocationExplorer = true"
+      @prefetchLocations="prefetchLocationMap"
+    >
       <brick-filter
         v-model:inscription="inscription"
         v-model:locationIds="locationIds"
@@ -43,6 +46,7 @@ import LocationExplorer from './components/LocationExplorer.vue'
 import { defaultEnvKey, defaultUrlKey } from './types/index'
 import type { ParkLocation, ParkLocationsApiResponse } from './types/index'
 import { withCacheBuster } from './utils/cacheBuster'
+import { preloadImage } from './utils/preloadImage'
 
 export default defineComponent({
   components: {
@@ -75,6 +79,10 @@ export default defineComponent({
     },
   },
   methods: {
+    // The explorer opens on the first location, so that's the map to warm.
+    prefetchLocationMap() {
+      preloadImage(this.locations[0]?.mapImageUrl)
+    },
     resolveAssetUrl(url?: string): string {
       if (!url) {
         return ''

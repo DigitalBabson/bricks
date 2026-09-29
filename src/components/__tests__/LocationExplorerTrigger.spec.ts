@@ -17,6 +17,15 @@ describe('LocationExplorerTrigger', () => {
     expect(wrapper.emitted('openLocations')).toHaveLength(1)
   })
 
+  it.each(['pointerenter', 'pointerdown', 'focus'])('emits prefetchLocations on %s', async (event) => {
+    const wrapper = mount(LocationExplorerTrigger)
+
+    await wrapper.trigger(event)
+
+    expect(wrapper.emitted('prefetchLocations')).toHaveLength(1)
+    expect(wrapper.emitted('openLocations')).toBeUndefined()
+  })
+
   it('supports the mobile floating variant', () => {
     const wrapper = mount(LocationExplorerTrigger, {
       props: {
