@@ -86,11 +86,13 @@
         <span class="tw-hidden lg:tw-inline">Enlarge Brick </span><i class="fa-solid fa-up-right-and-down-left-from-center lg:tw-ml-2"></i>
       </span>
     </div>
-    <transition name="fade">
-      <ui-modal v-if="showImg" :label="`Brick image: ${brick.inscription}`" @close="closeImg">
-        <img class="tw-object-contain tw-max-h-90vh" :src="brickImgUrl" />
-      </ui-modal>
-    </transition>
+    <teleport to="#bricks-modal-root">
+      <transition name="fade">
+        <ui-modal v-if="showImg" :label="`Brick image: ${brick.inscription}`" @close="closeImg">
+          <img class="tw-object-contain tw-max-h-90vh" :src="brickImgUrl" />
+        </ui-modal>
+      </transition>
+    </teleport>
     <button
       class="
         brick-card__location-btn
@@ -105,29 +107,31 @@
       View location details
     </button>
   </article>
-  <transition name="fade">
-    <ui-modal v-if="showMap" :label="`Location map: ${brick.inscription}`" @close="closeMap">
-      <div class="brick__map-wrapper tw-mx-auto tw-table">
-        <img
-          v-if="parkLocationImgURL"
-          class="brick__map-image tw-object-contain tw-max-w-full tw-max-h-[calc(90vh_-_160px)] md:tw-max-h-[calc(80vh_-_160px)]"
-          :src="parkLocationImgURL"
-        />
-        <div
-          class="brick__map-caption tw-table-caption tw-bg-white tw-px-6 tw-py-4 tw-text-left"
-        >
-          <div class="tw-mb-2">
-            <span class="tw-font-oswald tw-text-[18px] tw-text-black">Brick Location: </span>
-            <span class="tw-font-zilla tw-text-[19px] tw-text-black">{{ parkLocation }}</span>
-          </div>
-          <div>
-            <span class="tw-font-oswald tw-text-[18px] tw-text-black">Brick Inscription: </span>
-            <span class="tw-font-zilla tw-text-[19px] tw-text-black">{{ brick.inscription }}</span>
+  <teleport to="#bricks-modal-root">
+    <transition name="fade">
+      <ui-modal v-if="showMap" :label="`Location map: ${brick.inscription}`" @close="closeMap">
+        <div class="brick__map-wrapper tw-mx-auto tw-table">
+          <img
+            v-if="parkLocationImgURL"
+            class="brick__map-image tw-object-contain tw-max-w-full tw-max-h-[calc(90vh_-_160px)] md:tw-max-h-[calc(80vh_-_160px)]"
+            :src="parkLocationImgURL"
+          />
+          <div
+            class="brick__map-caption tw-table-caption tw-bg-white tw-px-6 tw-py-4 tw-text-left"
+          >
+            <div class="tw-mb-2">
+              <span class="tw-font-oswald tw-text-[18px] tw-text-black">Brick Location: </span>
+              <span class="tw-font-zilla tw-text-[19px] tw-text-black">{{ parkLocation }}</span>
+            </div>
+            <div>
+              <span class="tw-font-oswald tw-text-[18px] tw-text-black">Brick Inscription: </span>
+              <span class="tw-font-zilla tw-text-[19px] tw-text-black">{{ brick.inscription }}</span>
+            </div>
           </div>
         </div>
-      </div>
-    </ui-modal>
-  </transition>
+      </ui-modal>
+    </transition>
+  </teleport>
 </template>
 
 <script lang="ts">
@@ -422,14 +426,27 @@ export default defineComponent({
     flex-basis: 275px;
   }
 }
+/* The <teleport> sits outside the <transition> so that UiModal's root is a
+   plain element the transition can animate. */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.5s ease;
 }
 
+.fade-leave-active {
+  pointer-events: none;
+}
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: none;
+  }
 }
 .brick-card__media {
   position: relative;

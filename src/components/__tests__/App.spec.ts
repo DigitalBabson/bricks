@@ -48,6 +48,7 @@ function mountApp() {
         TheBricks: true,
         LocationExplorerTrigger: true,
         AppFooter: true,
+        teleport: true,
       },
     },
   })

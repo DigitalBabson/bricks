@@ -19,11 +19,15 @@
     </div>
   </main>
   <app-footer v-if="isDev" />
-  <location-explorer
-    v-if="showLocationExplorer"
-    :locations="locations"
-    @close="showLocationExplorer = false"
-  />
+  <teleport to="#bricks-modal-root">
+    <transition name="fade">
+      <location-explorer
+        v-if="showLocationExplorer"
+        :locations="locations"
+        @close="showLocationExplorer = false"
+      />
+    </transition>
+  </teleport>
 </div>
 </template>
 
@@ -158,3 +162,26 @@ export default defineComponent({
   },
 })
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-leave-active {
+  pointer-events: none;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: none;
+  }
+}
+</style>

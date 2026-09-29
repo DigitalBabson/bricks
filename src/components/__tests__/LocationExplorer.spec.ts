@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { mount, DOMWrapper, VueWrapper } from '@vue/test-utils'
+import { mount, VueWrapper } from '@vue/test-utils'
 import LocationExplorer from '../LocationExplorer.vue'
 import type { ParkLocation } from '../../types/index'
 
@@ -15,18 +15,12 @@ const locationWithNoMap: ParkLocation[] = [
   { id: 'loc-4', name: 'New Zone', mapImageUrl: '' },
 ]
 
-// Mount into a real #bricks-modal-root, as the page does, and query the teleport
-// target. VTU's `teleport: true` stub replaces its whole subtree on every
-// re-render, so element references taken before a click go stale.
-let modalRoot: DOMWrapper<Element>
-
 function mountExplorer(locations: ParkLocation[] = mockLocations) {
-  const target = document.createElement('div')
-  target.id = 'bricks-modal-root'
-  document.body.appendChild(target)
-  modalRoot = new DOMWrapper(target)
   return mount(LocationExplorer, {
     props: { locations },
+    global: {
+      stubs: { teleport: true },
+    },
     attachTo: document.body,
   })
 }
@@ -36,7 +30,6 @@ describe('LocationExplorer', () => {
 
   afterEach(() => {
     wrapper?.unmount()
-    document.getElementById('bricks-modal-root')?.remove()
   })
 
   describe('Rendering', () => {
@@ -45,12 +38,12 @@ describe('LocationExplorer', () => {
     })
 
     it('renders a dark backdrop overlay', () => {
-      const backdrop = modalRoot.find('.tw-fixed.tw-inset-0')
+      const backdrop = wrapper.find('.tw-fixed.tw-inset-0')
       expect(backdrop.exists()).toBe(true)
     })
 
     it('renders the sidebar with all location names', () => {
-      const items = modalRoot.findAll('nav li')
+      const items = wrapper.findAll('nav li')
       expect(items).toHaveLength(3)
       expect(items[0].text()).toBe('Class Walk of 2019')
       expect(items[1].text()).toBe('Rodger Babson Statue')
@@ -58,24 +51,24 @@ describe('LocationExplorer', () => {
     })
 
     it('renders the close button with aria-label', () => {
-      const closeButton = modalRoot.find('button[aria-label="Close location explorer"]')
+      const closeButton = wrapper.find('button[aria-label="Close location explorer"]')
       expect(closeButton.exists()).toBe(true)
     })
 
     it('renders the map image for the default-selected first location', () => {
-      const img = modalRoot.find('img')
+      const img = wrapper.find('img')
       expect(img.exists()).toBe(true)
       expect(img.attributes('src')).toBe('https://example.com/map1.jpg')
       expect(img.attributes('alt')).toBe('Map of Class Walk of 2019')
     })
 
     it('has aria-label on the sidebar nav', () => {
-      const nav = modalRoot.find('nav')
+      const nav = wrapper.find('nav')
       expect(nav.attributes('aria-label')).toBe('Park locations')
     })
 
     it('applies Oswald font and correct typography to list items', () => {
-      const item = modalRoot.find('nav li')
+      const item = wrapper.find('nav li')
       expect(item.classes()).toContain('tw-font-oswald')
       expect(item.classes()).toContain('tw-text-[16px]')
       expect(item.classes()).toContain('tw-leading-6')
@@ -87,13 +80,13 @@ describe('LocationExplorer', () => {
   describe('Default selection', () => {
     it('selects the first location on mount', () => {
       wrapper = mountExplorer()
-      const items = modalRoot.findAll('nav li')
+      const items = wrapper.findAll('nav li')
       expect(items[0].classes()).toContain('tw-font-medium')
     })
 
     it('uses the first location map image as src', () => {
       wrapper = mountExplorer()
-      const img = modalRoot.find('img')
+      const img = wrapper.find('img')
       expect(img.attributes('src')).toBe('https://example.com/map1.jpg')
     })
   })
@@ -104,23 +97,23 @@ describe('LocationExplorer', () => {
     })
 
     it('highlights the clicked location', async () => {
-      const items = modalRoot.findAll('nav li')
+      const items = wrapper.findAll('nav li')
       await items[1].trigger('click')
 
       expect(items[1].classes()).toContain('tw-font-medium')
     })
 
     it('swaps the map image to the clicked location', async () => {
-      const items = modalRoot.findAll('nav li')
+      const items = wrapper.findAll('nav li')
       await items[1].trigger('click')
 
-      const img = modalRoot.find('img')
+      const img = wrapper.find('img')
       expect(img.attributes('src')).toBe('https://example.com/map2.jpg')
       expect(img.attributes('alt')).toBe('Map of Rodger Babson Statue')
     })
 
     it('removes highlight from the previously selected location', async () => {
-      const items = modalRoot.findAll('nav li')
+      const items = wrapper.findAll('nav li')
       await items[1].trigger('click')
 
       expect(items[0].classes()).not.toContain('tw-font-medium')
@@ -128,10 +121,10 @@ describe('LocationExplorer', () => {
     })
 
     it('renders only one map image at a time', async () => {
-      const items = modalRoot.findAll('nav li')
+      const items = wrapper.findAll('nav li')
       await items[2].trigger('click')
 
-      const images = modalRoot.findAll('img')
+      const images = wrapper.findAll('img')
       expect(images).toHaveLength(1)
       expect(images[0].attributes('src')).toBe('https://example.com/map3.jpg')
     })
@@ -143,14 +136,14 @@ describe('LocationExplorer', () => {
     })
 
     it('emits close when the × button is clicked', async () => {
-      const closeButton = modalRoot.find('button[aria-label="Close location explorer"]')
+      const closeButton = wrapper.find('button[aria-label="Close location explorer"]')
       await closeButton.trigger('click')
 
       expect(wrapper.emitted('close')).toHaveLength(1)
     })
 
     it('emits close when the backdrop is clicked', async () => {
-      const backdrop = modalRoot.find('.tw-bg-black\\/\\[0\\.87\\]')
+      const backdrop = wrapper.find('.tw-bg-black\\/\\[0\\.87\\]')
       await backdrop.trigger('click')
 
       expect(wrapper.emitted('close')).toHaveLength(1)
@@ -166,13 +159,13 @@ describe('LocationExplorer', () => {
   describe('Empty locations', () => {
     it('renders no list items when locations is empty', () => {
       wrapper = mountExplorer(emptyLocations)
-      const items = modalRoot.findAll('nav li')
+      const items = wrapper.findAll('nav li')
       expect(items).toHaveLength(0)
     })
 
     it('shows fallback text when locations is empty', () => {
       wrapper = mountExplorer(emptyLocations)
-      expect(modalRoot.text()).toContain('No map available for this location.')
+      expect(wrapper.text()).toContain('No map available for this location.')
     })
 
     it('does not error on mount with empty locations', () => {
@@ -185,14 +178,14 @@ describe('LocationExplorer', () => {
   describe('No map image', () => {
     it('shows fallback text when selected location has no mapImageUrl', () => {
       wrapper = mountExplorer(locationWithNoMap)
-      expect(modalRoot.text()).toContain('No map available for this location.')
-      expect(modalRoot.find('img').exists()).toBe(false)
+      expect(wrapper.text()).toContain('No map available for this location.')
+      expect(wrapper.find('img').exists()).toBe(false)
     })
   })
 
   describe('Mobile chevrons', () => {
     async function makeListScrollable(w: VueWrapper, scrollTop = 0) {
-      const list = modalRoot.find('ul').element
+      const list = w.find('ul').element
       Object.defineProperty(list, 'scrollHeight', { value: 300, configurable: true })
       Object.defineProperty(list, 'clientHeight', { value: 100, configurable: true })
       Object.defineProperty(list, 'scrollTop', { value: scrollTop, writable: true, configurable: true })
@@ -204,13 +197,13 @@ describe('LocationExplorer', () => {
     it('shows down chevron when list is scrollable', async () => {
       wrapper = mountExplorer()
       await makeListScrollable(wrapper)
-      expect(modalRoot.find('button[aria-label="Scroll locations down"]').exists()).toBe(true)
+      expect(wrapper.find('button[aria-label="Scroll locations down"]').exists()).toBe(true)
     })
 
     it('shows up chevron when list is scrolled down', async () => {
       wrapper = mountExplorer()
       await makeListScrollable(wrapper, 50)
-      expect(modalRoot.find('button[aria-label="Scroll locations up"]').exists()).toBe(true)
+      expect(wrapper.find('button[aria-label="Scroll locations up"]').exists()).toBe(true)
     })
 
     it('clicking a chevron scrolls the list', async () => {
@@ -220,7 +213,7 @@ describe('LocationExplorer', () => {
       let scrollCalled = false
       list.scrollBy = (() => { scrollCalled = true }) as typeof list.scrollBy
 
-      await modalRoot.find('button[aria-label="Scroll locations down"]').trigger('click')
+      await wrapper.find('button[aria-label="Scroll locations down"]').trigger('click')
       expect(scrollCalled).toBe(true)
     })
   })
@@ -231,32 +224,32 @@ describe('LocationExplorer', () => {
     })
 
     it('listbox container has role="listbox"', () => {
-      expect(modalRoot.find('ul').attributes('role')).toBe('listbox')
+      expect(wrapper.find('ul').attributes('role')).toBe('listbox')
     })
 
     it('all items have tabindex="0" for Tab navigation', () => {
-      const items = modalRoot.findAll('nav li')
+      const items = wrapper.findAll('nav li')
       items.forEach((item) => expect(item.attributes('tabindex')).toBe('0'))
     })
 
     it('each item has role="option" and correct aria-selected', () => {
-      const items = modalRoot.findAll('nav li')
+      const items = wrapper.findAll('nav li')
       items.forEach((item) => expect(item.attributes('role')).toBe('option'))
       expect(items[0].attributes('aria-selected')).toBe('true')
       expect(items[1].attributes('aria-selected')).toBe('false')
     })
 
     it('focusing an item selects it and swaps the map image', async () => {
-      const items = modalRoot.findAll('nav li')
+      const items = wrapper.findAll('nav li')
       await items[1].trigger('focus')
 
-      expect(modalRoot.find('img').attributes('src')).toBe('https://example.com/map2.jpg')
+      expect(wrapper.find('img').attributes('src')).toBe('https://example.com/map2.jpg')
       expect(items[1].attributes('aria-selected')).toBe('true')
       expect(items[0].attributes('aria-selected')).toBe('false')
     })
 
     it('clicking a non-active item selects it', async () => {
-      const items = modalRoot.findAll('nav li')
+      const items = wrapper.findAll('nav li')
       await items[1].trigger('click')
 
       expect(items[1].attributes('aria-selected')).toBe('true')
