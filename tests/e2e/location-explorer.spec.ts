@@ -12,6 +12,10 @@ async function openExplorer(page: Page) {
 }
 
 test.describe('Location Explorer — Desktop', () => {
+  // Pin a desktop size so the mobile projects (Pixel 5, iPhone 12) don't run
+  // these at phone width, where the list sits full-width below the map.
+  test.use({ viewport: { width: 1280, height: 800 } })
+
   test.beforeEach(async ({ page }) => {
     await page.goto('/')
     await waitForBricks(page)
