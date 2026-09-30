@@ -5,7 +5,8 @@
       tw-flex tw-items-center tw-justify-center
       tw-bg-black/[0.87]
     "
-    @click.self="$emit('close')"
+    @pointerdown="handleBackdropPointerdown"
+    @click="handleBackdropClick"
   >
     <div
       ref="dialogContainer"
@@ -32,7 +33,10 @@
       >
         <i class="fa-solid fa-xmark tw-text-4xl"></i>
       </button>
-      <div class="tw-flex tw-max-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-hidden">
+      <div
+        ref="contentWrapper"
+        class="tw-flex tw-max-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-hidden"
+      >
         <slot />
       </div>
     </div>
@@ -55,9 +59,32 @@ export default defineComponent({
   data() {
     return {
       previouslyFocused: null as HTMLElement | null,
+      pointerDownOutside: true,
     }
   },
   methods: {
+    // The dialog container and content wrapper are transparent layout boxes that
+    // fill most of the screen, so clicks on the visible backdrop usually land on
+    // them rather than on the backdrop itself. Treat all three as "outside".
+    isOutsideContent(target: EventTarget | null) {
+      return (
+        target === this.$el ||
+        target === this.$refs.dialogContainer ||
+        target === this.$refs.contentWrapper
+      )
+    },
+    handleBackdropPointerdown(event: PointerEvent) {
+      // Remember where the press started so a drag from the content (e.g.
+      // selecting caption text) that ends on the backdrop doesn't close.
+      this.pointerDownOutside = this.isOutsideContent(event.target)
+    },
+    handleBackdropClick(event: MouseEvent) {
+      const startedOutside = this.pointerDownOutside
+      this.pointerDownOutside = true
+      if (startedOutside && this.isOutsideContent(event.target)) {
+        this.$emit('close')
+      }
+    },
     handleDocumentKeydown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
         this.$emit('close')
