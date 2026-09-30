@@ -318,12 +318,26 @@ export default defineComponent({
       // Normalize keyword: trim, collapse whitespace, and convert to lowercase for case-insensitive search
       const normalizedKeyword = this.inscription.trim().replace(/\s+/g, ' ').toLowerCase();
 
-      // For single-letter queries, strip all spaces to handle bricks with inconsistent spacing
-      // e.g., 'G  E l  P  E  Y' (double spaces) will be searched as 'GALEPEY'
+      // For single-letter queries with inconsistent spacing (like brick 2646 "G  E l  P  E  Y"),
+      // strip all spaces to handle bricks with inconsistent spacing.
+      // For repeated single-letter queries (like 'a a a a'), we only search for that one letter.
       const isSingleLetterQuery = isAllSingleLetters(this.inscription);
-      const searchKeyword = isSingleLetterQuery
-        ? normalizedKeyword.replace(/\s+/g, '')
-        : normalizedKeyword;
+      let searchKeyword: string;
+      
+      if (isSingleLetterQuery) {
+        // Check if all words are the SAME letter (e.g., 'a a a a')
+        const words = normalizedKeyword.split(' ').filter(w => w.length > 0);
+        if (words.every(word => word === words[0])) {
+          // All same letter - search for just that one letter
+          searchKeyword = words[0];
+        } else {
+          // Different letters (like 'g e l p e y') - strip spaces to search for combined string
+          searchKeyword = normalizedKeyword.replace(/\s+/g, '');
+        }
+      } else {
+        // Not a single-letter query - use normalized keyword with collapsed spaces
+        searchKeyword = normalizedKeyword;
+      }
 
       let url = this.apiUrl +
         `bricks?page[limit]=${this.pageSize}` +

@@ -605,7 +605,7 @@ describe('TheBricks', () => {
     await flushPromises()
     vi.clearAllMocks()
 
-    // All single letters - should skip SearchStax and go straight to Drupal
+    // All single letters repeated (like 'A A A A') - should search for just that letter
     await wrapper.setProps({ inscription: 'A A A A' })
     vi.advanceTimersByTime(500)
     await flushPromises()
@@ -614,8 +614,8 @@ describe('TheBricks', () => {
     expect(mockedAxios.get).toHaveBeenCalledTimes(1)
     const url = mockedAxios.get.mock.calls[0][0] as string
     expect(url).toContain('filter[field_brick_inscription][operator]=CONTAINS')
-    // Single-letter queries strip all spaces to match bricks with inconsistent spacing
-    expect(url).toContain('filter[field_brick_inscription][value]=aaaa')
+    // Single-letter repeated queries search for just that one letter (not concatenated)
+    expect(url).toContain('filter[field_brick_inscription][value]=a')
   })
 
   it('routes single-letter keywords with extra spaces through Drupal (with normalization)', async () => {
