@@ -315,11 +315,9 @@ export default defineComponent({
     async fetchViaDrupalKeyword() {
       const offset = (this.currentPage - 1) * this.pageSize;
 
-      // Normalize keyword before fallback to match Drupal's expected format
-      const normalizedKeyword = this.inscription.trim().replace(/\s+/g, ' ');
+      // Normalize keyword: trim, collapse whitespace, and convert to lowercase for case-insensitive search
+      const normalizedKeyword = this.inscription.trim().replace(/\s+/g, ' ').toLowerCase();
 
-      // For single-letter queries (SearchStax fallback), sort by relevance if possible
-      // Otherwise fall back to alphabetical
       let url = this.apiUrl +
         `bricks?page[limit]=${this.pageSize}` +
         `&filter[field_brick_inscription][operator]=CONTAINS` +
