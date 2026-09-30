@@ -57,6 +57,9 @@ export async function searchBricks(params: SearchstaxParams): Promise<Searchstax
     url.searchParams.append('fq', `ss_zone_uuid:(${zoneFilter})`)
   }
 
+  // Sort alphabetically by inscription for consistent results
+  url.searchParams.set('sort', 'tcngramm_X3b_en_description asc')
+
   const response = await axios.get<SearchstaxResponse>(url.toString(), {
     headers: { Authorization: `Token ${token}` },
   })
