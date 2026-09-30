@@ -49,7 +49,7 @@ export async function searchBricks(params: SearchstaxParams): Promise<Searchstax
   url.searchParams.append('fq', buildKeywordFilter(keyword))
   url.searchParams.set('rows', String(pageSize))
   url.searchParams.set('start', String(offset))
-  url.searchParams.set('fl', 'ss_uuid,ss_zone_uuid,ss_file_img_uuid,tcngramm_X3b_en_description,s_tcngramm_X3b_en_description')
+  url.searchParams.set('fl', 'ss_uuid,ss_zone_uuid,ss_file_img_uuid,tcngramm_X3b_en_description')
   url.searchParams.set('wt', 'json')
 
   if (locationIds && locationIds.length > 0) {
@@ -57,9 +57,8 @@ export async function searchBricks(params: SearchstaxParams): Promise<Searchstax
     url.searchParams.append('fq', `ss_zone_uuid:(${zoneFilter})`)
   }
 
-  // Sort by non-tokenized field if available, otherwise fall back to ss_uuid for stable sorting
-  // Note: tcngramm_ fields are tokenized and may not sort alphabetically correctly
-  url.searchParams.set('sort', 's_tcngramm_X3b_en_description asc,ss_uuid asc')
+  // Note: SearchStax defaults to relevance scoring (score desc)
+  // For alphabetical sorting, Drupal's CONTAINS fallback is used instead
 
   const response = await axios.get<SearchstaxResponse>(url.toString(), {
     headers: { Authorization: `Token ${token}` },
