@@ -316,19 +316,19 @@ export default defineComponent({
       const offset = (this.currentPage - 1) * this.pageSize;
 
       // Normalize keyword: trim, collapse whitespace, and convert to lowercase for case-insensitive search
-      // For single-letter keywords, also remove ALL spaces since bricks store clean text without extra spaces
+      const normalizedKeyword = this.inscription.trim().replace(/\s+/g, ' ').toLowerCase();
+
+      // For single-letter queries, strip all spaces to handle bricks with inconsistent spacing
+      // e.g., 'G  E l  P  E  Y' (double spaces) will be searched as 'GALEPEY'
       const isSingleLetterQuery = isAllSingleLetters(this.inscription);
-      let normalizedKeyword = this.inscription.trim().replace(/\s+/g, ' ').toLowerCase();
-      
-      // Strip all spaces for single-letter queries to match clean Drupal data
-      if (isSingleLetterQuery) {
-        normalizedKeyword = normalizedKeyword.replace(/\s+/g, '');
-      }
+      const searchKeyword = isSingleLetterQuery
+        ? normalizedKeyword.replace(/\s+/g, '')
+        : normalizedKeyword;
 
       let url = this.apiUrl +
         `bricks?page[limit]=${this.pageSize}` +
         `&filter[field_brick_inscription][operator]=CONTAINS` +
-        `&filter[field_brick_inscription][value]=${encodeURIComponent(normalizedKeyword)}` +
+        `&filter[field_brick_inscription][value]=${encodeURIComponent(searchKeyword)}` +
         this.buildDrupalImageQuery() +
         `&page[offset]=${offset}` +
         `&sort=field_brick_inscription`;
