@@ -316,7 +316,14 @@ export default defineComponent({
       const offset = (this.currentPage - 1) * this.pageSize;
 
       // Normalize keyword: trim, collapse whitespace, and convert to lowercase for case-insensitive search
-      const normalizedKeyword = this.inscription.trim().replace(/\s+/g, ' ').toLowerCase();
+      // For single-letter keywords, also remove ALL spaces since bricks store clean text without extra spaces
+      const isSingleLetterQuery = isAllSingleLetters(this.inscription);
+      let normalizedKeyword = this.inscription.trim().replace(/\s+/g, ' ').toLowerCase();
+      
+      // Strip all spaces for single-letter queries to match clean Drupal data
+      if (isSingleLetterQuery) {
+        normalizedKeyword = normalizedKeyword.replace(/\s+/g, '');
+      }
 
       let url = this.apiUrl +
         `bricks?page[limit]=${this.pageSize}` +
