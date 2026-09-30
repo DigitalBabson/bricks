@@ -7,7 +7,16 @@ import type { BrickApiItem, FileApiItem, ParkLocation } from '../../types/index'
 import * as searchstaxService from '../../services/searchstax'
 
 vi.mock('axios')
-vi.mock('../../services/searchstax')
+vi.mock('../../services/searchstax', () => ({
+  searchBricks: vi.fn(),
+  isAllSingleLetters: (keyword: string) => {
+    const words = keyword.trim().split(/\s+/)
+    if (words.length === 0 || (words.length === 1 && words[0].length === 0)) {
+      return false
+    }
+    return words.every((word) => word.replace(/[^\w]/g, '').length <= 1)
+  },
+}))
 
 const mockedAxios = vi.mocked(axios, true)
 const mockedSearchBricks = vi.mocked(searchstaxService.searchBricks)
@@ -586,5 +595,90 @@ describe('TheBricks', () => {
 
     // Should fire immediately without needing timer advancement
     expect(mockedAxios.get).toHaveBeenCalledTimes(1)
+  })
+
+  // --- Single-letter keyword routing tests ---
+
+  it('routes all single-letter keywords through Drupal CONTAINS (not SearchStax)', async () => {
+    vi.useFakeTimers()
+    const wrapper = mountTheBricks({ inscription: '', locationIds: [] })
+    await flushPromises()
+    vi.clearAllMocks()
+
+    // All single letters - should skip SearchStax and go straight to Drupal
+    await wrapper.setProps({ inscription: 'A A A A' })
+    vi.advanceTimersByTime(500)
+    await flushPromises()
+
+    expect(mockedSearchBricks).not.toHaveBeenCalled()
+    expect(mockedAxios.get).toHaveBeenCalledTimes(1)
+    const url = mockedAxios.get.mock.calls[0][0] as string
+    expect(url).toContain('filter[field_brick_inscription][operator]=CONTAINS')
+    // Spaces should be normalized before sending to Drupal
+    expect(url).toContain('filter[field_brick_inscription][value]=A%20A%20A%20A')
+  })
+
+  it('routes single-letter keywords with extra spaces through Drupal (with normalization)', async () => {
+    vi.useFakeTimers()
+    const wrapper = mountTheBricks({ inscription: '', locationIds: [] })
+    await flushPromises()
+    vi.clearAllMocks()
+
+    // Extra spaces - should be normalized
+    await wrapper.setProps({ inscription: '  A   A   A   A  ' })
+    vi.advanceTimersByTime(500)
+    await flushPromises()
+
+    expect(mockedSearchBricks).not.toHaveBeenCalled()
+    expect(mockedAxios.get).toHaveBeenCalledTimes(1)
+    const url = mockedAxios.get.mock.calls[0][0] as string
+    expect(url).toContain('filter[field_brick_inscription][operator]=CONTAINS')
+    // Should be normalized to single spaces
+    expect(url).toContain('filter[field_brick_inscription][value]=A%20A%20A%20A')
+  })
+
+  it('routes mixed single/multi-letter keywords through SearchStax', async () => {
+    vi.useFakeTimers()
+    const wrapper = mountTheBricks({ inscription: '', locationIds: [] })
+    await flushPromises()
+    vi.clearAllMocks()
+
+    // Has a multi-letter word, so goes through SearchStax
+    await wrapper.setProps({ inscription: 'J SMITH' })
+    vi.advanceTimersByTime(500)
+    await flushPromises()
+
+    expect(mockedSearchBricks).toHaveBeenCalledTimes(1)
+    expect(mockedSearchBricks).toHaveBeenCalledWith(
+      expect.objectContaining({
+        keyword: 'J SMITH',
+      })
+    )
+  })
+
+  it('falls back to normalized Drupal search when SearchStax fails for multi-letter query', async () => {
+    vi.useFakeTimers()
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const wrapper = mountTheBricks({ inscription: '', locationIds: [] })
+    await flushPromises()
+    vi.clearAllMocks()
+
+    mockedSearchBricks.mockRejectedValue(new Error('SearchStax down'))
+    mockedAxios.get.mockResolvedValue(
+      mockApiResponse([makeBrick('d-1', 'BRUCE FALLBACK')], 1)
+    )
+
+    // Multi-letter keyword - goes through SearchStax first, then fallback
+    await wrapper.setProps({ inscription: 'bruce' })
+    vi.advanceTimersByTime(500)
+    await flushPromises()
+
+    expect(mockedSearchBricks).toHaveBeenCalledTimes(1)
+    expect(mockedAxios.get).toHaveBeenCalledTimes(1)
+    const url = mockedAxios.get.mock.calls[0][0] as string
+    expect(url).toContain('filter[field_brick_inscription][operator]=CONTAINS')
+    expect(url).toContain('filter[field_brick_inscription][value]=bruce')
+
+    warnSpy.mockRestore()
   })
 })

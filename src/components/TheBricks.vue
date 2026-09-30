@@ -311,13 +311,17 @@ export default defineComponent({
       this.showMessage = hydratedBricks.length === 0;
       this.totalPages = Math.ceil(result.numFound / this.pageSize) || 1;
     },
+
     async fetchViaDrupalKeyword() {
       const offset = (this.currentPage - 1) * this.pageSize;
+
+      // Normalize keyword before fallback to match Drupal's expected format
+      const normalizedKeyword = this.inscription.trim().replace(/\s+/g, ' ');
 
       let url = this.apiUrl +
         `bricks?page[limit]=${this.pageSize}` +
         `&filter[field_brick_inscription][operator]=CONTAINS` +
-        `&filter[field_brick_inscription][value]=${encodeURIComponent(this.inscription)}` +
+        `&filter[field_brick_inscription][value]=${encodeURIComponent(normalizedKeyword)}` +
         this.buildDrupalImageQuery() +
         `&page[offset]=${offset}` +
         `&sort=field_sort_alpha`;
@@ -351,9 +355,14 @@ export default defineComponent({
         const hasKeyword = this.inscription.length >= 3;
 
         if (hasKeyword) {
+          // Check if all words are single letters - SearchStax can't handle these
+          const shouldSkipSearchstax = isAllSingleLetters(this.inscription);
+
           try {
-            await this.fetchViaSearchstax();
-            return;
+            if (!shouldSkipSearchstax) {
+              await this.fetchViaSearchstax();
+              return;
+            }
           } catch {
             console.warn('SearchStax unavailable, falling back to Drupal keyword search');
           }
