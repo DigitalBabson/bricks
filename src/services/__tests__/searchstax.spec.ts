@@ -64,6 +64,15 @@ describe('isAllSingleLetters', () => {
     expect(isAllSingleLetters('  A   B   C  ')).toBe(true);
     expect(isAllSingleLetters('A  B  C')).toBe(true);
   });
+
+  it('preserves Unicode letters when counting word length', () => {
+    // Accented characters are multi-letter words
+    expect(isAllSingleLetters('ÉTÉ')).toBe(false);
+    expect(isAllSingleLetters('ÖZ!')).toBe(false); // punctuation ignored, Ö is 1 char but Z is 1 too
+    expect(isAllSingleLetters('CAFÉ')).toBe(false);
+    // Mixed single-letter with punctuation
+    expect(isAllSingleLetters('A! B?')).toBe(true);
+  });
 });
 
 describe('searchBricks', () => {

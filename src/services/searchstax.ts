@@ -27,7 +27,8 @@ export function isAllSingleLetters(keyword: string): boolean {
     return false
   }
   // Check if ALL words are single letters (ignoring punctuation)
-  return words.every((word) => word.replace(/[^\w]/g, '').length <= 1)
+  // Use Unicode-aware pattern: \p{L} matches any Unicode letter
+  return words.every((word) => word.replace(/\p{P}/gu, '').length <= 1)
 }
 
 function escapeSolrTerm(value: string): string {
