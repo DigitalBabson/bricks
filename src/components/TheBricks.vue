@@ -318,13 +318,16 @@ export default defineComponent({
       // Normalize keyword before fallback to match Drupal's expected format
       const normalizedKeyword = this.inscription.trim().replace(/\s+/g, ' ');
 
+      // For single-letter queries (SearchStax fallback), sort by relevance if possible
+      // Otherwise fall back to alphabetical
       let url = this.apiUrl +
         `bricks?page[limit]=${this.pageSize}` +
         `&filter[field_brick_inscription][operator]=CONTAINS` +
         `&filter[field_brick_inscription][value]=${encodeURIComponent(normalizedKeyword)}` +
         this.buildDrupalImageQuery() +
-        `&page[offset]=${offset}` +
-        `&sort=field_sort_alpha`;
+        `&page[offset]=${offset}`;
+
+
 
       if (this.locationIds.length > 0) {
         url += `&filter[field_brick_zone.id][operator]=IN` +
