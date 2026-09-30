@@ -274,7 +274,7 @@ export default defineComponent({
       if (this.locationIds.length > 0) {
         return this.apiUrl +
           `bricks?page[limit]=${this.pageSize}` +
-          `&sort=field_brick_inscription` +
+          `&sort=field_sort_alpha` +
           `&filter[field_brick_zone.id][operator]=IN` +
           this.buildLocationFilter() +
           this.buildDrupalImageQuery() +
@@ -285,7 +285,7 @@ export default defineComponent({
         `bricks?page[limit]=${this.pageSize}` +
         `&page[offset]=${offset}` +
         this.buildDrupalImageQuery() +
-        `&sort=field_brick_inscription`;
+        `&sort=field_sort_alpha`;
     },
     async fetchViaSearchstax() {
       // Check if search will fail due to single-letter words being filtered out
@@ -331,7 +331,7 @@ export default defineComponent({
         `&filter[field_brick_inscription][value]=${encodeURIComponent(searchKeyword)}` +
         this.buildDrupalImageQuery() +
         `&page[offset]=${offset}` +
-        `&sort=field_brick_inscription`;
+        `&sort=field_sort_alpha`;
 
 
 
