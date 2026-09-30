@@ -57,6 +57,29 @@ describe('UiModal', () => {
     wrapper.unmount()
   })
 
+  it('emits close event when the area around the content is clicked', () => {
+    const wrapper = mountModal()
+
+    const dialog = document.body.querySelector('[role="dialog"]') as HTMLElement
+    dialog.click()
+    ;(dialog.lastElementChild as HTMLElement).click()
+
+    expect(wrapper.emitted('close')).toHaveLength(2)
+    wrapper.unmount()
+  })
+
+  it('does not emit close when a drag starts on content and ends on the backdrop', () => {
+    const wrapper = mountModal('<div class="modal-body">Content</div>')
+
+    const modalContent = document.body.querySelector('.modal-body') as HTMLElement
+    const backdrop = document.body.querySelector('.tw-bg-black\\/\\[0\\.87\\]') as HTMLElement
+    modalContent.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+    backdrop.click()
+
+    expect(wrapper.emitted('close')).toBeUndefined()
+    wrapper.unmount()
+  })
+
   it('emits close event when Escape is pressed', () => {
     const wrapper = mountModal()
 
