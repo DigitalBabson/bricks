@@ -571,18 +571,18 @@ describe('TheBricks', () => {
     expect(url).not.toContain('filter[field_brick_inscription]')
   })
 
-  it('does not fetch for keywords under 3 characters', async () => {
+  it('fetches keywords with 1+ characters (debounced)', async () => {
     vi.useFakeTimers()
     const wrapper = mountTheBricks({ inscription: '', locationIds: [] })
     await flushPromises()
     vi.clearAllMocks()
 
     await wrapper.setProps({ inscription: 'ab' })
-    vi.advanceTimersByTime(1000)
+    vi.advanceTimersByTime(500)
     await flushPromises()
 
-    expect(mockedSearchBricks).not.toHaveBeenCalled()
-    expect(mockedAxios.get).not.toHaveBeenCalled()
+    // Should trigger SearchStax search (which may fail for single letters)
+    expect(mockedSearchBricks).toHaveBeenCalled()
   })
 
   it('locationIds watcher fires immediately (no debounce)', async () => {

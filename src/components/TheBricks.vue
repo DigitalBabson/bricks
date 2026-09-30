@@ -97,7 +97,7 @@ export default defineComponent({
 
       if (value.length === 0) {
         this.fetchBricks();
-      } else if (value.length >= 3) {
+      } else if (value.length >= 1) {
         this.searchTimeout = setTimeout(() => {
           this.searchTimeout = null;
           this.fetchBricks();
