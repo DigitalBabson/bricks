@@ -361,7 +361,7 @@ export default defineComponent({
     },
     async fetchBricks() {
       try {
-        const hasKeyword = this.inscription.length >= 3;
+        const hasKeyword = this.inscription.length >= 1;
 
         if (hasKeyword) {
           // Check if all words are single letters - SearchStax can't handle these
