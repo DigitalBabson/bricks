@@ -15,6 +15,21 @@ export interface SearchstaxResult {
   numFound: number
 }
 
+/**
+ * Checks if a keyword search will return no results due to single-letter words
+ * being filtered out by the SearchStax field's LengthFilterFactory (min: 2).
+ * Returns true if all words in the keyword are single letters.
+ */
+export function isAllSingleLetters(keyword: string): boolean {
+  const words = keyword.trim().split(/\s+/)
+  // Empty or whitespace-only string
+  if (words.length === 0 || (words.length === 1 && words[0].length === 0)) {
+    return false
+  }
+  // Check if ALL words are single letters (ignoring punctuation)
+  return words.every((word) => word.replace(/[^\w]/g, '').length <= 1)
+}
+
 function escapeSolrTerm(value: string): string {
   return value.replace(/([+\-!(){}[\]^"~*?:\\/]|&&|\|\|)/g, '\\$1')
 }

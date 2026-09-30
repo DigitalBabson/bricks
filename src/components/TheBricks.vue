@@ -43,7 +43,7 @@ import BrickCard from "./BrickCard.vue";
 import Pagination from "./Pagination.vue";
 import { defaultEnvKey, defaultUrlKey, searchstaxEndpointKey, searchstaxTokenKey } from "../types/index"
 import type { Brick, BrickApiResponse, FileApiItem, ParkLocation } from "../types/index"
-import { searchBricks } from "../services/searchstax"
+import { searchBricks, isAllSingleLetters } from "../services/searchstax"
 import { isDefaultDrupalImage } from "../utils/placeholderImage"
 import { withCacheBuster } from "../utils/cacheBuster"
 
@@ -288,6 +288,13 @@ export default defineComponent({
         `&sort=field_sort_alpha`;
     },
     async fetchViaSearchstax() {
+      // Check if search will fail due to single-letter words being filtered out
+      if (isAllSingleLetters(this.inscription)) {
+        console.warn('SearchStax cannot search all single-letter keywords, falling back to Drupal');
+        await this.fetchViaDrupalKeyword();
+        return;
+      }
+
       const offset = (this.currentPage - 1) * this.pageSize;
 
       const result = await searchBricks({
