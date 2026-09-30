@@ -7,10 +7,10 @@ test.describe('Sorting and Pagination', () => {
   });
 
   test('bricks load in alphabetical order', async ({ page }) => {
-    // Drupal sorts on field_brick_inscription for accurate alphabetical ordering
+    // Drupal sorts on field_sort_alpha for accurate alphabetical ordering
     // Check that the app asks for that sort and renders the bricks in order
     const bricksResponse = page.waitForResponse(
-      (resp) => resp.url().includes('/jsonapi/bricks?') && resp.url().includes('sort=field_brick_inscription') && resp.ok()
+      (resp) => resp.url().includes('/jsonapi/bricks?') && resp.url().includes('sort=field_sort_alpha') && resp.ok()
     );
     await page.goto('/');
     const body = await (await bricksResponse).json();
