@@ -7,7 +7,16 @@ import type { BrickApiItem, FileApiItem, ParkLocation } from '../../types/index'
 import * as searchstaxService from '../../services/searchstax'
 
 vi.mock('axios')
-vi.mock('../../services/searchstax')
+vi.mock('../../services/searchstax', () => ({
+  searchBricks: vi.fn(),
+  isAllSingleLetters: (keyword: string) => {
+    const words = keyword.trim().split(/\s+/)
+    if (words.length === 0 || (words.length === 1 && words[0].length === 0)) {
+      return false
+    }
+    return words.every((word) => word.replace(/[^\w]/g, '').length <= 1)
+  },
+}))
 
 const mockedAxios = vi.mocked(axios, true)
 const mockedSearchBricks = vi.mocked(searchstaxService.searchBricks)
@@ -562,18 +571,18 @@ describe('TheBricks', () => {
     expect(url).not.toContain('filter[field_brick_inscription]')
   })
 
-  it('does not fetch for keywords under 3 characters', async () => {
+  it('fetches keywords with 1+ characters (debounced)', async () => {
     vi.useFakeTimers()
     const wrapper = mountTheBricks({ inscription: '', locationIds: [] })
     await flushPromises()
     vi.clearAllMocks()
 
     await wrapper.setProps({ inscription: 'ab' })
-    vi.advanceTimersByTime(1000)
+    vi.advanceTimersByTime(500)
     await flushPromises()
 
-    expect(mockedSearchBricks).not.toHaveBeenCalled()
-    expect(mockedAxios.get).not.toHaveBeenCalled()
+    // Should trigger SearchStax search (which may fail for single letters)
+    expect(mockedSearchBricks).toHaveBeenCalled()
   })
 
   it('locationIds watcher fires immediately (no debounce)', async () => {
@@ -586,5 +595,90 @@ describe('TheBricks', () => {
 
     // Should fire immediately without needing timer advancement
     expect(mockedAxios.get).toHaveBeenCalledTimes(1)
+  })
+
+  // --- Single-letter keyword routing tests ---
+
+  it('routes all single-letter keywords through Drupal CONTAINS (not SearchStax)', async () => {
+    vi.useFakeTimers()
+    const wrapper = mountTheBricks({ inscription: '', locationIds: [] })
+    await flushPromises()
+    vi.clearAllMocks()
+
+    // All single letters repeated (like 'A A A A') - should search for just that letter
+    await wrapper.setProps({ inscription: 'A A A A' })
+    vi.advanceTimersByTime(500)
+    await flushPromises()
+
+    expect(mockedSearchBricks).not.toHaveBeenCalled()
+    expect(mockedAxios.get).toHaveBeenCalledTimes(1)
+    const url = mockedAxios.get.mock.calls[0][0] as string
+    expect(url).toContain('filter[field_brick_inscription][operator]=CONTAINS')
+    // Single-letter repeated queries search for just that one letter (not concatenated)
+    expect(url).toContain('filter[field_brick_inscription][value]=a')
+  })
+
+  it('routes single-letter keywords with extra spaces through Drupal (with normalization)', async () => {
+    vi.useFakeTimers()
+    const wrapper = mountTheBricks({ inscription: '', locationIds: [] })
+    await flushPromises()
+    vi.clearAllMocks()
+
+    // Extra spaces - for single-letter queries, all spaces are stripped
+    await wrapper.setProps({ inscription: '  G   E   l   P   E   Y  ' })
+    vi.advanceTimersByTime(500)
+    await flushPromises()
+
+    expect(mockedSearchBricks).not.toHaveBeenCalled()
+    expect(mockedAxios.get).toHaveBeenCalledTimes(1)
+    const url = mockedAxios.get.mock.calls[0][0] as string
+    expect(url).toContain('filter[field_brick_inscription][operator]=CONTAINS')
+    // Single-letter queries strip all spaces to match bricks with inconsistent spacing
+    expect(url).toContain('filter[field_brick_inscription][value]=gelpey')
+  })
+
+  it('routes mixed single/multi-letter keywords through SearchStax', async () => {
+    vi.useFakeTimers()
+    const wrapper = mountTheBricks({ inscription: '', locationIds: [] })
+    await flushPromises()
+    vi.clearAllMocks()
+
+    // Has a multi-letter word, so goes through SearchStax
+    await wrapper.setProps({ inscription: 'J SMITH' })
+    vi.advanceTimersByTime(500)
+    await flushPromises()
+
+    expect(mockedSearchBricks).toHaveBeenCalledTimes(1)
+    expect(mockedSearchBricks).toHaveBeenCalledWith(
+      expect.objectContaining({
+        keyword: 'J SMITH',
+      })
+    )
+  })
+
+  it('falls back to normalized Drupal search when SearchStax fails for multi-letter query', async () => {
+    vi.useFakeTimers()
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const wrapper = mountTheBricks({ inscription: '', locationIds: [] })
+    await flushPromises()
+    vi.clearAllMocks()
+
+    mockedSearchBricks.mockRejectedValue(new Error('SearchStax down'))
+    mockedAxios.get.mockResolvedValue(
+      mockApiResponse([makeBrick('d-1', 'BRUCE FALLBACK')], 1)
+    )
+
+    // Multi-letter keyword - goes through SearchStax first, then fallback
+    await wrapper.setProps({ inscription: 'bruce' })
+    vi.advanceTimersByTime(500)
+    await flushPromises()
+
+    expect(mockedSearchBricks).toHaveBeenCalledTimes(1)
+    expect(mockedAxios.get).toHaveBeenCalledTimes(1)
+    const url = mockedAxios.get.mock.calls[0][0] as string
+    expect(url).toContain('filter[field_brick_inscription][operator]=CONTAINS')
+    expect(url).toContain('filter[field_brick_inscription][value]=bruce')
+
+    warnSpy.mockRestore()
   })
 })

@@ -7,10 +7,8 @@ test.describe('Sorting and Pagination', () => {
   });
 
   test('bricks load in alphabetical order', async ({ page }) => {
-    // Drupal sorts on field_sort_alpha, a separate sort key, so "A.J. BOYAJIAN"
-    // lands between "A. FIRAT" and "A. JAY" in a way no rule on the inscription
-    // alone reproduces. Check that the app asks for that sort and renders the
-    // bricks in the order Drupal returns them.
+    // Drupal sorts on field_sort_alpha for accurate alphabetical ordering
+    // Check that the app asks for that sort and renders the bricks in order
     const bricksResponse = page.waitForResponse(
       (resp) => resp.url().includes('/jsonapi/bricks?') && resp.url().includes('sort=field_sort_alpha') && resp.ok()
     );

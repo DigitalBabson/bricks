@@ -15,6 +15,22 @@ export interface SearchstaxResult {
   numFound: number
 }
 
+/**
+ * Checks if a keyword search will return no results due to single-letter words
+ * being filtered out by the SearchStax field's LengthFilterFactory (min: 2).
+ * Returns true if all words in the keyword are single letters.
+ */
+export function isAllSingleLetters(keyword: string): boolean {
+  const words = keyword.trim().split(/\s+/)
+  // Empty or whitespace-only string
+  if (words.length === 0 || (words.length === 1 && words[0].length === 0)) {
+    return false
+  }
+  // Check if ALL words are single letters (ignoring punctuation)
+  // Use Unicode-aware pattern: \p{L} matches any Unicode letter
+  return words.every((word) => word.replace(/\p{P}/gu, '').length <= 1)
+}
+
 function escapeSolrTerm(value: string): string {
   return value.replace(/([+\-!(){}[\]^"~*?:\\/]|&&|\|\|)/g, '\\$1')
 }
@@ -40,6 +56,9 @@ export async function searchBricks(params: SearchstaxParams): Promise<Searchstax
     const zoneFilter = locationIds.map(escapeSolrTerm).join(' OR ')
     url.searchParams.append('fq', `ss_zone_uuid:(${zoneFilter})`)
   }
+
+  // Note: SearchStax defaults to relevance scoring (score desc)
+  // For alphabetical sorting, Drupal's CONTAINS fallback is used instead
 
   const response = await axios.get<SearchstaxResponse>(url.toString(), {
     headers: { Authorization: `Token ${token}` },

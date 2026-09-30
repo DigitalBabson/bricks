@@ -43,7 +43,7 @@ import BrickCard from "./BrickCard.vue";
 import Pagination from "./Pagination.vue";
 import { defaultEnvKey, defaultUrlKey, searchstaxEndpointKey, searchstaxTokenKey } from "../types/index"
 import type { Brick, BrickApiResponse, FileApiItem, ParkLocation } from "../types/index"
-import { searchBricks } from "../services/searchstax"
+import { searchBricks, isAllSingleLetters } from "../services/searchstax"
 import { isDefaultDrupalImage } from "../utils/placeholderImage"
 import { withCacheBuster } from "../utils/cacheBuster"
 
@@ -97,7 +97,7 @@ export default defineComponent({
 
       if (value.length === 0) {
         this.fetchBricks();
-      } else if (value.length >= 3) {
+      } else if (value.length >= 1) {
         this.searchTimeout = setTimeout(() => {
           this.searchTimeout = null;
           this.fetchBricks();
@@ -288,6 +288,13 @@ export default defineComponent({
         `&sort=field_sort_alpha`;
     },
     async fetchViaSearchstax() {
+      // Check if search will fail due to single-letter words being filtered out
+      if (isAllSingleLetters(this.inscription)) {
+        console.warn('SearchStax cannot search all single-letter keywords, falling back to Drupal');
+        await this.fetchViaDrupalKeyword();
+        return;
+      }
+
       const offset = (this.currentPage - 1) * this.pageSize;
 
       const result = await searchBricks({
@@ -304,16 +311,43 @@ export default defineComponent({
       this.showMessage = hydratedBricks.length === 0;
       this.totalPages = Math.ceil(result.numFound / this.pageSize) || 1;
     },
+
     async fetchViaDrupalKeyword() {
       const offset = (this.currentPage - 1) * this.pageSize;
+
+      // Normalize keyword: trim, collapse whitespace, and convert to lowercase for case-insensitive search
+      const normalizedKeyword = this.inscription.trim().replace(/\s+/g, ' ').toLowerCase();
+
+      // For single-letter queries with inconsistent spacing (like brick 2646 "G  E l  P  E  Y"),
+      // strip all spaces to handle bricks with inconsistent spacing.
+      // For repeated single-letter queries (like 'a a a a'), we only search for that one letter.
+      const isSingleLetterQuery = isAllSingleLetters(this.inscription);
+      let searchKeyword: string;
+      
+      if (isSingleLetterQuery) {
+        // Check if all words are the SAME letter (e.g., 'a a a a')
+        const words = normalizedKeyword.split(' ').filter(w => w.length > 0);
+        if (words.every(word => word === words[0])) {
+          // All same letter - search for just that one letter
+          searchKeyword = words[0];
+        } else {
+          // Different letters (like 'g e l p e y') - strip spaces to search for combined string
+          searchKeyword = normalizedKeyword.replace(/\s+/g, '');
+        }
+      } else {
+        // Not a single-letter query - use normalized keyword with collapsed spaces
+        searchKeyword = normalizedKeyword;
+      }
 
       let url = this.apiUrl +
         `bricks?page[limit]=${this.pageSize}` +
         `&filter[field_brick_inscription][operator]=CONTAINS` +
-        `&filter[field_brick_inscription][value]=${encodeURIComponent(this.inscription)}` +
+        `&filter[field_brick_inscription][value]=${encodeURIComponent(searchKeyword)}` +
         this.buildDrupalImageQuery() +
         `&page[offset]=${offset}` +
         `&sort=field_sort_alpha`;
+
+
 
       if (this.locationIds.length > 0) {
         url += `&filter[field_brick_zone.id][operator]=IN` +
@@ -341,12 +375,17 @@ export default defineComponent({
     },
     async fetchBricks() {
       try {
-        const hasKeyword = this.inscription.length >= 3;
+        const hasKeyword = this.inscription.length >= 1;
 
         if (hasKeyword) {
+          // Check if all words are single letters - SearchStax can't handle these
+          const shouldSkipSearchstax = isAllSingleLetters(this.inscription);
+
           try {
-            await this.fetchViaSearchstax();
-            return;
+            if (!shouldSkipSearchstax) {
+              await this.fetchViaSearchstax();
+              return;
+            }
           } catch {
             console.warn('SearchStax unavailable, falling back to Drupal keyword search');
           }
