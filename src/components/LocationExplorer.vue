@@ -5,7 +5,8 @@
       tw-flex tw-items-center tw-justify-center
       tw-bg-black/[0.87]
     "
-    @click.self="$emit('close')"
+    @pointerdown="backdropClose.onPointerdown"
+    @click="backdropClose.onClick"
   >
     <div
       ref="dialogContainer"
@@ -41,6 +42,7 @@
       <!-- Content: mobile stacked, desktop image-fill with list overlaid,
            short landscape: sidebar (nav left, image right) -->
       <div
+        ref="contentWrapper"
         class="tw-flex tw-flex-1 tw-min-h-0 tw-overflow-hidden"
         :class="isShortLandscape ? 'tw-flex-row tw-justify-center' : 'tw-flex-col md:tw-relative'"
       >
@@ -167,6 +169,7 @@ import type { PropType } from 'vue'
 import type { ParkLocation } from '../types/index'
 import { lockBodyScroll, unlockBodyScroll } from '../composables/useBodyScrollLock'
 import { fadeInOnLoad } from '../directives/fadeInOnLoad'
+import { createBackdropClose } from '../composables/useBackdropClose'
 
 export default defineComponent({
   directives: {
@@ -191,6 +194,10 @@ export default defineComponent({
       imageRenderedWidth: 0,
       isMobile: false,
       isShortLandscape: false,
+      backdropClose: createBackdropClose(
+        (event) => this.isOutsideContent(event),
+        () => this.$emit('close'),
+      ),
     }
   },
   computed: {
@@ -261,6 +268,35 @@ export default defineComponent({
   methods: {
     optionId(id: string): string {
       return `location-explorer-option-${id}`
+    },
+    // The dialog, content wrapper and image container are transparent layout
+    // boxes, and on desktop the map <img> fills the dialog with object-contain,
+    // so the grey bands beside the map are the <img> itself. Treat clicks on all
+    // of those (outside the drawn map) as clicks on the backdrop.
+    isOutsideContent(event: MouseEvent) {
+      const target = event.target
+      if (
+        target === this.$el ||
+        target === this.$refs.dialogContainer ||
+        target === this.$refs.contentWrapper ||
+        target === this.$refs.imageContainer
+      ) {
+        return true
+      }
+      const img = this.$refs.mapImage as HTMLImageElement | undefined
+      if (!img || target !== img || !img.naturalWidth || !img.naturalHeight) return false
+      const box = img.getBoundingClientRect()
+      const scale = Math.min(box.width / img.naturalWidth, box.height / img.naturalHeight)
+      const renderedW = img.naturalWidth * scale
+      const renderedH = img.naturalHeight * scale
+      const left = box.left + (box.width - renderedW) / 2
+      const top = box.top + (box.height - renderedH) / 2
+      return (
+        event.clientX < left ||
+        event.clientX > left + renderedW ||
+        event.clientY < top ||
+        event.clientY > top + renderedH
+      )
     },
     selectLocation(id: string) {
       this.selectedZoneId = id
