@@ -5,8 +5,8 @@
       tw-flex tw-items-center tw-justify-center
       tw-bg-black/[0.87]
     "
-    @pointerdown="handleBackdropPointerdown"
-    @click="handleBackdropClick"
+    @pointerdown="backdropClose.onPointerdown"
+    @click="backdropClose.onClick"
   >
     <div
       ref="dialogContainer"
@@ -46,6 +46,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { lockBodyScroll, unlockBodyScroll } from '../composables/useBodyScrollLock'
+import { createBackdropClose } from '../composables/useBackdropClose'
 
 export default defineComponent({
   props: {
@@ -59,7 +60,10 @@ export default defineComponent({
   data() {
     return {
       previouslyFocused: null as HTMLElement | null,
-      pointerDownOutside: true,
+      backdropClose: createBackdropClose(
+        (event) => this.isOutsideContent(event.target),
+        () => this.$emit('close'),
+      ),
     }
   },
   methods: {
@@ -72,18 +76,6 @@ export default defineComponent({
         target === this.$refs.dialogContainer ||
         target === this.$refs.contentWrapper
       )
-    },
-    handleBackdropPointerdown(event: PointerEvent) {
-      // Remember where the press started so a drag from the content (e.g.
-      // selecting caption text) that ends on the backdrop doesn't close.
-      this.pointerDownOutside = this.isOutsideContent(event.target)
-    },
-    handleBackdropClick(event: MouseEvent) {
-      const startedOutside = this.pointerDownOutside
-      this.pointerDownOutside = true
-      if (startedOutside && this.isOutsideContent(event.target)) {
-        this.$emit('close')
-      }
     },
     handleDocumentKeydown(event: KeyboardEvent) {
       if (event.key === 'Escape') {

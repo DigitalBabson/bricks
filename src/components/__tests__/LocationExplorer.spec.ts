@@ -149,6 +149,52 @@ describe('LocationExplorer', () => {
       expect(wrapper.emitted('close')).toHaveLength(1)
     })
 
+    it('emits close when a transparent wrapper around the map is clicked', async () => {
+      await wrapper.find('[role="dialog"]').trigger('click')
+      await wrapper.find('[role="dialog"] > div').trigger('click')
+
+      expect(wrapper.emitted('close')).toHaveLength(2)
+    })
+
+    // Desktop map: 1100×640 box, 861×873 image under object-contain → drawn
+    // map is ~631px wide and centered, leaving grey bands at either side.
+    function mockLetterboxedMap() {
+      const img = wrapper.find('img').element as HTMLImageElement
+      Object.defineProperty(img, 'naturalWidth', { value: 861 })
+      Object.defineProperty(img, 'naturalHeight', { value: 873 })
+      img.getBoundingClientRect = () =>
+        ({ left: 90, top: 80, width: 1100, height: 640, right: 1190, bottom: 720 }) as DOMRect
+      return img
+    }
+
+    it('emits close when the grey band beside the map is clicked', async () => {
+      await wrapper.findAll('nav li')[1].trigger('click')
+      const img = mockLetterboxedMap()
+      img.dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: 1100, clientY: 400 }))
+
+      expect(wrapper.emitted('close')).toHaveLength(1)
+    })
+
+    it('does not emit close when the drawn map is clicked', () => {
+      const img = mockLetterboxedMap()
+      img.dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: 640, clientY: 400 }))
+
+      expect(wrapper.emitted('close')).toBeUndefined()
+    })
+
+    it('does not emit close when a location is clicked', async () => {
+      await wrapper.findAll('nav li')[2].trigger('click')
+
+      expect(wrapper.emitted('close')).toBeUndefined()
+    })
+
+    it('does not emit close when a drag starts on the list and ends on the backdrop', async () => {
+      await wrapper.find('nav li').trigger('pointerdown')
+      await wrapper.find('.tw-bg-black\\/\\[0\\.87\\]').trigger('click')
+
+      expect(wrapper.emitted('close')).toBeUndefined()
+    })
+
     it('emits close when Escape is pressed', () => {
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
 
