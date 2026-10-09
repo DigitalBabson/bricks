@@ -35,28 +35,35 @@
         @error="onImgError"
       />
 
+      <!-- The 3:2 media box is only ~106-120px tall on phones, so the panel
+           sizes to its content, the type steps down by breakpoint, and the
+           inscription clamps at four lines as a last resort (ITCMS-7836). -->
       <div
         v-if="showComingSoonOverlay"
         class="
-          tw-absolute tw-inset-x-4 tw-inset-y-10 tw-flex tw-items-center tw-justify-center
+          brick-card__coming-soon
+          tw-absolute tw-inset-2 md:tw-inset-3 xl:tw-inset-4
+          tw-flex tw-items-center tw-justify-center
         "
       >
         <div
           class="
+            brick-card__coming-soon-panel
             tw-flex tw-w-full tw-flex-col tw-items-center tw-justify-center
-            tw-bg-white/70 tw-px-5 tw-py-4 tw-text-center
+            tw-max-h-full tw-bg-white/70 tw-px-3 tw-py-2 md:tw-px-4 md:tw-py-3 xl:tw-px-5 xl:tw-py-4 tw-text-center
             tw-shadow-[0_0_24px_rgba(255,255,255,0.35)]
           "
         >
           <p
             class="
-              tw-font-oswald tw-uppercase tw-text-[16px] tw-text-black tw-leading-normal
+              tw-m-0 tw-font-oswald tw-uppercase tw-text-black tw-leading-tight tw-line-clamp-4
+              tw-text-[13px] md:tw-text-[15px] xl:tw-text-[16px]
             "
           >
             {{ brick.inscription }}
           </p>
-          <div class="tw-my-3 tw-h-px tw-w-full tw-bg-brickBabsonGrey/35"></div>
-          <p class="tw-font-oswald tw-text-[16px] tw-text-black">
+          <div class="tw-my-1.5 md:tw-my-2 xl:tw-my-3 tw-h-px tw-shrink-0 tw-w-full tw-bg-brickBabsonGrey/35"></div>
+          <p class="tw-m-0 tw-font-oswald tw-text-black tw-leading-tight tw-shrink-0 tw-text-[13px] md:tw-text-[15px] xl:tw-text-[16px]">
             Image Coming Soon
           </p>
         </div>
