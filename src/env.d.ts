@@ -7,6 +7,8 @@ interface ImportMetaEnv {
   readonly DEV_HERO_IMAGE: string
   readonly DEV_PLACEHOLDER_IMAGE_UUID: string
   readonly DEV_PLACEHOLDER_IMAGE: string
+  readonly DEV_NEWRELIC_APP_ID?: string
+  readonly DEV_NEWRELIC_LICENSE_KEY?: string
 }
 
 interface ImportMeta {

@@ -55,6 +55,17 @@ API endpoints are configured via Vite's mode system. Each mode loads a `.env.[mo
 
 To override values locally without committing secrets, create `.env.[mode].local` (gitignored).
 
+### New Relic Browser monitoring
+
+`src/utils/newRelic.ts` starts the New Relic Browser agent (SPA, errors, AJAX; no session replay) when the build's env file sets `DEV_NEWRELIC_APP_ID` and `DEV_NEWRELIC_LICENSE_KEY`. Only two builds report, both to account 1659938:
+
+| Build | Browser app |
+|-------|-------------|
+| `build:production` | `bricks-prod` |
+| `build:stage` (test-www) | `bricks-test` |
+
+Dev, stage2, local and GitHub Pages builds leave the variables unset, so the agent never starts. The browser license key only allows sending data, so it is committed. The build inlines the agent into the single `index-*.js`, so the T4 upload is unchanged.
+
 ## Architecture
 
 ### Component hierarchy

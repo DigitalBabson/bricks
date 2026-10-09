@@ -28,6 +28,7 @@
     "test:e2e:debug": "playwright test --debug"
   },
   "dependencies": {
+    "@newrelic/browser-agent": "^1.323.0",
     "axios": "^1.20.0",
     "vue": "^3.5.27"
   },
