@@ -460,12 +460,17 @@ export default defineComponent({
     transition: none;
   }
 }
+/* Thumbnails are the brick_preview style (600x400 scale-and-crop) and the
+   coming-soon image is also 3:2, so the box is sized before anything loads
+   and never resizes when the image arrives (ITCMS-7836). */
 .brick-card__media {
   position: relative;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
 }
 .brick-card__placeholder {
-  width: 100%;
-  padding-top: 56.25%; /* 16:9 */
+  position: absolute;
+  inset: 0;
   background: repeating-linear-gradient(
     -45deg,
     rgba(0,0,0,0.06),
@@ -476,15 +481,15 @@ export default defineComponent({
   animation: brick-card-pulse 1.2s ease-in-out infinite;
 }
 .brick-card__image {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
 }
 .brick-card__image--loading {
-  inset: 0;
-  height: 100%;
   opacity: 0;
-  position: absolute;
 }
 @media screen and (max-width: 400px) {
   .brick-card__location-btn {
