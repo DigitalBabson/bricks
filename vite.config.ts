@@ -73,6 +73,9 @@ export default defineConfig(({ command, mode }) => {
       rollupOptions: {
         output: {
           manualChunks: undefined,
+          // T4 hosts a single index-*.js, so keep lazy imports (the New Relic
+          // agent's features) inside it rather than in sibling chunks.
+          inlineDynamicImports: true,
         },
         // https://rollupjs.org/guide/en/#big-list-of-options
       },

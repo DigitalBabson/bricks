@@ -2,6 +2,10 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import "./index.css";
 import { defaultEnvKey, defaultUrlKey, searchstaxEndpointKey, searchstaxTokenKey } from './types/index'
+import { startNewRelic } from './utils/newRelic'
+
+// Start Browser monitoring before the app mounts so it sees the first load.
+startNewRelic(import.meta.env)
 
 // Read the Drupal JSON:API endpoint from .env (e.g. https://dev.contentfiles.babson.edu/jsonapi/)
 // Falls back to the production contentfiles endpoint if the env var is not set.
