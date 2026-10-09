@@ -35,28 +35,38 @@
         @error="onImgError"
       />
 
+      <!-- The 3:2 media box is only ~80-120px tall on phones, so the panel
+           sizes to its content, the type steps down by breakpoint, and the
+           inscription never shrinks: it clamps to whole lines that fit
+           (2 / 3 / 4 by width) instead (ITCMS-7836). -->
       <div
         v-if="showComingSoonOverlay"
         class="
-          tw-absolute tw-inset-x-4 tw-inset-y-10 tw-flex tw-items-center tw-justify-center
+          brick-card__coming-soon
+          tw-absolute tw-inset-1.5 min-[360px]:tw-inset-2 md:tw-inset-3 xl:tw-inset-4
+          tw-flex tw-items-center tw-justify-center
         "
       >
         <div
           class="
+            brick-card__coming-soon-panel
             tw-flex tw-w-full tw-flex-col tw-items-center tw-justify-center
-            tw-bg-white/70 tw-px-5 tw-py-4 tw-text-center
+            tw-max-h-full tw-bg-white/70 tw-text-center
+            tw-px-2 tw-py-1 min-[360px]:tw-px-3 min-[360px]:tw-py-2 md:tw-px-4 md:tw-py-3 xl:tw-px-5 xl:tw-py-4
             tw-shadow-[0_0_24px_rgba(255,255,255,0.35)]
           "
         >
           <p
             class="
-              tw-font-oswald tw-uppercase tw-text-[16px] tw-text-black tw-leading-normal
+              tw-m-0 tw-shrink-0 tw-font-oswald tw-uppercase tw-text-black tw-leading-tight
+              tw-line-clamp-2 min-[390px]:tw-line-clamp-3 md:tw-line-clamp-4
+              tw-text-[12px] min-[360px]:tw-text-[13px] md:tw-text-[15px] xl:tw-text-[16px]
             "
           >
             {{ brick.inscription }}
           </p>
-          <div class="tw-my-3 tw-h-px tw-w-full tw-bg-brickBabsonGrey/35"></div>
-          <p class="tw-font-oswald tw-text-[16px] tw-text-black">
+          <div class="tw-my-1 min-[360px]:tw-my-1.5 md:tw-my-2 xl:tw-my-3 tw-h-px tw-shrink-0 tw-w-full tw-bg-brickBabsonGrey/35"></div>
+          <p class="tw-m-0 tw-font-oswald tw-text-black tw-leading-tight tw-shrink-0 tw-text-[12px] min-[360px]:tw-text-[13px] md:tw-text-[15px] xl:tw-text-[16px]">
             Image Coming Soon
           </p>
         </div>
@@ -460,12 +470,17 @@ export default defineComponent({
     transition: none;
   }
 }
+/* Thumbnails are the brick_preview style (600x400 scale-and-crop) and the
+   coming-soon image is also 3:2, so the box is sized before anything loads
+   and never resizes when the image arrives (ITCMS-7836). */
 .brick-card__media {
   position: relative;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
 }
 .brick-card__placeholder {
-  width: 100%;
-  padding-top: 56.25%; /* 16:9 */
+  position: absolute;
+  inset: 0;
   background: repeating-linear-gradient(
     -45deg,
     rgba(0,0,0,0.06),
@@ -476,15 +491,15 @@ export default defineComponent({
   animation: brick-card-pulse 1.2s ease-in-out infinite;
 }
 .brick-card__image {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
 }
 .brick-card__image--loading {
-  inset: 0;
-  height: 100%;
   opacity: 0;
-  position: absolute;
 }
 @media screen and (max-width: 400px) {
   .brick-card__location-btn {
