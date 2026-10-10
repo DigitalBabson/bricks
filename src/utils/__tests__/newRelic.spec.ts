@@ -22,6 +22,17 @@ describe('startNewRelic', () => {
     expect(options.features).not.toContain(SessionReplay)
   })
 
+  it('keeps third-party hosts out of AJAX data but not Rave or the app\'s own calls', () => {
+    startNewRelic({ DEV_NEWRELIC_APP_ID: '1120575188', DEV_NEWRELIC_LICENSE_KEY: 'abc123' })
+
+    const { init } = Agent.mock.calls[0][0]
+    expect(init.feature_flags).toContain('ajax_metrics_deny_list')
+    expect(init.ajax.deny_list).toEqual(expect.arrayContaining(['bam.nr-data.net', 'doubleclick.net', 'hideousplay.com']))
+    for (const host of ['content.getrave.com', 'searchstax.com', 'babson.edu']) {
+      expect(init.ajax.deny_list.some((entry: string) => host.endsWith(entry))).toBe(false)
+    }
+  })
+
   it.each([
     {},
     { DEV_NEWRELIC_APP_ID: '1120575188' },
