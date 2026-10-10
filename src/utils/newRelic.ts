@@ -12,6 +12,26 @@ import { SoftNav } from '@newrelic/browser-agent/features/soft_navigations'
 const ACCOUNT_ID = '1659938'
 const TRUST_KEY = '26315'
 
+// Third-party hosts the T4 page calls (analytics, ads, marketing tags). The
+// agent matches the end of the hostname, so one entry covers all subdomains.
+// Keeping them out of AJAX data leaves the requests this app makes (SearchStax,
+// contentfiles JSON:API) easy to see. Rave alerts (content.getrave.com) stays
+// visible on purpose: it runs on every visit and is the slowest call.
+export const AJAX_DENY_LIST = [
+  'bam.nr-data.net',
+  'google.com',
+  'doubleclick.net',
+  'googleadservices.com',
+  'googletagmanager.com',
+  'clarity.ms',
+  'linkedin.com',
+  'amazon-adsystem.com',
+  'hideousplay.com',
+  'go-babson.org',
+  'bc0a.com',
+  'spotify.com',
+]
+
 export interface NewRelicEnv {
   DEV_NEWRELIC_APP_ID?: string
   DEV_NEWRELIC_LICENSE_KEY?: string
@@ -39,7 +59,10 @@ export function startNewRelic(env: NewRelicEnv): Agent | undefined {
       sa: 1,
     },
     init: {
-      ajax: { deny_list: ['bam.nr-data.net'] },
+      // Also drop denied hosts from the aggregated AJAX metrics behind the
+      // charts, not just from the AjaxRequest events.
+      feature_flags: ['ajax_metrics_deny_list'],
+      ajax: { deny_list: AJAX_DENY_LIST },
       // Drupal and SearchStax are cross-origin and Acquia doesn't support
       // distributed tracing, so trace headers would only trip CORS.
       distributed_tracing: { enabled: false },
