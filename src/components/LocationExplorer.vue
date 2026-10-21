@@ -20,6 +20,7 @@
         md:tw-rounded-lg
         tw-flex tw-flex-col
       "
+      :class="{ 'tw-h-[90vh]': isShortLandscape }"
     >
       <!-- Close button: fixed top-right on mobile, image-relative on desktop -->
       <button
@@ -194,6 +195,7 @@ export default defineComponent({
       imageRenderedWidth: 0,
       isMobile: false,
       isShortLandscape: false,
+      lastTabWasShift: false,
       backdropClose: createBackdropClose(
         (event) => this.isOutsideContent(event),
         () => this.$emit('close'),
@@ -245,6 +247,7 @@ export default defineComponent({
   },
   mounted() {
     document.addEventListener('keydown', this.onKeydown)
+    document.addEventListener('focusin', this.onFocusin)
     lockBodyScroll()
     this.checkLayout()
     this.$nextTick(() => {
@@ -255,6 +258,7 @@ export default defineComponent({
   },
   beforeUnmount() {
     document.removeEventListener('keydown', this.onKeydown)
+    document.removeEventListener('focusin', this.onFocusin)
     unlockBodyScroll()
     window.removeEventListener('resize', this.updateNavHeight)
     // Per ITCMS-7535 comment 509211: closing the Location Explorer (via X or Esc)
@@ -306,24 +310,42 @@ export default defineComponent({
         this.$emit('close')
         return
       }
-      // Focus trap: constrain Tab within the dialog
+      // Focus trap: cycle Tab ourselves over the dialog's controls. Which elements
+      // native Tab visits is up to the browser (Safari and macOS Firefox skip
+      // <button>s by default), so checking only "is this the last control?" lets
+      // focus walk out to the page behind the overlay.
       if (e.key === 'Tab') {
-        const container = this.$refs.dialogContainer as HTMLElement | undefined
-        if (!container) return
-        const focusable = container.querySelectorAll<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        )
+        this.lastTabWasShift = e.shiftKey
+        e.preventDefault()
+        const focusable = this.getFocusable()
         if (!focusable.length) return
-        const first = focusable[0]
-        const last = focusable[focusable.length - 1]
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault()
-          last.focus()
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault()
-          first.focus()
-        }
+        const index = focusable.indexOf(document.activeElement as HTMLElement)
+        const last = focusable.length - 1
+        const next = e.shiftKey
+          ? (index <= 0 ? last : index - 1)
+          : (index === -1 || index === last ? 0 : index + 1)
+        focusable[next].focus()
       }
+    },
+    // Disabled controls (the scroll chevrons) can't take focus, so they're excluded:
+    // as first/last they'd never match activeElement and Tab would escape.
+    getFocusable(): HTMLElement[] {
+      const container = this.$refs.dialogContainer as HTMLElement | undefined
+      if (!container) return []
+      return Array.from(
+        container.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      )
+    },
+    // Backstop for focus that lands outside the dialog without a Tab keydown
+    // (e.g. assistive-tech navigation).
+    onFocusin(e: FocusEvent) {
+      const container = this.$refs.dialogContainer as HTMLElement | undefined
+      if (!container || !(e.target instanceof Node) || container.contains(e.target)) return
+      const focusable = this.getFocusable()
+      if (!focusable.length) return
+      ;(this.lastTabWasShift ? focusable[focusable.length - 1] : focusable[0]).focus()
     },
     checkLayout() {
       this.isMobile = window.innerWidth < 768
