@@ -147,4 +147,43 @@ describe('UiModal', () => {
     w2.unmount()
     expect(document.body.style.overflow).toBe('') // now released
   })
+
+  describe('focus trap', () => {
+    function pressTab(shiftKey = false) {
+      const event = new KeyboardEvent('keydown', { key: 'Tab', shiftKey, bubbles: true, cancelable: true })
+      document.dispatchEvent(event)
+      return event
+    }
+
+    it('cycles Tab through the modal controls and wraps in both directions', () => {
+      const wrapper = mountModal('<button class="inner">Inner</button>')
+      const close = wrapper.find('button[aria-label="Close modal"]').element as HTMLElement
+      const inner = wrapper.find('.inner').element as HTMLElement
+      close.focus()
+
+      expect(pressTab().defaultPrevented).toBe(true)
+      expect(document.activeElement).toBe(inner)
+      pressTab()
+      expect(document.activeElement).toBe(close)
+      pressTab(true)
+      expect(document.activeElement).toBe(inner)
+      wrapper.unmount()
+    })
+
+    it('pulls focus back in when it lands outside the modal, and stops after unmount', () => {
+      const wrapper = mountModal()
+      const outside = document.createElement('a')
+      outside.href = '#footer'
+      document.body.appendChild(outside)
+      try {
+        outside.focus()
+        expect(wrapper.find('[role="dialog"]').element.contains(document.activeElement)).toBe(true)
+        wrapper.unmount()
+        outside.focus()
+        expect(document.activeElement).toBe(outside)
+      } finally {
+        outside.remove()
+      }
+    })
+  })
 })

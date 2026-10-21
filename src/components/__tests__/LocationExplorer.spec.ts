@@ -303,6 +303,67 @@ describe('LocationExplorer', () => {
     })
   })
 
+  describe('Focus trap', () => {
+    function pressTab(shiftKey = false) {
+      const event = new KeyboardEvent('keydown', { key: 'Tab', shiftKey, bubbles: true, cancelable: true })
+      document.dispatchEvent(event)
+      return event
+    }
+
+    beforeEach(() => {
+      wrapper = mountExplorer()
+    })
+
+    it('moves focus from the close button through the zones and back to the close button', () => {
+      const closeButton = wrapper.find('button[aria-label="Close location explorer"]').element as HTMLElement
+      const items = wrapper.findAll('nav li').map((li) => li.element as HTMLElement)
+      closeButton.focus()
+
+      items.forEach((item) => {
+        expect(pressTab().defaultPrevented).toBe(true)
+        expect(document.activeElement).toBe(item)
+      })
+      pressTab()
+      expect(document.activeElement).toBe(closeButton)
+    })
+
+    it('wraps Shift+Tab from the close button to the last zone', () => {
+      const closeButton = wrapper.find('button[aria-label="Close location explorer"]').element as HTMLElement
+      const items = wrapper.findAll('nav li')
+      closeButton.focus()
+
+      pressTab(true)
+      expect(document.activeElement).toBe(items[items.length - 1].element)
+    })
+
+    it('pulls focus back in when it lands outside the dialog', () => {
+      const outside = document.createElement('a')
+      outside.href = '#footer'
+      document.body.appendChild(outside)
+      try {
+        outside.focus()
+        const dialog = wrapper.find('[role="dialog"]').element
+        expect(dialog.contains(document.activeElement)).toBe(true)
+      } finally {
+        outside.remove()
+      }
+    })
+
+    it('stops listening for focus after unmount', () => {
+      wrapper.unmount()
+      const outside = document.createElement('a')
+      outside.href = '#footer'
+      document.body.appendChild(outside)
+      try {
+        outside.focus()
+        expect(document.activeElement).toBe(outside)
+      } finally {
+        outside.remove()
+      }
+      wrapper = mountExplorer()
+    })
+  })
+
   describe('Body scroll lock', () => {
     it('sets body overflow to hidden on mount', () => {
       wrapper = mountExplorer()

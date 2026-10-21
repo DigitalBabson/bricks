@@ -60,6 +60,7 @@ export default defineComponent({
   data() {
     return {
       previouslyFocused: null as HTMLElement | null,
+      lastTabWasShift: false,
       backdropClose: createBackdropClose(
         (event) => this.isOutsideContent(event.target),
         () => this.$emit('close'),
@@ -82,23 +83,40 @@ export default defineComponent({
         this.$emit('close')
         return
       }
+      // Focus trap: cycle Tab ourselves over the dialog's controls. Which elements
+      // native Tab visits is up to the browser (Safari and macOS Firefox skip
+      // <button>s by default), so checking only "is this the last control?" lets
+      // focus walk out to the page behind the overlay.
       if (event.key === 'Tab') {
-        const container = this.$refs.dialogContainer as HTMLElement | undefined
-        if (!container) return
-        const focusable = container.querySelectorAll<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        )
+        this.lastTabWasShift = event.shiftKey
+        event.preventDefault()
+        const focusable = this.getFocusable()
         if (!focusable.length) return
-        const first = focusable[0]
-        const last = focusable[focusable.length - 1]
-        if (event.shiftKey && document.activeElement === first) {
-          event.preventDefault()
-          last.focus()
-        } else if (!event.shiftKey && document.activeElement === last) {
-          event.preventDefault()
-          first.focus()
-        }
+        const index = focusable.indexOf(document.activeElement as HTMLElement)
+        const last = focusable.length - 1
+        const next = event.shiftKey
+          ? (index <= 0 ? last : index - 1)
+          : (index === -1 || index === last ? 0 : index + 1)
+        focusable[next].focus()
       }
+    },
+    getFocusable(): HTMLElement[] {
+      const container = this.$refs.dialogContainer as HTMLElement | undefined
+      if (!container) return []
+      return Array.from(
+        container.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      )
+    },
+    // Backstop for focus that lands outside the dialog without a Tab keydown
+    // (e.g. assistive-tech navigation).
+    handleDocumentFocusin(event: FocusEvent) {
+      const container = this.$refs.dialogContainer as HTMLElement | undefined
+      if (!container || !(event.target instanceof Node) || container.contains(event.target)) return
+      const focusable = this.getFocusable()
+      if (!focusable.length) return
+      ;(this.lastTabWasShift ? focusable[focusable.length - 1] : focusable[0]).focus()
     },
   },
   mounted() {
@@ -106,6 +124,7 @@ export default defineComponent({
     // focus to it on close — keeps Tab order continuous from the opener.
     this.previouslyFocused = (document.activeElement as HTMLElement) || null
     document.addEventListener('keydown', this.handleDocumentKeydown)
+    document.addEventListener('focusin', this.handleDocumentFocusin)
     lockBodyScroll()
     this.$nextTick(() => {
       (this.$refs.closeButton as HTMLElement)?.focus()
@@ -113,6 +132,7 @@ export default defineComponent({
   },
   beforeUnmount() {
     document.removeEventListener('keydown', this.handleDocumentKeydown)
+    document.removeEventListener('focusin', this.handleDocumentFocusin)
     unlockBodyScroll()
     const override = this.returnFocusSelector
       ? document.querySelector<HTMLElement>(this.returnFocusSelector)
